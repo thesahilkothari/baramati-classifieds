@@ -6,39 +6,40 @@ import { slugify } from "@/app/lib/slugify";
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
 
-  const q = searchParams.get("q");
   const city = searchParams.get("city");
   const category = searchParams.get("category");
+  const q = searchParams.get("q");
 
   const ads = await prisma.ad.findMany({
     where: {
       status: "ACTIVE",
-      ...(q && {
-        OR: [
-          { title: { contains: q } },
-          { description: { contains: q } },
-        ],
-      }),
       ...(city && {
         city: {
-          slug: city,
-        },
+          slug: city
+        }
       }),
       ...(category && {
         category: {
-          slug: category,
-        },
+          slug: category
+        }
       }),
+      ...(q && {
+        OR: [
+          { title: { contains: q } },
+          { description: { contains: q } }
+        ]
+      })
     },
     include: {
       images: true,
-      city: true,
       category: true,
+      city: true,
+      user: true
     },
     orderBy: [
       { isFeatured: "desc" },
-      { createdAt: "desc" },
-    ],
+      { createdAt: "desc" }
+    ]
   });
 
   return NextResponse.json({ ads });
@@ -66,6 +67,9 @@ export async function POST(req) {
       categoryId,
       cityId,
       address,
+      latitude,
+      longitude,
+      images = []
     } = body;
 
     if (!title || !description || !categoryId || !cityId || !mobile) {
@@ -75,28 +79,43 @@ export async function POST(req) {
       );
     }
 
+    const baseSlug = slugify(title);
+    const uniqueSlug = `${baseSlug}-${Date.now()}`;
+
     const ad = await prisma.ad.create({
       data: {
         title,
-        slug: `${slugify(title)}-${Date.now()}`,
+        slug: uniqueSlug,
         description,
         price: price ? Number(price) : null,
         mobile,
         whatsapp,
         address,
+        latitude: latitude ? Number(latitude) : null,
+        longitude: longitude ? Number(longitude) : null,
         userId: user.id,
         categoryId: Number(categoryId),
         cityId: Number(cityId),
         status: "PENDING",
+        images: {
+          create: images.map((img) => ({
+            url: img.url,
+            publicId: img.publicId
+          }))
+        }
       },
+      include: {
+        images: true
+      }
     });
 
     return NextResponse.json({
       success: true,
       ad,
-      message: "Ad submitted for review",
+      message: "Ad submitted for review"
     });
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: "Failed to create ad" },
       { status: 500 }
