@@ -15,6 +15,7 @@ export default function PostAdPage() {
     categoryId: "",
     cityId: "",
     address: "",
+    images: []
   });
 
   useEffect(() => {
@@ -35,9 +36,9 @@ export default function PostAdPage() {
     const res = await fetch("/api/ads", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify(form),
+      body: JSON.stringify(form)
     });
 
     const data = await res.json();
@@ -54,87 +55,113 @@ export default function PostAdPage() {
     <div className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="text-3xl font-extrabold">Post Free Ad</h1>
 
+      <p className="mt-2 text-slate-500">
+        Add clear photos and genuine details for better response.
+      </p>
+
       <form
         onSubmit={handleSubmit}
         className="mt-8 space-y-5 rounded-2xl border bg-white p-6 shadow-sm"
       >
-        <input
-          required
-          value={form.title}
-          onChange={(e) => setForm({ ...form, title: e.target.value })}
-          className="w-full rounded-xl border px-4 py-3"
-          placeholder="Ad title"
-        />
+        <div>
+          <label className="font-semibold">Ad Title</label>
+          <input
+            required
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            className="mt-2 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-600"
+            placeholder="Example: 2BHK flat for rent in Baramati"
+          />
+        </div>
 
-        <textarea
-          required
-          rows="6"
-          value={form.description}
-          onChange={(e) => setForm({ ...form, description: e.target.value })}
-          className="w-full rounded-xl border px-4 py-3"
-          placeholder="Description"
-        />
+        <div>
+          <label className="font-semibold">Description</label>
+          <textarea
+            required
+            rows="6"
+            value={form.description}
+            onChange={(e) =>
+              setForm({ ...form, description: e.target.value })
+            }
+            className="mt-2 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-600"
+            placeholder="Write full details of your ad"
+          />
+        </div>
 
-        <input
-          type="number"
-          value={form.price}
-          onChange={(e) => setForm({ ...form, price: e.target.value })}
-          className="w-full rounded-xl border px-4 py-3"
-          placeholder="Price in ₹"
-        />
+        <div className="grid gap-5 md:grid-cols-2">
+          <div>
+            <label className="font-semibold">Price</label>
+            <input
+              type="number"
+              value={form.price}
+              onChange={(e) => setForm({ ...form, price: e.target.value })}
+              className="mt-2 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-600"
+              placeholder="Amount in ₹"
+            />
+          </div>
 
-        <input
-          required
-          value={form.mobile}
-          onChange={(e) => setForm({ ...form, mobile: e.target.value })}
-          className="w-full rounded-xl border px-4 py-3"
-          placeholder="Mobile number"
-        />
+          <div>
+            <label className="font-semibold">Mobile Number</label>
+            <input
+              required
+              value={form.mobile}
+              onChange={(e) => setForm({ ...form, mobile: e.target.value })}
+              className="mt-2 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-600"
+              placeholder="10 digit mobile"
+            />
+          </div>
+        </div>
 
-        <input
-          value={form.whatsapp}
-          onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
-          className="w-full rounded-xl border px-4 py-3"
-          placeholder="WhatsApp number"
-        />
+        <div className="grid gap-5 md:grid-cols-2">
+          <div>
+            <label className="font-semibold">Category</label>
+            <select
+              required
+              value={form.categoryId}
+              onChange={(e) =>
+                setForm({ ...form, categoryId: e.target.value })
+              }
+              className="mt-2 w-full rounded-xl border px-4 py-3"
+            >
+              <option value="">Select Category</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.nameEn} / {cat.nameMr}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <select
-          required
-          value={form.categoryId}
-          onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
-          className="w-full rounded-xl border px-4 py-3"
-        >
-          <option value="">Select Category</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.nameEn} / {cat.nameMr}
-            </option>
-          ))}
-        </select>
+          <div>
+            <label className="font-semibold">City</label>
+            <select
+              required
+              value={form.cityId}
+              onChange={(e) => setForm({ ...form, cityId: e.target.value })}
+              className="mt-2 w-full rounded-xl border px-4 py-3"
+            >
+              <option value="">Select City</option>
+              {cities.map((city) => (
+                <option key={city.id} value={city.id}>
+                  {city.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
-        <select
-          required
-          value={form.cityId}
-          onChange={(e) => setForm({ ...form, cityId: e.target.value })}
-          className="w-full rounded-xl border px-4 py-3"
-        >
-          <option value="">Select City</option>
-          {cities.map((city) => (
-            <option key={city.id} value={city.id}>
-              {city.name}
-            </option>
-          ))}
-        </select>
+        <div>
+          <label className="font-semibold">Address / Area</label>
+          <input
+            value={form.address}
+            onChange={(e) => setForm({ ...form, address: e.target.value })}
+            className="mt-2 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-600"
+            placeholder="Example: Vidya Pratishthan Road, Baramati"
+          />
+        </div>
 
-        <input
-          value={form.address}
-          onChange={(e) => setForm({ ...form, address: e.target.value })}
-          className="w-full rounded-xl border px-4 py-3"
-          placeholder="Address / Area"
-        />
-
-        <button className="w-full rounded-xl bg-blue-700 px-6 py-3 font-bold text-white">
-          Submit Ad
+        <button className="w-full rounded-xl bg-blue-700 px-6 py-3 font-bold text-white hover:bg-blue-800">
+          Submit Ad for Review
         </button>
       </form>
     </div>
