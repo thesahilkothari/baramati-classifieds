@@ -6,20 +6,24 @@ export default function AdCard({ ad }) {
   return (
     <Link
       href={`/ads/${ad.slug}`}
-      className="overflow-hidden rounded-2xl border bg-white shadow-sm hover:shadow-md"
+      className="overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
     >
       <div className="relative aspect-[4/3] bg-slate-100">
-        <img src={image} alt={ad.title} className="h-full w-full object-cover" />
+        <img
+          src={image}
+          alt={ad.title}
+          className="h-full w-full object-cover"
+        />
 
         {ad.isFeatured && (
-          <span className="absolute left-3 top-3 rounded-full bg-yellow-400 px-3 py-1 text-xs font-bold">
+          <span className="absolute left-3 top-3 rounded-full bg-yellow-400 px-3 py-1 text-xs font-bold text-slate-900">
             Featured
           </span>
         )}
       </div>
 
       <div className="p-4">
-        <p className="text-xs font-bold uppercase text-blue-700">
+        <p className="text-xs font-medium uppercase text-blue-700">
           {ad.category?.nameEn}
         </p>
 
