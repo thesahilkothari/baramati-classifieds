@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SearchBar() {
   const router = useRouter();
@@ -9,7 +9,7 @@ export default function SearchBar() {
   const [q, setQ] = useState("");
   const [city, setCity] = useState("baramati");
 
-  function handleSubmit(e) {
+  function handleSearch(e) {
     e.preventDefault();
 
     const params = new URLSearchParams();
@@ -22,7 +22,7 @@ export default function SearchBar() {
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleSearch}
       className="grid gap-3 rounded-2xl bg-white p-3 shadow-xl md:grid-cols-[1fr_180px_130px]"
     >
       <input
@@ -35,7 +35,7 @@ export default function SearchBar() {
       <select
         value={city}
         onChange={(e) => setCity(e.target.value)}
-        className="rounded-xl border px-4 py-3 text-slate-900"
+        className="rounded-xl border px-4 py-3 text-slate-900 outline-none focus:border-blue-600"
       >
         <option value="baramati">Baramati</option>
         <option value="pune">Pune</option>
@@ -44,7 +44,7 @@ export default function SearchBar() {
         <option value="nashik">Nashik</option>
       </select>
 
-      <button className="rounded-xl bg-blue-700 px-6 py-3 font-bold text-white">
+      <button className="rounded-xl bg-blue-700 px-6 py-3 font-semibold text-white hover:bg-blue-800">
         Search
       </button>
     </form>
