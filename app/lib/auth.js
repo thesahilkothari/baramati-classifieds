@@ -11,9 +11,7 @@ export async function getCurrentUser() {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const user = await prisma.user.findUnique({
-      where: {
-        id: decoded.id,
-      },
+      where: { id: decoded.id }
     });
 
     return user;
