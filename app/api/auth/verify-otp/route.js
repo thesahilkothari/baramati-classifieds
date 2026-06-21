@@ -13,12 +13,12 @@ export async function POST(req) {
         code,
         verified: false,
         expiresAt: {
-          gt: new Date(),
-        },
+          gt: new Date()
+        }
       },
       orderBy: {
-        createdAt: "desc",
-      },
+        createdAt: "desc"
+      }
     });
 
     if (!otpRecord) {
@@ -30,27 +30,27 @@ export async function POST(req) {
 
     await prisma.otp.update({
       where: { id: otpRecord.id },
-      data: { verified: true },
+      data: { verified: true }
     });
 
     const user = await prisma.user.upsert({
       where: { mobile },
       update: {
         isVerified: true,
-        ...(name ? { name } : {}),
+        ...(name ? { name } : {})
       },
       create: {
         mobile,
         name,
-        isVerified: true,
-      },
+        isVerified: true
+      }
     });
 
     const token = jwt.sign(
       {
         id: user.id,
         mobile: user.mobile,
-        role: user.role,
+        role: user.role
       },
       process.env.JWT_SECRET,
       { expiresIn: "30d" }
@@ -61,14 +61,15 @@ export async function POST(req) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60 * 24 * 30,
+      maxAge: 60 * 60 * 24 * 30
     });
 
     return NextResponse.json({
       success: true,
-      user,
+      user
     });
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: "OTP verification failed" },
       { status: 500 }
