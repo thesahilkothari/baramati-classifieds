@@ -15,7 +15,7 @@
   "bcryptjs": "^2.4.3",
   "cloudinary": "^2.5.1",
   "cookie": "^1.0.2",
-  "jsonwebtoken": "^9.0.2",
+  "jsonwebtoken": "9.0.2",
   "lucide-react": "^0.468.0",
   "mysql2": "^3.11.5",
   "next": "15.0.0",
