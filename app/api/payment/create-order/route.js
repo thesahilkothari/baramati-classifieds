@@ -30,6 +30,8 @@ export async function POST(req) {
       );
     }
 
+    const razorpay = getRazorpayInstance();
+    
     const order = await razorpay.orders.create({
       amount,
       currency: "INR",
