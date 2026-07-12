@@ -21,8 +21,8 @@
   "next": "15.0.0",
   "prisma": "^6.0.0",
   "razorpay": "^2.9.5",
-  "react": "^19.0.0",
-  "react-dom": "^19.0.0"
+  "react": "19.0.0",
+  "react-dom": "19.0.0"
 },
   "devDependencies": {
     "prisma": "^5.0.0"
