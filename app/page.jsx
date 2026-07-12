@@ -4,6 +4,8 @@ import SearchBar from "./components/SearchBar";
 import AdCard from "./components/AdCard";
 import { prisma } from "./lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const ads = await prisma.ad.findMany({
     where: {
