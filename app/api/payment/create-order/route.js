@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { razorpay } from "@/app/lib/razorpay";
+import { getRazorpayInstance } from "@/app/lib/razorpay";
 import { prisma } from "@/app/lib/prisma";
 import { getCurrentUser } from "@/app/lib/auth";
 
