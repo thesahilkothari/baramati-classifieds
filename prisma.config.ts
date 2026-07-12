@@ -10,6 +10,6 @@ if (!databaseUrl) {
 export default defineConfig({
   schema: "prisma/schema.prisma",
   datasource: {
-    url: baramati-classifieds-db.ctc60ggyc1kx.eu-north-1.rds.amazonaws.com
+    url: databaseUrl
   }
 });
