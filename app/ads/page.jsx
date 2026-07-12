@@ -1,6 +1,6 @@
-import AdCard from "../components/AdCard";
-import SearchBar from "../components/SearchBar";
-import { prisma } from "../lib/prisma";
+import AdCard from "@/app/components/AdCard";
+import SearchBar from "@/app/components/SearchBar";
+import { prisma } from "@/app/lib/prisma";
 
 export const metadata = {
   title: "Classified Ads in Baramati | Baramati Classifieds",
