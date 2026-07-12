@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -10,4 +11,139 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+=======
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum AdStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+  EXPIRED
+  SOLD
+}
+
+enum AdType {
+  FREE
+  FEATURED
+  PREMIUM
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  name        String?
+  mobile      String    @unique
+  email       String?
+  isVerified  Boolean   @default(false)
+  role        UserRole  @default(USER)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  ads         Ad[]
+}
+
+model Otp {
+  id          Int      @id @default(autoincrement())
+  mobile      String
+  code        String
+  expiresAt   DateTime
+  verified    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  nameEn      String
+  nameMr      String
+  slug        String   @unique
+  icon        String?
+  createdAt   DateTime @default(now())
+
+  ads         Ad[]
+}
+
+model City {
+  id          Int      @id @default(autoincrement())
+  name        String
+  slug        String   @unique
+  state       String   @default("Maharashtra")
+  latitude    Float?
+  longitude   Float?
+
+  ads         Ad[]
+}
+
+model Ad {
+  id          Int       @id @default(autoincrement())
+  title       String
+  slug        String    @unique
+  description String    @db.Text
+  price       Decimal?  @db.Decimal(12,2)
+  mobile      String
+  whatsapp    String?
+  address     String?
+  latitude    Float?
+  longitude   Float?
+
+  status      AdStatus  @default(PENDING)
+  adType      AdType    @default(FREE)
+  isFeatured  Boolean   @default(false)
+  views       Int       @default(0)
+
+  userId      Int
+  categoryId  Int
+  cityId      Int
+
+  user        User      @relation(fields: [userId], references: [id])
+  category    Category  @relation(fields: [categoryId], references: [id])
+  city        City      @relation(fields: [cityId], references: [id])
+
+  images      AdImage[]
+  payments    Payment[]
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  expiresAt   DateTime?
+}
+
+model AdImage {
+  id        Int      @id @default(autoincrement())
+  url       String
+  publicId  String?
+  adId      Int
+  ad        Ad       @relation(fields: [adId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id                  Int      @id @default(autoincrement())
+  userId              Int
+  adId                Int
+  razorpayOrderId     String
+  razorpayPaymentId   String?
+  amount              Int
+  currency            String   @default("INR")
+  status              String   @default("CREATED")
+  createdAt           DateTime @default(now())
+
+  ad                  Ad       @relation(fields: [adId], references: [id])
+}
+
+model FraudReport {
+  id              Int      @id @default(autoincrement())
+  adId            Int
+  reason          String
+  reporterMobile  String?
+  createdAt       DateTime @default(now())
+>>>>>>> 41a721f1368e50083981d8f8c1bb2e3ec85b40cc
 }

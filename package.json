@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+<<<<<<< HEAD
     "lint": "eslint"
   },
   "dependencies": {
@@ -31,5 +32,30 @@
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
     "typescript": "^5"
+=======
+    "lint": "next lint",
+    "db:push": "prisma db push",
+    "db:seed": "node prisma/seed.js"
+  },
+ "dependencies": {
+  "@prisma/client": "^6.0.0",
+  "bcryptjs": "^2.4.3",
+  "cloudinary": "^2.5.1",
+  "cookie": "^1.0.2",
+  "jsonwebtoken": "9.0.2",
+  "lucide-react": "^0.468.0",
+  "mysql2": "^3.11.5",
+  "next": "15.0.0",
+  "prisma": "^6.0.0",
+  "razorpay": "^2.9.5",
+  "react": "19.0.0",
+  "react-dom": "19.0.0"
+},
+  "devDependencies": {
+    "prisma": "^5.0.0"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+>>>>>>> 41a721f1368e50083981d8f8c1bb2e3ec85b40cc
   }
 }
