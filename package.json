@@ -34,7 +34,14 @@
     "tailwindcss": "^4",
     "typescript": "^5"
   },
+<<<<<<< HEAD
   "prisma": {
     "seed": "node prisma/seed.js"
   }
 }
+=======
+
+>>>>>>>
+  
+}
+>>>>>>> 5bedc0f29299c957a2f6e1192fb7ffd2abf1914b
