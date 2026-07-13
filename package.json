@@ -8,21 +8,18 @@
     "start": "next start",
     "lint": "eslint",
     "db:push": "prisma db push",
-    "db:seed": "node prisma/seed.js"
+    "db:generate": "prisma generate",
+    "db:validate": "prisma validate"
   },
   "dependencies": {
-<<<<<<< HEAD
     "@prisma/adapter-mariadb": "^7.8.0",
     "@prisma/client": "^7.8.0",
-=======
-    "@prisma/client": "7.8.0",
->>>>>>> a99a785c15cfe3047c5cc95eaabce2120d4a98db
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.10.0",
     "cookie": "^1.1.1",
     "jsonwebtoken": "9.0.2",
     "lucide-react": "^0.468.0",
-    "mariadb": "^3.5.3",
+    "mariadb": "^3.4.5",
     "mysql2": "^3.11.5",
     "next": "^15.5.20",
     "razorpay": "^2.9.6",
@@ -30,14 +27,14 @@
     "react-dom": "19.0.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.6",
+    "@eslint/eslintrc": "^3.3.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "^15.5.20",
-    "prisma": "7.8.0",
+    "prisma": "^7.8.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
