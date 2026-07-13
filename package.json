@@ -11,8 +11,12 @@
     "db:seed": "node prisma/seed.js"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@prisma/adapter-mariadb": "^7.8.0",
     "@prisma/client": "^7.8.0",
+=======
+    "@prisma/client": "7.8.0",
+>>>>>>> a99a785c15cfe3047c5cc95eaabce2120d4a98db
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.10.0",
     "cookie": "^1.1.1",
@@ -33,7 +37,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "^15.5.20",
-    "prisma": "^7.8.0",
+    "prisma": "7.8.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
