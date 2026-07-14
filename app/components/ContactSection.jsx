@@ -30,26 +30,30 @@ export default function ContactSection() {
               </a>
             </p>
 
-            <p>
-              <span className="font-semibold text-slate-900">WhatsApp:</span>{" "}
-              <a
-                href="https://wa.me/919673931666"
-                className="text-blue-700 hover:underline"
-              >
-                +91 9673931666
-              </a>
-            </p>
+<p>
+  <span className="font-semibold text-slate-900">Promoter:</span>{" "}
+  SAHIL KOTHARI ENTERPRISES PRIVATE LIMITED
+</p>
 
-            <p>
-              <span className="font-semibold text-slate-900">Email:</span>{" "}
-              <a
-                href="mailto:thesahilkothari@gmail.com"
-                className="text-blue-700 hover:underline"
-              >
-                thesahilkothari@gmail.com
-              </a>
-            </p>
+<p>
+  <span className="font-semibold text-slate-900">WhatsApp:</span>{" "}
+  <a
+    href="https://wa.me/919673931166"
+    className="text-blue-700 hover:underline"
+  >
+    +91 9673931166
+  </a>
+</p>
 
+<p>
+  <span className="font-semibold text-slate-900">Email:</span>{" "}
+  <a
+    href="mailto:sahilkothariepl@gmail.com"
+    className="text-blue-700 hover:underline"
+  >
+    sahilkothariepl@gmail.com
+  </a>
+</p>
             <p>
               <span className="font-semibold text-slate-900">Location:</span>{" "}
               Baramati, Maharashtra
