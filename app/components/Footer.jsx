@@ -48,21 +48,22 @@ export default function Footer() {
           </div>
         </div>
 
-        <div>
-          <h3 className="font-bold">Contact</h3>
-          <div className="mt-3 space-y-2 text-sm text-slate-300">
-            <p>Baramati, Maharashtra</p>
-            <a href="https://wa.me/919673931666" className="block hover:text-white">
-              WhatsApp: +91 9673931666
-            </a>
-            <a
-              href="mailto:thesahilkothari@gmail.com"
-              className="block hover:text-white"
-            >
-              thesahilkothari@gmail.com
-            </a>
-          </div>
-        </div>
+      <div>
+  <h3 className="font-bold">Contact</h3>
+  <div className="mt-3 space-y-2 text-sm text-slate-300">
+    <p>SAHIL KOTHARI ENTERPRISES PRIVATE LIMITED</p>
+    <p>Baramati, Maharashtra</p>
+    <a href="https://wa.me/919673931166" className="block hover:text-white">
+      WhatsApp: +91 9673931166
+    </a>
+    <a
+      href="mailto:sahilkothariepl@gmail.com"
+      className="block hover:text-white"
+    >
+      sahilkothariepl@gmail.com
+    </a>
+  </div>
+</div>
       </div>
 
       <div className="mx-auto mt-8 max-w-7xl border-t border-slate-800 pt-5 text-sm text-slate-400">
