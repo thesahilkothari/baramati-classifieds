@@ -11,7 +11,10 @@ function createPrismaClient() {
   }
 
   const adapter = new PrismaMariaDb({
-    connectionString: databaseUrl
+    connectionString: databaseUrl,
+    connectionLimit: 1,
+    connectTimeout: 20000,
+    acquireTimeout: 20000
   });
 
   return new PrismaClient({
