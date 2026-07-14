@@ -1,123 +1,142 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/app/lib/prisma";
-import { getCurrentUser } from "@/app/lib/auth";
-import { slugify } from "@/app/lib/slugify";
+import { prisma } from "../../lib/prisma";
 
-export async function GET(req) {
-  const { searchParams } = new URL(req.url);
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-  const city = searchParams.get("city");
-  const category = searchParams.get("category");
-  const q = searchParams.get("q");
-
-  const ads = await prisma.ad.findMany({
-    where: {
-      status: "ACTIVE",
-      ...(city && {
-        city: {
-          slug: city
-        }
-      }),
-      ...(category && {
-        category: {
-          slug: category
-        }
-      }),
-      ...(q && {
-        OR: [
-          { title: { contains: q } },
-          { description: { contains: q } }
-        ]
-      })
-    },
-    include: {
-      images: true,
-      category: true,
-      city: true,
-      user: true
-    },
-    orderBy: [
-      { isFeatured: "desc" },
-      { createdAt: "desc" }
-    ]
-  });
-
-  return NextResponse.json({ ads });
+function slugify(text) {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
 }
 
-export async function POST(req) {
+async function createUniqueSlug(title) {
+  const baseSlug = slugify(title);
+  let slug = baseSlug;
+  let counter = 1;
+
+  while (await prisma.ad.findUnique({ where: { slug } })) {
+    slug = `${baseSlug}-${counter}`;
+    counter += 1;
+  }
+
+  return slug;
+}
+
+function cleanMobile(value) {
+  return String(value || "").replace(/\D/g, "");
+}
+
+export async function POST(request) {
   try {
-    const user = await getCurrentUser();
+    const body = await request.json();
 
-    if (!user) {
+    const name = String(body.name || "").trim();
+    const mobile = cleanMobile(body.mobile);
+    const whatsapp = cleanMobile(body.whatsapp || body.mobile);
+    const title = String(body.title || "").trim();
+    const description = String(body.description || "").trim();
+    const price = String(body.price || "").trim();
+    const address = String(body.address || "").trim();
+    const categoryId = Number(body.categoryId);
+    const cityId = Number(body.cityId);
+
+    if (!name || name.length < 2) {
       return NextResponse.json(
-        { error: "Login required" },
-        { status: 401 }
-      );
-    }
-
-    const body = await req.json();
-
-    const {
-      title,
-      description,
-      price,
-      mobile,
-      whatsapp,
-      categoryId,
-      cityId,
-      address,
-      latitude,
-      longitude,
-      images = []
-    } = body;
-
-    if (!title || !description || !categoryId || !cityId || !mobile) {
-      return NextResponse.json(
-        { error: "Required fields are missing" },
+        { error: "Please enter your name." },
         { status: 400 }
       );
     }
 
-    const baseSlug = slugify(title);
-    const uniqueSlug = `${baseSlug}-${Date.now()}`;
+    if (!mobile || mobile.length !== 10) {
+      return NextResponse.json(
+        { error: "Please enter a valid 10 digit mobile number." },
+        { status: 400 }
+      );
+    }
+
+    if (!title || title.length < 8) {
+      return NextResponse.json(
+        { error: "Ad title must be at least 8 characters." },
+        { status: 400 }
+      );
+    }
+
+    if (!description || description.length < 20) {
+      return NextResponse.json(
+        { error: "Description must be at least 20 characters." },
+        { status: 400 }
+      );
+    }
+
+    if (!categoryId || !cityId) {
+      return NextResponse.json(
+        { error: "Please select category and city." },
+        { status: 400 }
+      );
+    }
+
+    const category = await prisma.category.findUnique({
+      where: { id: categoryId }
+    });
+
+    const city = await prisma.city.findUnique({
+      where: { id: cityId }
+    });
+
+    if (!category || !city) {
+      return NextResponse.json(
+        { error: "Selected category or city is invalid." },
+        { status: 400 }
+      );
+    }
+
+    const user = await prisma.user.upsert({
+      where: { mobile },
+      update: {
+        name,
+        isVerified: true
+      },
+      create: {
+        name,
+        mobile,
+        isVerified: true
+      }
+    });
+
+    const slug = await createUniqueSlug(title);
 
     const ad = await prisma.ad.create({
       data: {
         title,
-        slug: uniqueSlug,
+        slug,
         description,
-        price: price ? Number(price) : null,
+        price: price ? price : null,
         mobile,
         whatsapp,
         address,
-        latitude: latitude ? Number(latitude) : null,
-        longitude: longitude ? Number(longitude) : null,
-        userId: user.id,
-        categoryId: Number(categoryId),
-        cityId: Number(cityId),
         status: "PENDING",
-        images: {
-          create: images.map((img) => ({
-            url: img.url,
-            publicId: img.publicId
-          }))
-        }
-      },
-      include: {
-        images: true
+        adType: "FREE",
+        isFeatured: false,
+        userId: user.id,
+        categoryId,
+        cityId
       }
     });
 
     return NextResponse.json({
       success: true,
-      ad,
-      message: "Ad submitted for review"
+      message: "Ad submitted successfully and is pending approval.",
+      adId: ad.id,
+      slug: ad.slug
     });
   } catch (error) {
-    console.error(error);
+    console.error("Ad submission failed:", error);
+
     return NextResponse.json(
-      { error: "Failed to create ad" },
+      { error: "Unable to submit ad. Please try again." },
       { status: 500 }
     );
   }
