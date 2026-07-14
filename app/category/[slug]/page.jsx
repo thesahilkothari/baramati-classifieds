@@ -1,64 +1,78 @@
-import { notFound } from "next/navigation";
-import { prisma } from "@/app/lib/prisma";
-import AdCard from "@/app/components/AdCard";
+import Link from "next/link";
+import AdCard from "../../components/AdCard";
+import { prisma } from "../../lib/prisma";
 
-export async function generateMetadata({ params }) {
-  const category = await prisma.category.findUnique({
-    where: {
-      slug: params.slug
-    }
-  });
+export const dynamic = "force-dynamic";
 
-  if (!category) {
-    return {
-      title: "Category Not Found"
-    };
-  }
-
-  return {
-    title: `${category.nameEn} Ads in Baramati | Baramati Classifieds`,
-    description: `Find latest ${category.nameEn} classified ads in Baramati and Maharashtra.`
-  };
+function formatSlug(slug) {
+  return slug
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }
 
 export default async function CategoryPage({ params }) {
-  const category = await prisma.category.findUnique({
-    where: {
-      slug: params.slug
+  const resolvedParams = await params;
+  const slug = resolvedParams.slug;
+
+  let ads = [];
+  let categoryName = formatSlug(slug);
+
+  try {
+    const category = await prisma.category.findUnique({
+      where: { slug }
+    });
+
+    if (category) {
+      categoryName = category.nameEn;
+
+      ads = await prisma.ad.findMany({
+        where: {
+          status: "ACTIVE",
+          categoryId: category.id
+        },
+        include: {
+          images: true,
+          category: true,
+          city: true
+        },
+        orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
+        take: 50
+      });
     }
-  });
-
-  if (!category) notFound();
-
-  const ads = await prisma.ad.findMany({
-    where: {
-      categoryId: category.id,
-      status: "ACTIVE"
-    },
-    include: {
-      images: true,
-      category: true,
-      city: true
-    },
-    orderBy: [
-      { isFeatured: "desc" },
-      { createdAt: "desc" }
-    ]
-  });
+  } catch (error) {
+    console.error("Category page fetch failed:", error);
+  }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
-      <h1 className="text-3xl font-extrabold">
-        {category.nameEn} Ads
-      </h1>
+    <main className="min-h-screen bg-slate-50">
+      <section className="bg-slate-900 px-4 py-10 text-white">
+        <div className="mx-auto max-w-6xl">
+          <Link href="/" className="text-sm font-semibold text-blue-300">
+            ← Back to Home
+          </Link>
 
-      <p className="mt-1 text-lg text-slate-500">{category.nameMr}</p>
+          <h1 className="mt-4 text-4xl font-bold">{categoryName}</h1>
 
-      <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {ads.map((ad) => (
-          <AdCard key={ad.id} ad={ad} />
-        ))}
-      </div>
-    </div>
+          <p className="mt-3 text-slate-300">
+            Browse ads listed under this category.
+          </p>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-10">
+        {ads.length === 0 ? (
+          <div className="rounded-2xl border bg-white p-8 text-center text-slate-600">
+            No active ads found in this category yet.
+          </div>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {ads.map((ad) => (
+              <AdCard key={ad.id} ad={ad} />
+            ))}
+          </div>
+        )}
+      </section>
+    </main>
   );
 }
