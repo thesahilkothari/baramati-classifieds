@@ -1,62 +1,56 @@
 import { NextResponse } from "next/server";
-import { getRazorpayInstance } from "@/app/lib/razorpay";
-import { prisma } from "@/app/lib/prisma";
-import { getCurrentUser } from "@/app/lib/auth";
+import Razorpay from "razorpay";
 
-export async function POST(req) {
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+function getRazorpayInstance() {
+  const keyId = process.env.RAZORPAY_KEY_ID;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+
+  if (!keyId || !keySecret) {
+    throw new Error("Razorpay environment variables are missing");
+  }
+
+  return new Razorpay({
+    key_id: keyId,
+    key_secret: keySecret
+  });
+}
+
+export async function POST(request) {
   try {
-    const user = await getCurrentUser();
+    const body = await request.json();
+    const amount = Number(body.amount);
 
-    if (!user) {
+    if (!amount || amount < 1) {
       return NextResponse.json(
-        { error: "Login required" },
-        { status: 401 }
-      );
-    }
-
-    const { adId, plan } = await req.json();
-
-    const amountMap = {
-      featured: 19900,
-      premium: 49900
-    };
-
-    const amount = amountMap[plan];
-
-    if (!amount) {
-      return NextResponse.json(
-        { error: "Invalid premium plan" },
+        { error: "Invalid payment amount" },
         { status: 400 }
       );
     }
 
     const razorpay = getRazorpayInstance();
-    
-    const order = await razorpay.orders.create({
-      amount,
-      currency: "INR",
-      receipt: `ad_${adId}_${Date.now()}`
-    });
 
-    await prisma.payment.create({
-      data: {
-        userId: user.id,
-        adId: Number(adId),
-        razorpayOrderId: order.id,
-        amount,
-        status: "CREATED"
+    const order = await razorpay.orders.create({
+      amount: amount * 100,
+      currency: "INR",
+      receipt: `featured_ad_${Date.now()}`,
+      notes: {
+        purpose: body.purpose || "FEATURED_AD"
       }
     });
 
     return NextResponse.json({
       orderId: order.id,
-      amount,
-      currency: "INR"
+      amount: order.amount,
+      currency: order.currency
     });
   } catch (error) {
-    console.error(error);
+    console.error("Razorpay order creation failed:", error);
+
     return NextResponse.json(
-      { error: "Payment order creation failed" },
+      { error: "Unable to create Razorpay order" },
       { status: 500 }
     );
   }
