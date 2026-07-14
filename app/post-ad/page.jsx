@@ -1,4 +1,5 @@
 import Link from "next/link";
+import FeaturedAdPaymentButton from "../components/FeaturedAdPaymentButton";
 
 export const metadata = {
   title: "Post Free Ad | My Classifieds",
