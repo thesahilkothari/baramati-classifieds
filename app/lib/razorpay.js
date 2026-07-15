@@ -5,11 +5,11 @@ export function getRazorpayInstance() {
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
   if (!keyId || !keySecret) {
-    throw new Error("Razorpay environment variables are missing");
+    throw new Error("Razorpay environment variables are missing.");
   }
 
   return new Razorpay({
     key_id: keyId,
-    key_secret: keySecret,
+    key_secret: keySecret
   });
 }
