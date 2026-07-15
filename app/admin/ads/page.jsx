@@ -196,7 +196,20 @@ export default async function AdminAdsPage({ searchParams }) {
                         {ad.address || "Not provided"}
                       </p>
                     </div>
+{ad.payments?.length > 0 && (
+  <div className="mt-4 rounded-2xl bg-blue-50 p-4 text-sm text-blue-900">
+    <p className="font-bold">Payment History</p>
 
+    <div className="mt-2 space-y-1">
+      {ad.payments.map((payment) => (
+        <p key={payment.id}>
+          {payment.status} | ₹{payment.amount / 100} |{" "}
+          {payment.razorpayPaymentId || payment.razorpayOrderId}
+        </p>
+      ))}
+    </div>
+  </div>
+)}
                     <AdminAdActions
                       adId={ad.id}
                       currentStatus={ad.status}
