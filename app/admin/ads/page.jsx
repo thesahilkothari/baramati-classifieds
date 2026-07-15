@@ -54,15 +54,21 @@ export default async function AdminAdsPage({ searchParams }) {
         };
 
   const ads = await prisma.ad.findMany({
-    where,
-    include: {
-      category: true,
-      city: true,
-      user: true
-    },
-    orderBy: { createdAt: "desc" },
-    take: 100
-  });
+  where,
+  include: {
+    category: true,
+    city: true,
+    user: true,
+    payments: {
+      orderBy: {
+        createdAt: "desc"
+      },
+      take: 3
+    }
+  },
+  orderBy: { createdAt: "desc" },
+  take: 100
+});
 
   const counts = await prisma.ad.groupBy({
     by: ["status"],
