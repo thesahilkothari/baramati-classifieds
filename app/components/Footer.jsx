@@ -45,6 +45,18 @@ export default function Footer() {
             <Link href="/safety" className="block hover:text-white">
               Safety Tips
             </Link>
+            <Link href="/terms" className="block hover:text-white">
+  Terms of Use
+</Link>
+<Link href="/privacy" className="block hover:text-white">
+  Privacy Policy
+</Link>
+<Link href="/refund" className="block hover:text-white">
+  Refund Policy
+</Link>
+<Link href="/disclaimer" className="block hover:text-white">
+  Disclaimer
+</Link>
           </div>
         </div>
 
