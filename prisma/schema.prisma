@@ -127,14 +127,46 @@ model Payment {
   adId              Int
   razorpayOrderId   String
   razorpayPaymentId String?
+  razorpaySignature String?  @db.VarChar(191)
   amount            Int
   currency          String   @default("INR")
   status            String   @default("CREATED")
   plan              String?
   purpose           String?
+  failureReason     String?  @db.Text
+  webhookEventId    String?  @db.VarChar(191)
+  verifiedAt        DateTime?
   createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   ad                Ad       @relation(fields: [adId], references: [id])
+
+  @@index([adId])
+  @@index([razorpayOrderId])
+  @@index([razorpayPaymentId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model PaymentWebhookEvent {
+  id                Int       @id @default(autoincrement())
+  provider          String    @default("RAZORPAY")
+  eventId           String    @unique
+  eventType         String
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  paymentRecordId   Int?
+  processed         Boolean   @default(false)
+  processedAt       DateTime?
+  error             String?   @db.Text
+  payload           Json
+  createdAt         DateTime  @default(now())
+
+  @@index([eventType])
+  @@index([razorpayOrderId])
+  @@index([razorpayPaymentId])
+  @@index([processed])
+  @@index([createdAt])
 }
 
 model FraudReport {

@@ -53,6 +53,8 @@ export async function POST(request) {
       currency: "INR",
       receipt: `ad_${ad.id}_${Date.now()}`,
       notes: {
+        platform: "My Classifieds",
+        website: "myclassifieds.in",
         adId: String(ad.id),
         plan: plan.key,
         purpose: plan.purpose
@@ -68,7 +70,8 @@ export async function POST(request) {
         currency: "INR",
         status: "CREATED",
         plan: plan.key,
-        purpose: plan.purpose
+        purpose: plan.purpose,
+        failureReason: null
       }
     });
 
