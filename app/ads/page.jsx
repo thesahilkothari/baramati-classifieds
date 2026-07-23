@@ -12,33 +12,44 @@ export const metadata = {
     "Browse newspaper-style classified ads for Baramati and Maharashtra."
 };
 
-function buildCommonWhere({ q, city, category }) {
-  return {
-    status: "ACTIVE",
-    ...(q
-      ? {
-          OR: [
-            { title: { contains: q } },
-            { description: { contains: q } },
-            { address: { contains: q } }
-          ]
-        }
-      : {}),
-    ...(city
-      ? {
-          city: {
-            slug: city
-          }
-        }
-      : {}),
-    ...(category
-      ? {
-          category: {
-            slug: category
-          }
-        }
-      : {})
-  };
+function buildCommonConditions({ q, city, category, now }) {
+  const conditions = [
+    { status: "ACTIVE" },
+    {
+      OR: [
+        { expiresAt: null },
+        { expiresAt: { gt: now } }
+      ]
+    }
+  ];
+
+  if (q) {
+    conditions.push({
+      OR: [
+        { title: { contains: q } },
+        { description: { contains: q } },
+        { address: { contains: q } }
+      ]
+    });
+  }
+
+  if (city) {
+    conditions.push({
+      city: {
+        slug: city
+      }
+    });
+  }
+
+  if (category) {
+    conditions.push({
+      category: {
+        slug: category
+      }
+    });
+  }
+
+  return conditions;
 }
 
 function ClassifiedSection({ title, label, borderClass, ads }) {
@@ -75,6 +86,7 @@ function ClassifiedSection({ title, label, borderClass, ads }) {
 }
 
 export default async function AdsPage({ searchParams }) {
+  const now = new Date();
   const params = await searchParams;
 
   const q = params?.q?.trim() || "";
@@ -87,7 +99,12 @@ export default async function AdsPage({ searchParams }) {
   let paidAds = [];
   let freeAds = [];
 
-  const commonWhere = buildCommonWhere({ q, city, category });
+  const commonConditions = buildCommonConditions({
+    q,
+    city,
+    category,
+    now
+  });
 
   try {
     categories = await prisma.category.findMany({
@@ -96,21 +113,27 @@ export default async function AdsPage({ searchParams }) {
 
     premiumAds = await prisma.ad.findMany({
       where: {
-        ...commonWhere,
-        adType: "PREMIUM"
+        AND: [
+          ...commonConditions,
+          { adType: "PREMIUM" }
+        ]
       },
       include: {
         category: true,
         city: true
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
       take: 100
     });
 
     featuredAds = await prisma.ad.findMany({
       where: {
-        ...commonWhere,
-        adType: "FEATURED"
+        AND: [
+          ...commonConditions,
+          { isFeatured: true },
+          { featuredUntil: { gt: now } },
+          { adType: { not: "PREMIUM" } }
+        ]
       },
       include: {
         category: true,
@@ -122,13 +145,16 @@ export default async function AdsPage({ searchParams }) {
 
     paidAds = await prisma.ad.findMany({
       where: {
-        ...commonWhere,
-        adType: "FREE",
-        payments: {
-          some: {
-            status: "PAID"
+        AND: [
+          ...commonConditions,
+          { adType: "PAID" },
+          {
+            OR: [
+              { featuredUntil: null },
+              { featuredUntil: { lte: now } }
+            ]
           }
-        }
+        ]
       },
       include: {
         category: true,
@@ -140,13 +166,10 @@ export default async function AdsPage({ searchParams }) {
 
     freeAds = await prisma.ad.findMany({
       where: {
-        ...commonWhere,
-        adType: "FREE",
-        payments: {
-          none: {
-            status: "PAID"
-          }
-        }
+        AND: [
+          ...commonConditions,
+          { adType: "FREE" }
+        ]
       },
       include: {
         category: true,
