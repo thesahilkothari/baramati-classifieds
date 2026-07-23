@@ -1,12 +1,22 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  ACTIVE_POLICY_VERSION,
+  ADVERTISER_TYPES,
+  POLICY_EFFECTIVE_DATE,
+  POLICY_EFFECTIVE_DATE_LABEL,
+  REQUIRED_POST_AD_DECLARATIONS,
+  validatePostAdDeclarations
+} from "../lib/compliance";
 
 const initialForm = {
   name: "",
   mobile: "",
   whatsapp: "",
+  advertiserType: "",
   categoryId: "",
   cityId: "",
   title: "",
@@ -15,9 +25,18 @@ const initialForm = {
   address: ""
 };
 
+const initialDeclarations = REQUIRED_POST_AD_DECLARATIONS.reduce(
+  (result, declaration) => ({
+    ...result,
+    [declaration.key]: false
+  }),
+  {}
+);
+
 export default function PostAdForm({ categories, cities }) {
   const router = useRouter();
   const [form, setForm] = useState(initialForm);
+  const [declarations, setDeclarations] = useState(initialDeclarations);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -30,9 +49,45 @@ export default function PostAdForm({ categories, cities }) {
     }));
   }
 
+  function updateDeclaration(event) {
+    const { name, checked } = event.target;
+
+    setDeclarations((current) => ({
+      ...current,
+      [name]: checked
+    }));
+  }
+
+  function setAllDeclarations(checked) {
+    setDeclarations(
+      REQUIRED_POST_AD_DECLARATIONS.reduce(
+        (result, declaration) => ({
+          ...result,
+          [declaration.key]: checked
+        }),
+        {}
+      )
+    );
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
     setError("");
+
+    if (!form.advertiserType) {
+      setError("Please select your advertiser type.");
+      return;
+    }
+
+    const declarationValidation = validatePostAdDeclarations(declarations);
+
+    if (!declarationValidation.isValid) {
+      setError(
+        "Please complete all mandatory declarations and policy acceptances before submitting the classified."
+      );
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -43,7 +98,10 @@ export default function PostAdForm({ categories, cities }) {
         },
         body: JSON.stringify({
           ...form,
-          images: []
+          images: [],
+          declarations,
+          policyVersion: ACTIVE_POLICY_VERSION,
+          policyEffectiveDate: POLICY_EFFECTIVE_DATE
         })
       });
 
@@ -70,6 +128,38 @@ export default function PostAdForm({ categories, cities }) {
           {error}
         </div>
       )}
+
+      <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5">
+        <p className="text-sm font-black uppercase tracking-wide text-blue-800">
+          Policy Version {ACTIVE_POLICY_VERSION}
+        </p>
+
+        <p className="mt-2 text-sm leading-6 text-blue-900">
+          By submitting a classified, you must accept the current My Classifieds
+          legal terms effective from {POLICY_EFFECTIVE_DATE_LABEL}. Your
+          acceptance will be stored with the advertisement record for compliance
+          and dispute handling.
+        </p>
+
+        <div className="mt-3 flex flex-wrap gap-3 text-sm font-bold">
+          <Link href="/legal/terms" target="_blank" className="text-blue-800 underline">
+            Terms
+          </Link>
+          <Link href="/legal/privacy" target="_blank" className="text-blue-800 underline">
+            Privacy
+          </Link>
+          <Link href="/legal/refunds" target="_blank" className="text-blue-800 underline">
+            Refunds
+          </Link>
+          <Link
+            href="/legal/listing-rules"
+            target="_blank"
+            className="text-blue-800 underline"
+          >
+            Listing Rules
+          </Link>
+        </div>
+      </div>
 
       <div className="grid gap-5 md:grid-cols-2">
         <div>
@@ -111,6 +201,26 @@ export default function PostAdForm({ categories, cities }) {
             placeholder="Leave blank if same as mobile"
             maxLength={10}
           />
+        </div>
+
+        <div>
+          <label className="text-sm font-bold text-slate-700">
+            Advertiser Type
+          </label>
+          <select
+            name="advertiserType"
+            value={form.advertiserType}
+            onChange={updateField}
+            className="mt-2 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-700"
+            required
+          >
+            <option value="">Select advertiser type</option>
+            {ADVERTISER_TYPES.map((type) => (
+              <option key={type.value} value={type.value}>
+                {type.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>
@@ -201,9 +311,51 @@ export default function PostAdForm({ categories, cities }) {
         />
       </div>
 
+      <section className="rounded-2xl border-2 border-slate-900 bg-white p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-black uppercase text-slate-950">
+              Mandatory Declarations
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-600">
+              Required before submitting your classified advertisement.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setAllDeclarations(true)}
+            className="rounded-xl border px-4 py-2 text-xs font-black uppercase text-slate-700 hover:bg-slate-50"
+          >
+            Select All
+          </button>
+        </div>
+
+        <div className="mt-5 space-y-3">
+          {REQUIRED_POST_AD_DECLARATIONS.map((declaration) => (
+            <label
+              key={declaration.key}
+              className="flex gap-3 rounded-xl border bg-slate-50 p-4 text-sm font-semibold leading-6 text-slate-800"
+            >
+              <input
+                type="checkbox"
+                name={declaration.key}
+                checked={declarations[declaration.key]}
+                onChange={updateDeclaration}
+                className="mt-1 h-4 w-4 shrink-0"
+                required
+              />
+              <span>{declaration.label}</span>
+            </label>
+          ))}
+        </div>
+      </section>
+
       <div className="rounded-2xl bg-yellow-50 p-5 text-sm text-yellow-900">
         Your classified will be reviewed before publication. Keep the text
-        genuine, short and clear like a newspaper classified ad.
+        genuine, short and clear like a newspaper classified ad. Payment, if any,
+        does not guarantee approval of prohibited or misleading content.
       </div>
 
       <button

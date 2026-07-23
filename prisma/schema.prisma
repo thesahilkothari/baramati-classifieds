@@ -37,7 +37,9 @@ model User {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  ads        Ad[]
+  ads               Ad[]
+  policyAcceptances PolicyAcceptance[]
+  consentRecords    ConsentRecord[]
 }
 
 model Otp {
@@ -96,8 +98,10 @@ model Ad {
   category    Category @relation(fields: [categoryId], references: [id])
   city        City     @relation(fields: [cityId], references: [id])
 
-  images      AdImage[]
-  payments    Payment[]
+  images            AdImage[]
+  payments          Payment[]
+  policyAcceptances PolicyAcceptance[]
+  consentRecords    ConsentRecord[]
 
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
@@ -138,4 +142,56 @@ model FraudReport {
   reason         String
   reporterMobile String?
   createdAt      DateTime @default(now())
+}
+
+model PolicyAcceptance {
+  id                   Int      @id @default(autoincrement())
+  userId               Int?
+  adId                 Int?
+  mobile               String
+  name                 String?
+  policyVersion        String
+  effectiveDate        DateTime
+  source               String   @default("POST_AD_FORM")
+
+  acceptedTerms        Boolean  @default(false)
+  acceptedPrivacy      Boolean  @default(false)
+  acceptedRefund       Boolean  @default(false)
+  acceptedListingRules Boolean  @default(false)
+  acceptedModeration   Boolean  @default(false)
+
+  declarations         Json?
+  ipAddress            String?  @db.VarChar(191)
+  userAgent            String?  @db.Text
+  createdAt            DateTime @default(now())
+
+  user                 User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  ad                   Ad?      @relation(fields: [adId], references: [id], onDelete: SetNull)
+
+  @@index([mobile])
+  @@index([adId])
+  @@index([policyVersion])
+  @@index([createdAt])
+}
+
+model ConsentRecord {
+  id            Int      @id @default(autoincrement())
+  userId        Int?
+  adId          Int?
+  mobile        String?
+  consentType   String
+  consentValue  Boolean  @default(false)
+  policyVersion String?
+  source        String   @default("POST_AD_FORM")
+  ipAddress     String?  @db.VarChar(191)
+  userAgent     String?  @db.Text
+  createdAt     DateTime @default(now())
+
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  ad            Ad?      @relation(fields: [adId], references: [id], onDelete: SetNull)
+
+  @@index([mobile])
+  @@index([adId])
+  @@index([consentType])
+  @@index([createdAt])
 }
