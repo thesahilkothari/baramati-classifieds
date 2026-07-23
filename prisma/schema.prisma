@@ -137,7 +137,7 @@ model Payment {
   webhookEventId    String?  @db.VarChar(191)
   verifiedAt        DateTime?
   createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  updatedAt         DateTime @default(now()) @updatedAt
 
   ad                Ad       @relation(fields: [adId], references: [id])
 
