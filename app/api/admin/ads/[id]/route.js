@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
 import { getAdminSession } from "../../../../lib/adminAuth";
+import { getDefaultExpiryForAdType, addDays } from "../../../../lib/adPlans";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,61 +10,39 @@ const allowedStatuses = ["PENDING", "ACTIVE", "REJECTED", "SOLD", "EXPIRED"];
 
 export async function PATCH(request, { params }) {
   try {
-    const session = await getAdminSession();
+    const now = new Date();
 
-    if (!session) {
-      return NextResponse.json(
-        { error: "Unauthorized admin request." },
-        { status: 401 }
-      );
-    }
+const existingAd = await prisma.ad.findUnique({
+  where: { id: adId }
+});
 
-    const resolvedParams = await params;
-    const adId = Number(resolvedParams.id);
+if (!existingAd) {
+  return NextResponse.json(
+    { error: "Ad not found." },
+    { status: 404 }
+  );
+}
 
-    if (!adId) {
-      return NextResponse.json(
-        { error: "Invalid ad id." },
-        { status: 400 }
-      );
-    }
+const updateData = {
+  status
+};
 
-    const body = await request.json();
-    const status = String(body.status || "").toUpperCase();
+if (status === "ACTIVE") {
+  updateData.approvedAt = existingAd.approvedAt || now;
+  updateData.expiresAt =
+    existingAd.expiresAt || getDefaultExpiryForAdType(existingAd.adType, now);
 
-    if (!allowedStatuses.includes(status)) {
-      return NextResponse.json(
-        { error: "Invalid ad status." },
-        { status: 400 }
-      );
-    }
-
-    const updatedAd = await prisma.ad.update({
-      where: { id: adId },
-      data: {
-        status,
-        ...(status === "ACTIVE"
-          ? {
-              expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-            }
-          : {})
-      },
-      include: {
-        category: true,
-        city: true
-      }
-    });
-
-    return NextResponse.json({
-      success: true,
-      ad: updatedAd
-    });
-  } catch (error) {
-    console.error("Admin ad update failed:", error);
-
-    return NextResponse.json(
-      { error: "Unable to update ad." },
-      { status: 500 }
-    );
+  if (existingAd.isFeatured && !existingAd.featuredUntil) {
+    updateData.featuredUntil = addDays(now, 10);
   }
+}
+
+const updatedAd = await prisma.ad.update({
+  where: { id: adId },
+  data: updateData,
+  include: {
+    category: true,
+    city: true
+  }
+});  }
 }
