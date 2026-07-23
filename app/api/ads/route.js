@@ -109,21 +109,24 @@ export async function POST(request) {
     const slug = await createUniqueSlug(title);
 
     const ad = await prisma.ad.create({
-      data: {
-        title,
-        slug,
-        description,
-        price: price ? price : null,
-        mobile,
-        whatsapp,
-        address,
-        status: "PENDING",
-        adType: "FREE",
-        isFeatured: false,
-        userId: user.id,
-        categoryId,
-        cityId
-      }
+  data: {
+    title,
+    slug,
+    description,
+    price: price ? price : null,
+    mobile,
+    whatsapp,
+    address,
+    status: "PENDING",
+    adType: "FREE",
+    isFeatured: false,
+    userId: user.id,
+    categoryId,
+    cityId,
+    images: {
+      create: images
+    }
+  }
     });
 
     return NextResponse.json({
