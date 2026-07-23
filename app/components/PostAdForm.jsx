@@ -41,7 +41,10 @@ export default function PostAdForm({ categories, cities }) {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(form)
+        body: JSON.stringify({
+          ...form,
+          images: []
+        })
       });
 
       const data = await response.json();
@@ -82,7 +85,9 @@ export default function PostAdForm({ categories, cities }) {
         </div>
 
         <div>
-          <label className="text-sm font-bold text-slate-700">Mobile Number</label>
+          <label className="text-sm font-bold text-slate-700">
+            Mobile Number
+          </label>
           <input
             name="mobile"
             value={form.mobile}
@@ -95,7 +100,9 @@ export default function PostAdForm({ categories, cities }) {
         </div>
 
         <div>
-          <label className="text-sm font-bold text-slate-700">WhatsApp Number</label>
+          <label className="text-sm font-bold text-slate-700">
+            WhatsApp Number
+          </label>
           <input
             name="whatsapp"
             value={form.whatsapp}
@@ -168,19 +175,23 @@ export default function PostAdForm({ categories, cities }) {
       </div>
 
       <div>
-        <label className="text-sm font-bold text-slate-700">Description</label>
+        <label className="text-sm font-bold text-slate-700">
+          Classified Text
+        </label>
         <textarea
           name="description"
           value={form.description}
           onChange={updateField}
-          className="mt-2 min-h-36 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-700"
-          placeholder="Write important details about your ad"
+          className="mt-2 min-h-32 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-700"
+          placeholder="Write your classified ad text. Keep it short, clear and useful."
           required
         />
       </div>
 
       <div>
-        <label className="text-sm font-bold text-slate-700">Address / Local Area</label>
+        <label className="text-sm font-bold text-slate-700">
+          Area / Location
+        </label>
         <input
           name="address"
           value={form.address}
@@ -191,16 +202,16 @@ export default function PostAdForm({ categories, cities }) {
       </div>
 
       <div className="rounded-2xl bg-yellow-50 p-5 text-sm text-yellow-900">
-        Your ad will be reviewed before it becomes publicly visible. Do not post
-        misleading, illegal, fraudulent or duplicate ads.
+        Your classified will be reviewed before publication. Keep the text
+        genuine, short and clear like a newspaper classified ad.
       </div>
 
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full rounded-xl bg-blue-700 px-6 py-4 font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+        className="w-full rounded-xl bg-red-600 px-6 py-4 font-black uppercase text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {isSubmitting ? "Submitting..." : "Submit Ad for Approval"}
+        {isSubmitting ? "Submitting..." : "Submit Classified for Approval"}
       </button>
     </form>
   );
