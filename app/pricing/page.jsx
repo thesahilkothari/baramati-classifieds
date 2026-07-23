@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 export const metadata = {
   title: "Pricing | My Classifieds",
@@ -11,36 +11,34 @@ const plans = [
     name: "Free Classified",
     price: "₹0",
     duration: "7 Days",
-    badge: "Basic",
+    badge: "Free",
     border: "border-slate-300",
     button: "bg-slate-950 hover:bg-slate-800",
     href: "/post-ad?plan=free",
-    description:
-      "Best for simple local classifieds. Your ad will be visible after admin approval for 7 days.",
+    description: "Simple local classified listing after admin approval.",
     features: [
       "Visible for 7 days",
-      "Text-only classified listing",
+      "Text-only classified",
       "Category-wise display",
       "Admin approval required",
-      "Can upgrade before expiry"
+      "Can be upgraded before expiry"
     ]
   },
   {
     name: "Paid Classified",
     price: "₹199",
     duration: "7 Days",
-    badge: "Paid",
+    badge: "Popular",
     border: "border-blue-600",
     button: "bg-blue-700 hover:bg-blue-800",
     href: "/post-ad?plan=paid",
-    description:
-      "Suitable for sellers who want a paid listing with better seriousness and visibility.",
+    description: "Better option for sellers who want paid listing visibility.",
     features: [
       "Visible for 7 days",
-      "Displayed above free ads",
+      "Paid classified listing",
       "Category-wise display",
       "Admin approval required",
-      "Can add Featured upgrade"
+      "Eligible for Featured add-on"
     ]
   },
   {
@@ -51,14 +49,13 @@ const plans = [
     border: "border-red-600",
     button: "bg-red-600 hover:bg-red-700",
     href: "/post-ad?plan=premium",
-    description:
-      "Best for important, business, property, job, service and urgent classified advertisements.",
+    description: "Best for property, jobs, business and urgent advertisements.",
     features: [
       "Visible for 30 days",
-      "Displayed at top priority",
-      "Premium classified visibility",
+      "Premium classified listing",
+      "Longer validity",
       "Admin approval required",
-      "Can add Featured upgrade"
+      "Eligible for Featured add-on"
     ]
   },
   {
@@ -69,77 +66,76 @@ const plans = [
     border: "border-orange-500",
     button: "bg-orange-500 hover:bg-orange-600",
     href: "/post-ad?plan=featured",
-    description:
-      "Optional highlighting add-on for paid or premium ads. Free ads must first be upgraded.",
+    description: "Highlight your paid or premium classified for faster response.",
     features: [
       "Featured highlighting for 10 days",
-      "Available for paid/premium ads",
-      "Shown in Featured section",
+      "Only for paid/premium ads",
+      "Highlighted classified display",
       "Useful for urgent response",
-      "Admin approval rules still apply"
+      "Free ads must first be upgraded"
     ]
   }
 ];
 
 export default function PricingPage() {
   return (
-    <main className="bg-slate-100 px-4 py-10">
+    <main className="bg-slate-100 px-4 py-6">
       <section className="mx-auto max-w-7xl">
-        <div className="rounded-3xl border-2 border-slate-900 bg-white p-6 shadow-sm md:p-8">
-          <p className="text-sm font-black uppercase tracking-wide text-red-600">
-            Pricing
-          </p>
+        <div className="rounded-2xl border-2 border-slate-900 bg-white p-5 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-black uppercase tracking-wide text-red-600">
+                Pricing
+              </p>
 
-          <h1 className="mt-3 text-4xl font-black uppercase text-slate-950 md:text-5xl">
-            Classified Advertisement Plans
-          </h1>
+              <h1 className="mt-1 text-2xl font-black uppercase text-slate-950 md:text-3xl">
+                Classified Advertisement Plans
+              </h1>
 
-          <p className="mt-4 max-w-3xl text-slate-700">
-            Choose a simple newspaper-style classified plan. Free ads are
-            displayed for 7 days. Paid and premium ads receive higher visibility.
-            Featured highlighting is available as an add-on for paid or premium
-            ads.
-          </p>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-700">
+                Choose a simple plan to publish your newspaper-style classified
+                advertisement on My Classifieds.
+              </p>
+            </div>
 
-          <div className="mt-6 rounded-2xl border bg-yellow-50 p-5 text-sm leading-6 text-yellow-900">
-            <p className="font-black uppercase">Important</p>
-            <p className="mt-2">
-              All classifieds are subject to admin approval. Payment does not
-              guarantee publication of illegal, misleading, fraudulent or
-              prohibited advertisements.
-            </p>
+            <Link
+              href="/post-ad"
+              className="rounded-xl bg-red-600 px-5 py-3 text-sm font-black uppercase text-white hover:bg-red-700"
+            >
+              Place Classified
+            </Link>
           </div>
         </div>
 
-        <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           {plans.map((plan) => (
             <article
               key={plan.name}
-              className={`rounded-3xl border-2 bg-white p-6 shadow-sm ${plan.border}`}
+              className={`rounded-3xl border-2 bg-white p-5 shadow-sm ${plan.border}`}
             >
               <div className="flex items-start justify-between gap-3">
-                <h2 className="text-2xl font-black uppercase text-slate-950">
+                <h2 className="text-xl font-black uppercase text-slate-950">
                   {plan.name}
                 </h2>
 
-                <span className="rounded bg-slate-950 px-3 py-1 text-xs font-black uppercase text-white">
+                <span className="rounded bg-slate-950 px-3 py-1 text-[11px] font-black uppercase text-white">
                   {plan.badge}
                 </span>
               </div>
 
-              <p className="mt-5 text-4xl font-black text-red-600">
+              <p className="mt-4 text-4xl font-black text-red-600">
                 {plan.price}
               </p>
 
-              <p className="mt-1 text-sm font-black uppercase text-slate-600">
+              <p className="mt-1 text-xs font-black uppercase text-slate-600">
                 Valid for {plan.duration}
               </p>
 
-              <p className="mt-4 text-sm leading-6 text-slate-700">
+              <p className="mt-4 min-h-12 text-sm leading-6 text-slate-700">
                 {plan.description}
               </p>
 
-              <ul className="mt-6 space-y-3 text-sm font-semibold text-slate-700">
+              <ul className="mt-5 space-y-2 text-sm font-semibold text-slate-700">
                 {plan.features.map((feature) => (
                   <li key={feature} className="flex gap-2">
                     <span className="font-black text-green-700">✓</span>
@@ -150,7 +146,7 @@ export default function PricingPage() {
 
               <Link
                 href={plan.href}
-                className={`mt-7 flex w-full justify-center rounded-xl px-5 py-3 text-sm font-black uppercase text-white ${plan.button}`}
+                className={`mt-6 flex w-full justify-center rounded-xl px-5 py-3 text-sm font-black uppercase text-white ${plan.button}`}
               >
                 Choose Plan
               </Link>
@@ -158,39 +154,7 @@ export default function PricingPage() {
           ))}
         </div>
 
-        <section className="mt-10 grid gap-6 lg:grid-cols-2">
-          <div className="rounded-3xl border bg-white p-6 shadow-sm">
-            <h2 className="text-2xl font-black uppercase text-slate-950">
-              Display Priority
-            </h2>
-
-            <div className="mt-5 space-y-4 text-sm leading-6 text-slate-700">
-              <p>
-                <span className="font-black text-red-600">1. Premium Ads:</span>{" "}
-                Displayed first because they are valid for 30 days and have top
-                visibility.
-              </p>
-
-              <p>
-                <span className="font-black text-orange-600">
-                  2. Featured Ads:
-                </span>{" "}
-                Paid or premium ads with featured add-on are highlighted for 10
-                days.
-              </p>
-
-              <p>
-                <span className="font-black text-blue-700">3. Paid Ads:</span>{" "}
-                Displayed after premium and featured ads.
-              </p>
-
-              <p>
-                <span className="font-black text-slate-900">4. Free Ads:</span>{" "}
-                Displayed after paid ads and remain visible for 7 days.
-              </p>
-            </div>
-          </div>
-
+        <section className="mt-8 grid gap-5 lg:grid-cols-2">
           <div className="rounded-3xl border bg-white p-6 shadow-sm">
             <h2 className="text-2xl font-black uppercase text-slate-950">
               Expiry & Upgrade
@@ -208,8 +172,25 @@ export default function PricingPage() {
               </p>
 
               <p>
-                Automatic WhatsApp/SMS/email reminders will be enabled in a later
-                phase after connecting a notification provider.
+                Featured add-on is available only for paid or premium classified
+                ads.
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-3xl border bg-yellow-50 p-6 shadow-sm">
+            <h2 className="text-2xl font-black uppercase text-yellow-950">
+              Important Note
+            </h2>
+
+            <div className="mt-5 space-y-4 text-sm leading-6 text-yellow-900">
+              <p>
+                All classifieds are subject to admin approval before publication.
+              </p>
+
+              <p>
+                Payment does not guarantee approval of illegal, misleading,
+                fraudulent or prohibited advertisements.
               </p>
 
               <p>
@@ -230,32 +211,6 @@ export default function PricingPage() {
                 .
               </p>
             </div>
-          </div>
-        </section>
-
-        <section className="mt-10 rounded-3xl border-2 border-slate-900 bg-slate-950 p-6 text-white shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-5">
-            <div>
-              <p className="text-sm font-black uppercase tracking-wide text-yellow-300">
-                Ready to publish?
-              </p>
-
-              <h2 className="mt-2 text-3xl font-black uppercase">
-                Place your classified advertisement
-              </h2>
-
-              <p className="mt-3 max-w-2xl text-slate-300">
-                Submit your classified text. It will be reviewed and published
-                after approval.
-              </p>
-            </div>
-
-            <Link
-              href="/post-ad"
-              className="rounded-xl bg-red-600 px-6 py-3 text-sm font-black uppercase text-white hover:bg-red-700"
-            >
-              Place Classified
-            </Link>
           </div>
         </section>
       </section>
