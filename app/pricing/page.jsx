@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 
 export const metadata = {
   title: "Pricing | My Classifieds",
@@ -196,10 +196,10 @@ export default function PricingPage() {
               <p>
                 For support, contact{" "}
                 <a
-                  href="mailto:sahilkothariepl@gmail.com"
+                  href="mailto:connect@myclassifieds.in"
                   className="font-bold text-blue-700 hover:underline"
                 >
-                  sahilkothariepl@gmail.com
+                  connect@myclassifieds.in
                 </a>{" "}
                 or WhatsApp{" "}
                 <a
