@@ -7,6 +7,18 @@ import { prisma } from "./lib/prisma";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
+  const now = new Date();
+
+  const activeNotExpiredConditions = [
+    { status: "ACTIVE" },
+    {
+      OR: [
+        { expiresAt: null },
+        { expiresAt: { gt: now } }
+      ]
+    }
+  ];
+
   let categories = [];
   let premiumAds = [];
   let featuredAds = [];
@@ -20,21 +32,27 @@ export default async function HomePage() {
 
     premiumAds = await prisma.ad.findMany({
       where: {
-        status: "ACTIVE",
-        adType: "PREMIUM"
+        AND: [
+          ...activeNotExpiredConditions,
+          { adType: "PREMIUM" }
+        ]
       },
       include: {
         category: true,
         city: true
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
       take: 12
     });
 
     featuredAds = await prisma.ad.findMany({
       where: {
-        status: "ACTIVE",
-        adType: "FEATURED"
+        AND: [
+          ...activeNotExpiredConditions,
+          { isFeatured: true },
+          { featuredUntil: { gt: now } },
+          { adType: { not: "PREMIUM" } }
+        ]
       },
       include: {
         category: true,
@@ -46,13 +64,16 @@ export default async function HomePage() {
 
     paidAds = await prisma.ad.findMany({
       where: {
-        status: "ACTIVE",
-        adType: "FREE",
-        payments: {
-          some: {
-            status: "PAID"
+        AND: [
+          ...activeNotExpiredConditions,
+          { adType: "PAID" },
+          {
+            OR: [
+              { featuredUntil: null },
+              { featuredUntil: { lte: now } }
+            ]
           }
-        }
+        ]
       },
       include: {
         category: true,
@@ -64,13 +85,10 @@ export default async function HomePage() {
 
     freeAds = await prisma.ad.findMany({
       where: {
-        status: "ACTIVE",
-        adType: "FREE",
-        payments: {
-          none: {
-            status: "PAID"
-          }
-        }
+        AND: [
+          ...activeNotExpiredConditions,
+          { adType: "FREE" }
+        ]
       },
       include: {
         category: true,
@@ -82,8 +100,6 @@ export default async function HomePage() {
   } catch (error) {
     console.error("Homepage classified fetch failed:", error);
   }
-
-  const promotedAds = [...premiumAds, ...featuredAds];
 
   return (
     <main className="min-h-screen bg-slate-100">
@@ -135,7 +151,7 @@ export default async function HomePage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-3 py-5 md:px-4">
-        {promotedAds.length > 0 && (
+        {(premiumAds.length > 0 || featuredAds.length > 0) && (
           <section className="rounded-2xl border-2 border-red-600 bg-white p-3 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-3 border-b-2 border-red-600 pb-2">
               <div>
@@ -155,11 +171,33 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {promotedAds.map((ad, index) => (
-                <AdCard key={ad.id} ad={ad} index={index} />
-              ))}
-            </div>
+            {premiumAds.length > 0 && (
+              <div>
+                <h3 className="mb-3 rounded bg-slate-950 px-3 py-2 text-sm font-black uppercase text-white">
+                  Premium Ads
+                </h3>
+
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {premiumAds.map((ad, index) => (
+                    <AdCard key={ad.id} ad={ad} index={index} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {featuredAds.length > 0 && (
+              <div className={premiumAds.length > 0 ? "mt-5" : ""}>
+                <h3 className="mb-3 rounded bg-orange-500 px-3 py-2 text-sm font-black uppercase text-white">
+                  Featured Ads
+                </h3>
+
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {featuredAds.map((ad, index) => (
+                    <AdCard key={ad.id} ad={ad} index={index} />
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
         )}
 
@@ -202,9 +240,11 @@ export default async function HomePage() {
               <h3 className="text-xl font-black text-slate-900">
                 No classifieds published yet
               </h3>
+
               <p className="mt-2 text-slate-600">
                 Post your first classified and approve it from admin panel.
               </p>
+
               <Link
                 href="/post-ad"
                 className="mt-5 inline-flex rounded-xl bg-red-600 px-6 py-3 font-black uppercase text-white"
