@@ -1,11 +1,22 @@
 import Link from "next/link";
 
+const colorClasses = [
+  "border-red-300 bg-red-50",
+  "border-blue-300 bg-blue-50",
+  "border-yellow-300 bg-yellow-50",
+  "border-green-300 bg-green-50",
+  "border-purple-300 bg-purple-50",
+  "border-orange-300 bg-orange-50",
+  "border-pink-300 bg-pink-50",
+  "border-cyan-300 bg-cyan-50"
+];
+
 function formatPrice(price) {
-  if (!price) return "Price on request";
+  if (!price) return "Call for Price";
 
   const amount = Number(price);
 
-  if (Number.isNaN(amount)) return "Price on request";
+  if (Number.isNaN(amount)) return "Call for Price";
 
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
@@ -14,52 +25,63 @@ function formatPrice(price) {
   }).format(amount);
 }
 
-export default function AdCard({ ad }) {
-  const imageUrl = ad.images?.[0]?.url;
+export default function AdCard({ ad, index = 0 }) {
+  const colorClass = colorClasses[index % colorClasses.length];
 
   return (
-    <Link
-      href={`/ads/${ad.slug}`}
-      className="group overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+    <article
+      className={`rounded-xl border-2 p-3 shadow-sm ${colorClass}`}
     >
-      <div className="flex h-44 items-center justify-center bg-slate-100">
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={ad.title}
-            className="h-full w-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <div className="text-5xl">{ad.category?.icon || "📌"}</div>
+      <div className="flex items-start justify-between gap-2">
+        <span className="rounded bg-slate-950 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-white">
+          {ad.category?.nameEn || "Classified"}
+        </span>
+
+        {ad.isFeatured && (
+          <span className="rounded bg-red-600 px-2 py-1 text-[10px] font-black uppercase text-white">
+            Prime
+          </span>
         )}
       </div>
 
-      <div className="p-5">
-        <div className="flex items-center gap-2">
-          {ad.isFeatured && (
-            <span className="rounded-full bg-yellow-100 px-2 py-1 text-xs font-bold text-yellow-800">
-              Featured
-            </span>
-          )}
-
-          <span className="rounded-full bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700">
-            {ad.category?.nameEn || "Classified"}
-          </span>
-        </div>
-
-        <h3 className="mt-3 line-clamp-2 text-lg font-bold text-slate-900 group-hover:text-blue-700">
+      <Link href={`/ads/${ad.slug}`}>
+        <h3 className="mt-2 text-base font-black uppercase leading-tight text-slate-950 hover:text-blue-700">
           {ad.title}
         </h3>
+      </Link>
 
-        <p className="mt-2 text-xl font-extrabold text-slate-900">
-          {formatPrice(ad.price)}
-        </p>
+      <p className="mt-1 text-sm font-extrabold text-red-700">
+        {formatPrice(ad.price)}
+      </p>
 
-        <p className="mt-2 text-sm text-slate-500">
-          {ad.city?.name || "Maharashtra"}
-        </p>
+      <p className="mt-2 line-clamp-4 text-sm leading-5 text-slate-800">
+        {ad.description}
+      </p>
+
+      <div className="mt-3 border-t border-slate-300 pt-2 text-xs font-bold text-slate-700">
+        <p>{ad.city?.name || "Maharashtra"}</p>
+        {ad.address && <p>{ad.address}</p>}
       </div>
-    </Link>
+
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <a
+          href={`tel:${ad.mobile}`}
+          className="rounded-lg bg-blue-700 px-3 py-2 text-center text-xs font-black text-white"
+        >
+          Call
+        </a>
+
+        <a
+          href={`https://wa.me/91${ad.whatsapp || ad.mobile}?text=${encodeURIComponent(
+            `I am interested in your classified ad: ${ad.title}`
+          )}`}
+          target="_blank"
+          rel="noreferrer"
+          className="rounded-lg bg-green-600 px-3 py-2 text-center text-xs font-black text-white"
+        >
+          WhatsApp
+        </a>
+      </div>
+    </article>
   );
 }
