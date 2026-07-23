@@ -4,82 +4,94 @@ export default function Footer() {
   return (
     <footer className="border-t bg-slate-950 px-4 py-10 text-white">
       <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-4">
-        <div>
-          <h2 className="text-xl font-extrabold">My Classifieds</h2>
-          <p className="mt-3 text-sm leading-6 text-slate-300">
-            Local classified ads platform for Baramati and Maharashtra. Buy,
-            sell, rent, find jobs and promote local services.
-          </p>
-        </div>
+        <div className="md:col-span-2">
+          <Link href="/" className="text-2xl font-black uppercase">
+            My Classifieds
+          </Link>
 
-        <div>
-          <h3 className="font-bold">Categories</h3>
-          <div className="mt-3 space-y-2 text-sm text-slate-300">
-            <Link href="/category/real-estate" className="block hover:text-white">
-              Real Estate
-            </Link>
-            <Link href="/category/jobs" className="block hover:text-white">
-              Jobs
-            </Link>
-            <Link href="/category/vehicles" className="block hover:text-white">
-              Vehicles
-            </Link>
-            <Link href="/category/electronics" className="block hover:text-white">
-              Electronics
-            </Link>
+          <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300">
+            Good-old newspaper-style local classifieds, now available on every
+            mobile phone for Baramati and Maharashtra.
+          </p>
+
+          <div className="mt-5 space-y-1 text-sm text-slate-300">
+            <p>
+              WhatsApp:{" "}
+              <a
+                href="https://wa.me/919673931166"
+                className="font-bold text-white hover:text-blue-300"
+              >
+                +91 9673931166
+              </a>
+            </p>
+
+            <p>
+              Email:{" "}
+              <a
+                href="mailto:connect@myclassifieds.in"
+                className="font-bold text-white hover:text-blue-300"
+              >
+                connect@myclassifieds.in
+              </a>
+            </p>
           </div>
         </div>
 
         <div>
-          <h3 className="font-bold">Useful Links</h3>
-          <div className="mt-3 space-y-2 text-sm text-slate-300">
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-200">
+            Classifieds
+          </h2>
+
+          <nav className="mt-4 space-y-2 text-sm text-slate-300">
             <Link href="/ads" className="block hover:text-white">
               Browse Ads
             </Link>
+
             <Link href="/post-ad" className="block hover:text-white">
-              Post Free Ad
+              Place Classified
             </Link>
+
             <Link href="/pricing" className="block hover:text-white">
-              Promote Ad
+              Pricing
             </Link>
+
             <Link href="/safety" className="block hover:text-white">
               Safety Tips
             </Link>
-            <Link href="/terms" className="block hover:text-white">
-  Terms of Use
-</Link>
-<Link href="/privacy" className="block hover:text-white">
-  Privacy Policy
-</Link>
-<Link href="/refund" className="block hover:text-white">
-  Refund Policy
-</Link>
-<Link href="/disclaimer" className="block hover:text-white">
-  Disclaimer
-</Link>
-          </div>
+
+            <Link href="/contact" className="block hover:text-white">
+              Contact
+            </Link>
+          </nav>
         </div>
 
-      <div>
-  <h3 className="font-bold">Contact</h3>
-  <div className="mt-3 space-y-2 text-sm text-slate-300">
-    <p>SAHIL KOTHARI ENTERPRISES PRIVATE LIMITED</p>
-    <p>Baramati, Maharashtra</p>
-    <a href="https://wa.me/919673931166" className="block hover:text-white">
-      WhatsApp: +91 9673931166
-    </a>
-    <a
-      href="mailto:sahilkothariepl@gmail.com"
-      className="block hover:text-white"
-    >
-      sahilkothariepl@gmail.com
-    </a>
-  </div>
-</div>
+        <div>
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-200">
+            Legal
+          </h2>
+
+          <nav className="mt-4 space-y-2 text-sm text-slate-300">
+            <Link href="/terms" className="block hover:text-white">
+              Terms of Use
+            </Link>
+
+            <Link href="/privacy" className="block hover:text-white">
+              Privacy Policy
+            </Link>
+
+            <Link href="/refund" className="block hover:text-white">
+              Refund Policy
+            </Link>
+
+            <Link href="/disclaimer" className="block hover:text-white">
+              Disclaimer
+            </Link>
+          </nav>
+        </div>
       </div>
 
       <div className="mx-auto mt-8 max-w-7xl border-t border-slate-800 pt-5 text-sm text-slate-400">
-        © {new Date().getFullYear()} My Classifieds. All rights reserved.
+        <p>© 2026 My Classifieds. All rights reserved.</p>
       </div>
     </footer>
   );
