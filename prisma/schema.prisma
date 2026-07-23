@@ -102,6 +102,7 @@ model Ad {
   payments          Payment[]
   policyAcceptances PolicyAcceptance[]
   consentRecords    ConsentRecord[]
+  reportTickets     ReportTicket[]
 
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
@@ -193,5 +194,62 @@ model ConsentRecord {
   @@index([mobile])
   @@index([adId])
   @@index([consentType])
+  @@index([createdAt])
+}
+
+model ReportTicket {
+  id              Int      @id @default(autoincrement())
+  referenceNumber String   @unique
+  adId            Int?
+  reportType      String
+  reason          String   @db.VarChar(191)
+  description     String   @db.Text
+  pageUrl         String?  @db.Text
+  evidenceUrl     String?  @db.Text
+
+  reporterName    String?
+  reporterEmail   String?
+  reporterMobile  String?
+
+  status          String   @default("NEW")
+  priority        String   @default("NORMAL")
+  assignedTo      String?
+  resolutionNotes String?  @db.Text
+
+  ipAddress       String?  @db.VarChar(191)
+  userAgent       String?  @db.Text
+
+  acknowledgedAt  DateTime?
+  reviewedAt      DateTime?
+  resolvedAt      DateTime?
+  closedAt        DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  ad              Ad?      @relation(fields: [adId], references: [id], onDelete: SetNull)
+  actionLogs      ReportActionLog[]
+
+  @@index([adId])
+  @@index([reportType])
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
+}
+
+model ReportActionLog {
+  id             Int      @id @default(autoincrement())
+  reportTicketId Int
+  action         String
+  fromStatus     String?
+  toStatus       String?
+  note           String?  @db.Text
+  actor          String?
+  ipAddress      String?  @db.VarChar(191)
+  userAgent      String?  @db.Text
+  createdAt      DateTime @default(now())
+
+  reportTicket   ReportTicket @relation(fields: [reportTicketId], references: [id], onDelete: Cascade)
+
+  @@index([reportTicketId])
   @@index([createdAt])
 }
