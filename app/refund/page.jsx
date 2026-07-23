@@ -73,7 +73,7 @@ export default function RefundPage() {
               5. Contact for Refund Requests
             </h2>
             <p className="mt-2">
-              Refund-related requests may be sent to sahilkothariepl@gmail.com
+              Refund-related requests may be sent to connect@myclassifieds.in
               with payment ID, registered mobile number and ad details.
             </p>
           </div>

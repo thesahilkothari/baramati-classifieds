@@ -48,10 +48,10 @@ export default function ContactSection() {
 <p>
   <span className="font-semibold text-slate-900">Email:</span>{" "}
   <a
-    href="mailto:sahilkothariepl@gmail.com"
+    href="mailto:connect@myclassifieds.in"
     className="text-blue-700 hover:underline"
   >
-    sahilkothariepl@gmail.com
+    connect@myclassifieds.in
   </a>
 </p>
             <p>

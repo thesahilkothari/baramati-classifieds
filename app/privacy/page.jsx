@@ -76,7 +76,7 @@ export default function PrivacyPage() {
             </h2>
             <p className="mt-2">
               For privacy-related requests, contact us at
-              sahilkothariepl@gmail.com.
+              connect@myclassifieds.in.
             </p>
           </div>
         </div>

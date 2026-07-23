@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 
 export const metadata = {
   title: "Pricing | My Classifieds",
@@ -9,7 +9,7 @@ export const metadata = {
 const plans = [
   {
     name: "Free Classified",
-    price: "₹0",
+    price: "?0",
     duration: "7 Days",
     badge: "Free",
     border: "border-slate-300",
@@ -26,7 +26,7 @@ const plans = [
   },
   {
     name: "Paid Classified",
-    price: "₹199",
+    price: "?199",
     duration: "7 Days",
     badge: "Popular",
     border: "border-blue-600",
@@ -43,7 +43,7 @@ const plans = [
   },
   {
     name: "Premium Classified",
-    price: "₹499",
+    price: "?499",
     duration: "30 Days",
     badge: "Premium",
     border: "border-red-600",
@@ -60,7 +60,7 @@ const plans = [
   },
   {
     name: "Featured Add-on",
-    price: "₹299",
+    price: "?299",
     duration: "10 Days",
     badge: "Add-on",
     border: "border-orange-500",
@@ -138,7 +138,7 @@ export default function PricingPage() {
               <ul className="mt-5 space-y-2 text-sm font-semibold text-slate-700">
                 {plan.features.map((feature) => (
                   <li key={feature} className="flex gap-2">
-                    <span className="font-black text-green-700">✓</span>
+                    <span className="font-black text-green-700">?</span>
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -196,10 +196,10 @@ export default function PricingPage() {
               <p>
                 For support, contact{" "}
                 <a
-                  href="mailto:sahilkothariepl@gmail.com"
+                  href="mailto:connect@myclassifieds.in"
                   className="font-bold text-blue-700 hover:underline"
                 >
-                  sahilkothariepl@gmail.com
+                  connect@myclassifieds.in
                 </a>{" "}
                 or WhatsApp{" "}
                 <a

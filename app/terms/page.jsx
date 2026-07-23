@@ -88,7 +88,7 @@ export default function TermsPage() {
             </h2>
             <p className="mt-2">
               For support, contact SAHIL KOTHARI ENTERPRISES PRIVATE LIMITED at
-              9673931166 or sahilkothariepl@gmail.com.
+              9673931166 or connect@myclassifieds.in.
             </p>
           </div>
         </div>

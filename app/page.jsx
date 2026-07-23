@@ -290,10 +290,10 @@ export default async function HomePage() {
             <p>
               Email:{" "}
               <a
-                href="mailto:sahilkothariepl@gmail.com"
+                href="mailto:connect@myclassifieds.in"
                 className="font-bold text-blue-700"
               >
-                sahilkothariepl@gmail.com
+                connect@myclassifieds.in
               </a>
             </p>
           </div>

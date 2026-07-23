@@ -69,10 +69,10 @@ export default function Footer() {
       WhatsApp: +91 9673931166
     </a>
     <a
-      href="mailto:sahilkothariepl@gmail.com"
+      href="mailto:connect@myclassifieds.in"
       className="block hover:text-white"
     >
-      sahilkothariepl@gmail.com
+      connect@myclassifieds.in
     </a>
   </div>
 </div>
