@@ -10,18 +10,19 @@ const plans = [
     name: "Free Ad",
     price: "₹0",
     description: "Best for normal local listings.",
-    features: ["Basic listing", "Category visibility", "Admin approval", "30 days validity"],
+    features: ["Basic listing", "Category visibility", "Admin approval", "7 days validity"],
     cta: "Post Free Ad",
     href: "/post-ad"
   },
-  {
-    name: "Featured Ad",
+    {
+    name: "Paid Ad",
     price: "₹199",
     description: "Better visibility for faster response.",
-    features: ["Highlighted listing", "Priority display", "7 days featured visibility", "Admin approval"],
+    features: ["Priority display", "7 days visibility", "Admin approval"],
     cta: "Promote Ad",
     href: "/post-ad?plan=featured"
   },
+
   {
     name: "Premium Ad",
     price: "₹499",
@@ -30,6 +31,14 @@ const plans = [
     cta: "Choose Premium",
     href: "/post-ad?plan=premium"
   }
+    {
+    name: "Featured Ad",
+    price: "₹299",
+    description: "Better visibility for faster response.",
+    features: ["Featured add-on is available only for paid or premium ads.""Highlighted listing", "Priority display", "10 days featured visibility", "Admin approval"],
+    cta: "Promote Ad",
+    href: "/post-ad?plan=featured"
+  },
 ];
 
 export default function PricingPage() {
