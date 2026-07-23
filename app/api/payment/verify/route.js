@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
+import { getPlan, addDays } from "../../../lib/adPlans";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -27,14 +28,23 @@ export async function POST(request) {
     const body = await request.json();
 
     const adId = Number(body.adId);
-    const plan = String(body.plan || "FEATURED_7_DAYS");
+    const planKey = String(body.plan || "");
     const razorpayOrderId = String(body.razorpay_order_id || "");
     const razorpayPaymentId = String(body.razorpay_payment_id || "");
     const razorpaySignature = String(body.razorpay_signature || "");
 
-    if (!adId || !razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+    if (!adId || !planKey || !razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
       return NextResponse.json(
         { error: "Missing payment verification details." },
+        { status: 400 }
+      );
+    }
+
+    const plan = getPlan(planKey);
+
+    if (!plan) {
+      return NextResponse.json(
+        { error: "Invalid payment plan." },
         { status: 400 }
       );
     }
@@ -47,9 +57,7 @@ export async function POST(request) {
 
     if (!isValidSignature) {
       await prisma.payment.updateMany({
-        where: {
-          razorpayOrderId
-        },
+        where: { razorpayOrderId },
         data: {
           razorpayPaymentId,
           status: "FAILED_SIGNATURE"
@@ -62,45 +70,80 @@ export async function POST(request) {
       );
     }
 
-    const featuredDays = plan === "PREMIUM_30_DAYS" ? 30 : 7;
-
-    const payment = await prisma.payment.updateMany({
+    const paymentUpdate = await prisma.payment.updateMany({
       where: {
         razorpayOrderId,
         adId
       },
       data: {
         razorpayPaymentId,
-        status: "PAID"
+        status: "PAID",
+        plan: plan.key,
+        purpose: plan.purpose
       }
     });
 
-    if (payment.count === 0) {
+    if (paymentUpdate.count === 0) {
       return NextResponse.json(
         { error: "Payment record not found." },
         { status: 404 }
       );
     }
 
-    const expiresAt = new Date(
-      Date.now() + featuredDays * 24 * 60 * 60 * 1000
-    );
+    const ad = await prisma.ad.findUnique({
+      where: { id: adId }
+    });
+
+    if (!ad) {
+      return NextResponse.json({ error: "Ad not found." }, { status: 404 });
+    }
+
+    const now = new Date();
+    const updateData = {};
+
+    if (plan.key === "PAID_7_DAYS") {
+      updateData.adType = "PAID";
+
+      if (ad.status === "ACTIVE") {
+        updateData.expiresAt = addDays(now, 7);
+      }
+    }
+
+    if (plan.key === "PREMIUM_30_DAYS") {
+      updateData.adType = "PREMIUM";
+
+      if (ad.status === "ACTIVE") {
+        updateData.expiresAt = addDays(now, 30);
+      }
+    }
+
+    if (plan.key === "FEATURED_10_DAYS") {
+      if (ad.adType === "FREE") {
+        return NextResponse.json(
+          {
+            error:
+              "Featured add-on can be applied only to paid or premium ads."
+          },
+          { status: 400 }
+        );
+      }
+
+      updateData.isFeatured = true;
+
+      if (ad.status === "ACTIVE") {
+        updateData.featuredUntil = addDays(now, 10);
+      }
+    }
 
     await prisma.ad.update({
-      where: {
-        id: adId
-      },
-      data: {
-        adType: plan === "PREMIUM_30_DAYS" ? "PREMIUM" : "FEATURED",
-        isFeatured: true,
-        expiresAt
-      }
+      where: { id: adId },
+      data: updateData
     });
 
     return NextResponse.json({
       success: true,
       message:
-        "Payment verified successfully. Your ad promotion is recorded and will be visible after admin approval."
+        "Payment verified successfully. Your plan has been recorded and will apply after approval."
     });
   } catch (error) {
     console.error("Payment verification failed:", error);
