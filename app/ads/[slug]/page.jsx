@@ -5,11 +5,11 @@ import { prisma } from "../../lib/prisma";
 export const dynamic = "force-dynamic";
 
 function formatPrice(price) {
-  if (!price) return "Price on request";
+  if (!price) return "Call for Price";
 
   const amount = Number(price);
 
-  if (Number.isNaN(amount)) return "Price on request";
+  if (Number.isNaN(amount)) return "Call for Price";
 
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
@@ -21,18 +21,49 @@ function formatPrice(price) {
 function getWhatsAppUrl(ad) {
   const phone = ad.whatsapp || ad.mobile;
   const message = encodeURIComponent(
-    `Hello, I am interested in your ad on My Classifieds: ${ad.title}`
+    `Hello, I am interested in your classified ad on My Classifieds: ${ad.title}`
   );
 
   return `https://wa.me/91${phone}?text=${message}`;
 }
 
+function getPlanLabel(ad) {
+  if (ad.adType === "PREMIUM") {
+    return "Premium Classified";
+  }
+
+  if (ad.isFeatured && ad.featuredUntil && ad.featuredUntil > new Date()) {
+    return "Featured Classified";
+  }
+
+  if (ad.adType === "PAID") {
+    return "Paid Classified";
+  }
+
+  return "Free Classified";
+}
+
 export async function generateMetadata({ params }) {
+  const now = new Date();
   const resolvedParams = await params;
 
-  const ad = await prisma.ad.findUnique({
-    where: { slug: resolvedParams.slug },
-    include: { city: true, category: true }
+  const ad = await prisma.ad.findFirst({
+    where: {
+      AND: [
+        { slug: resolvedParams.slug },
+        { status: "ACTIVE" },
+        {
+          OR: [
+            { expiresAt: null },
+            { expiresAt: { gt: now } }
+          ]
+        }
+      ]
+    },
+    include: {
+      city: true,
+      category: true
+    }
   });
 
   if (!ad) {
@@ -48,10 +79,22 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function AdDetailPage({ params }) {
+  const now = new Date();
   const resolvedParams = await params;
 
-  const ad = await prisma.ad.findUnique({
-    where: { slug: resolvedParams.slug },
+  const ad = await prisma.ad.findFirst({
+    where: {
+      AND: [
+        { slug: resolvedParams.slug },
+        { status: "ACTIVE" },
+        {
+          OR: [
+            { expiresAt: null },
+            { expiresAt: { gt: now } }
+          ]
+        }
+      ]
+    },
     include: {
       images: true,
       category: true,
@@ -59,117 +102,112 @@ export default async function AdDetailPage({ params }) {
     }
   });
 
-  if (!ad || ad.status !== "ACTIVE") {
+  if (!ad) {
     notFound();
   }
 
   return (
-    <main className="bg-slate-50 px-4 py-10">
-      <section className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_380px]">
+    <main className="bg-slate-100 px-4 py-10">
+      <section className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_360px]">
         <div>
-          <Link href="/ads" className="text-sm font-semibold text-blue-700">
-            ← Back to Ads
+          <Link href="/ads" className="text-sm font-bold text-blue-700">
+            ← Back to Classified Board
           </Link>
 
-          <div className="mt-5 overflow-hidden rounded-3xl border bg-white shadow-sm">
-            <div className="flex min-h-80 items-center justify-center bg-slate-100">
-              {ad.images?.[0]?.url ? (
-                <img
-                  src={ad.images[0].url}
-                  alt={ad.title}
-                  className="h-full max-h-[520px] w-full object-cover"
-                />
-              ) : (
-                <div className="p-16 text-center">
-                  <div className="text-7xl">{ad.category?.icon || "📌"}</div>
-                  <p className="mt-4 text-slate-500">No image uploaded</p>
-                </div>
+          <article className="mt-5 rounded-3xl border-2 border-slate-900 bg-white p-6 shadow-sm">
+            <div className="flex flex-wrap gap-2">
+              <span className="rounded bg-slate-950 px-3 py-1 text-xs font-black uppercase text-white">
+                {ad.category?.nameEn || "Classified"}
+              </span>
+
+              <span className="rounded bg-blue-700 px-3 py-1 text-xs font-black uppercase text-white">
+                {getPlanLabel(ad)}
+              </span>
+
+              {ad.city?.name && (
+                <span className="rounded bg-slate-100 px-3 py-1 text-xs font-black uppercase text-slate-800">
+                  {ad.city.name}
+                </span>
               )}
             </div>
 
-            <div className="p-7">
-              <div className="flex flex-wrap gap-2">
-                {ad.isFeatured && (
-                  <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm font-bold text-yellow-800">
-                    Featured
-                  </span>
-                )}
+            <h1 className="mt-5 text-3xl font-black uppercase leading-tight text-slate-950 md:text-5xl">
+              {ad.title}
+            </h1>
 
-                <span className="rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700">
-                  {ad.category?.nameEn}
-                </span>
+            <p className="mt-4 text-3xl font-black text-red-700">
+              {formatPrice(ad.price)}
+            </p>
 
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
-                  {ad.city?.name}
-                </span>
-              </div>
+            <div className="mt-6 rounded-2xl border-2 border-slate-200 bg-slate-50 p-5">
+              <h2 className="text-xl font-black uppercase text-slate-950">
+                Classified Details
+              </h2>
 
-              <h1 className="mt-5 text-3xl font-extrabold text-slate-900 md:text-4xl">
-                {ad.title}
-              </h1>
-
-              <p className="mt-4 text-3xl font-extrabold text-blue-700">
-                {formatPrice(ad.price)}
+              <p className="mt-3 whitespace-pre-line text-base leading-7 text-slate-800">
+                {ad.description}
               </p>
-
-              <div className="mt-6 border-t pt-6">
-                <h2 className="text-xl font-bold text-slate-900">
-                  Description
-                </h2>
-                <p className="mt-3 whitespace-pre-line leading-7 text-slate-700">
-                  {ad.description}
-                </p>
-              </div>
-
-              {ad.address && (
-                <div className="mt-6 border-t pt-6">
-                  <h2 className="text-xl font-bold text-slate-900">Location</h2>
-                  <p className="mt-3 text-slate-700">{ad.address}</p>
-                </div>
-              )}
             </div>
-          </div>
+
+            {ad.address && (
+              <div className="mt-6 rounded-2xl border bg-white p-5">
+                <h2 className="text-xl font-black uppercase text-slate-950">
+                  Location
+                </h2>
+
+                <p className="mt-3 text-slate-700">{ad.address}</p>
+              </div>
+            )}
+
+            {ad.expiresAt && (
+              <p className="mt-5 text-sm font-semibold text-slate-500">
+                This classified is valid until{" "}
+                {new Date(ad.expiresAt).toLocaleDateString("en-IN")}.
+              </p>
+            )}
+          </article>
         </div>
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
-          <div className="rounded-3xl border bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-bold text-slate-900">
-              Contact Seller
+          <div className="rounded-3xl border-2 border-slate-900 bg-white p-6 shadow-sm">
+            <h2 className="text-xl font-black uppercase text-slate-900">
+              Contact Advertiser
             </h2>
 
             <p className="mt-3 text-sm text-slate-600">
               Contact directly through call or WhatsApp. Verify all details
-              before making payment.
+              before payment.
             </p>
 
             <div className="mt-6 space-y-3">
               <a
                 href={`tel:${ad.mobile}`}
-                className="flex w-full justify-center rounded-xl bg-blue-700 px-5 py-3 font-bold text-white hover:bg-blue-800"
+                className="flex w-full justify-center rounded-xl bg-blue-700 px-5 py-3 font-black uppercase text-white hover:bg-blue-800"
               >
-                Call Seller
+                Call Advertiser
               </a>
 
               <a
                 href={getWhatsAppUrl(ad)}
                 target="_blank"
                 rel="noreferrer"
-                className="flex w-full justify-center rounded-xl bg-green-600 px-5 py-3 font-bold text-white hover:bg-green-700"
+                className="flex w-full justify-center rounded-xl bg-green-600 px-5 py-3 font-black uppercase text-white hover:bg-green-700"
               >
-                WhatsApp Seller
+                WhatsApp
               </a>
 
               <Link
                 href="/safety"
-                className="flex w-full justify-center rounded-xl border px-5 py-3 font-bold text-slate-700 hover:bg-slate-50"
+                className="flex w-full justify-center rounded-xl border px-5 py-3 font-black uppercase text-slate-700 hover:bg-slate-50"
               >
-                Read Safety Tips
+                Safety Tips
               </Link>
             </div>
           </div>
 
           <div className="mt-5 rounded-3xl border bg-yellow-50 p-6 text-sm text-yellow-900">
-            <h3 className="font-bold">Safety Reminder</h3>
+            <h3 className="font-black uppercase">Safety Reminder</h3>
+
             <p className="mt-2">
               Do not share OTP, UPI PIN, bank passwords or card details. Meet in
               safe public places and verify documents before payment.
