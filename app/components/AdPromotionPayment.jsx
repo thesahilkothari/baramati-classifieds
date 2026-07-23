@@ -1,19 +1,23 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 
 const plans = [
   {
-    key: "FEATURED_7_DAYS",
-    name: "Featured Ad",
-    price: "₹199",
-    description: "Highlighted listing for 7 days."
+    key: "PAID_7_DAYS",
+    name: "Paid Classified",
+    price: "Rs. 199",
+    duration: "7 days",
+    description:
+      "Publish your classified as a paid listing for 7 days after admin approval."
   },
   {
     key: "PREMIUM_30_DAYS",
-    name: "Premium Ad",
-    price: "₹499",
-    description: "Premium listing visibility for 30 days."
+    name: "Premium Classified",
+    price: "Rs. 499",
+    duration: "30 days",
+    description:
+      "Best for important property, jobs, business and urgent classified advertisements."
   }
 ];
 
@@ -37,7 +41,7 @@ function loadRazorpayScript() {
 }
 
 export default function AdPromotionPayment({ adId }) {
-  const [selectedPlan, setSelectedPlan] = useState("FEATURED_7_DAYS");
+  const [selectedPlan, setSelectedPlan] = useState("PAID_7_DAYS");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -48,6 +52,11 @@ export default function AdPromotionPayment({ adId }) {
     setIsLoading(true);
 
     try {
+      if (!adId) {
+        setError("Invalid classified advertisement reference.");
+        return;
+      }
+
       const scriptLoaded = await loadRazorpayScript();
 
       if (!scriptLoaded) {
@@ -81,30 +90,47 @@ export default function AdPromotionPayment({ adId }) {
         description: orderData.planLabel,
         order_id: orderData.orderId,
         handler: async function (response) {
-          const verifyResponse = await fetch("/api/payment/verify", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              adId,
-              plan: selectedPlan,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature
-            })
-          });
+          try {
+            setError("");
+            setMessage("Verifying payment. Please wait...");
 
-          const verifyData = await verifyResponse.json();
+            const verifyResponse = await fetch("/api/payment/verify", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                adId,
+                plan: selectedPlan,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
 
-          if (!verifyResponse.ok) {
-            setError(verifyData.error || "Payment verification failed.");
-            return;
+            const verifyData = await verifyResponse.json();
+
+            if (!verifyResponse.ok) {
+              setMessage("");
+              setError(verifyData.error || "Payment verification failed.");
+              return;
+            }
+
+            setMessage(
+              "Payment successful. Your selected plan has been recorded and will apply after admin approval."
+            );
+          } catch (verificationError) {
+            console.error("Payment verification failed:", verificationError);
+            setMessage("");
+            setError(
+              "Payment was completed, but verification failed. Please contact support with your payment screenshot."
+            );
           }
-
-          setMessage(
-            "Payment successful. Your ad promotion is recorded and will be visible after admin approval."
-          );
+        },
+        modal: {
+          ondismiss: function () {
+            setIsLoading(false);
+          }
         },
         theme: {
           color: "#1d4ed8"
@@ -123,27 +149,34 @@ export default function AdPromotionPayment({ adId }) {
 
   return (
     <section className="mt-8 rounded-3xl border bg-white p-6 shadow-sm">
-      <p className="text-sm font-bold uppercase tracking-wide text-blue-700">
-        Promote Your Ad
+      <p className="text-sm font-black uppercase tracking-wide text-blue-700">
+        Promote Your Classified
       </p>
 
-      <h2 className="mt-2 text-2xl font-extrabold text-slate-900">
-        Get better visibility
+      <h2 className="mt-2 text-2xl font-black text-slate-900">
+        Choose paid visibility
       </h2>
 
-      <p className="mt-3 text-sm text-slate-600">
-        Your ad is submitted for approval. You may optionally promote it for
-        better visibility after admin approval.
+      <p className="mt-3 text-sm leading-6 text-slate-600">
+        Your classified has been submitted for admin approval. You may keep it
+        as a free classified, or choose a paid plan for better visibility after
+        approval.
       </p>
+
+      <div className="mt-5 rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm leading-6 text-yellow-900">
+        Featured Add-on is available only after the classified is converted to a
+        paid or premium plan. Therefore, only paid and premium plans are shown at
+        this stage. Prices are GST inclusive.
+      </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         {plans.map((plan) => (
           <label
             key={plan.key}
-            className={`cursor-pointer rounded-2xl border p-5 ${
+            className={`cursor-pointer rounded-2xl border-2 p-5 ${
               selectedPlan === plan.key
                 ? "border-blue-700 bg-blue-50"
-                : "bg-white"
+                : "border-slate-200 bg-white"
             }`}
           >
             <input
@@ -157,13 +190,20 @@ export default function AdPromotionPayment({ adId }) {
 
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h3 className="font-bold text-slate-900">{plan.name}</h3>
-                <p className="mt-2 text-sm text-slate-600">
+                <h3 className="text-lg font-black text-slate-900">
+                  {plan.name}
+                </h3>
+
+                <p className="mt-1 text-xs font-black uppercase text-slate-500">
+                  Valid for {plan.duration}
+                </p>
+
+                <p className="mt-3 text-sm leading-6 text-slate-600">
                   {plan.description}
                 </p>
               </div>
 
-              <p className="text-xl font-extrabold text-blue-700">
+              <p className="shrink-0 text-xl font-black text-blue-700">
                 {plan.price}
               </p>
             </div>
@@ -187,10 +227,15 @@ export default function AdPromotionPayment({ adId }) {
         type="button"
         onClick={startPayment}
         disabled={isLoading}
-        className="mt-6 w-full rounded-xl bg-blue-700 px-6 py-4 font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-6 w-full rounded-xl bg-blue-700 px-6 py-4 font-black uppercase text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {isLoading ? "Opening Payment..." : "Pay and Promote Ad"}
+        {isLoading ? "Opening Payment..." : "Pay and Promote Classified"}
       </button>
+
+      <p className="mt-4 text-center text-xs leading-5 text-slate-500">
+        Payment does not guarantee approval of prohibited, misleading,
+        fraudulent or illegal advertisements.
+      </p>
     </section>
   );
 }
