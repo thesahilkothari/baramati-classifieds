@@ -1,55 +1,47 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
 import { getRazorpayInstance } from "../../../lib/razorpay";
+import { getPlan } from "../../../lib/adPlans";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const promotionPlans = {
-  FEATURED_7_DAYS: {
-    label: "Featured Ad - 7 Days",
-    amount: 199
-  },
-  PREMIUM_30_DAYS: {
-    label: "Premium Ad - 30 Days",
-    amount: 499
-  }
-};
 
 export async function POST(request) {
   try {
     const body = await request.json();
 
     const adId = Number(body.adId);
-    const planKey = String(body.plan || "FEATURED_7_DAYS");
+    const planKey = String(body.plan || "");
 
     if (!adId) {
-      return NextResponse.json(
-        { error: "Invalid ad id." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid ad id." }, { status: 400 });
     }
 
-    const plan = promotionPlans[planKey];
+    const plan = getPlan(planKey);
 
-    if (!plan) {
+    if (!plan || plan.amount <= 0) {
       return NextResponse.json(
-        { error: "Invalid promotion plan." },
+        { error: "Invalid paid plan." },
         { status: 400 }
       );
     }
 
     const ad = await prisma.ad.findUnique({
       where: { id: adId },
-      include: {
-        user: true
-      }
+      include: { user: true }
     });
 
     if (!ad) {
+      return NextResponse.json({ error: "Ad not found." }, { status: 404 });
+    }
+
+    if (plan.key === "FEATURED_10_DAYS" && ad.adType === "FREE") {
       return NextResponse.json(
-        { error: "Ad not found." },
-        { status: 404 }
+        {
+          error:
+            "Featured add-on is available only after choosing a paid or premium plan."
+        },
+        { status: 400 }
       );
     }
 
@@ -62,8 +54,8 @@ export async function POST(request) {
       receipt: `ad_${ad.id}_${Date.now()}`,
       notes: {
         adId: String(ad.id),
-        plan: planKey,
-        purpose: "MY_CLASSIFIEDS_AD_PROMOTION"
+        plan: plan.key,
+        purpose: plan.purpose
       }
     });
 
@@ -74,7 +66,9 @@ export async function POST(request) {
         razorpayOrderId: order.id,
         amount: amountInPaise,
         currency: "INR",
-        status: "CREATED"
+        status: "CREATED",
+        plan: plan.key,
+        purpose: plan.purpose
       }
     });
 
@@ -83,7 +77,7 @@ export async function POST(request) {
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
-      plan: planKey,
+      plan: plan.key,
       planLabel: plan.label,
       razorpayKeyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
     });
