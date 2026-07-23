@@ -18,6 +18,9 @@ export default function Header() {
           <Link href="/safety" className="hover:text-blue-700">
             Safety
           </Link>
+          <Link href="/legal" className="hover:text-blue-700">
+            Legal
+          </Link>
           <Link href="/contact" className="hover:text-blue-700">
             Contact
           </Link>
@@ -27,7 +30,7 @@ export default function Header() {
           href="/post-ad"
           className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-bold text-white hover:bg-blue-800"
         >
-          Post Free Ad
+          Place Classified
         </Link>
       </div>
     </header>

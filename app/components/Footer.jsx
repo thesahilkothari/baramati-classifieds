@@ -1,4 +1,5 @@
-﻿import Link from "next/link";
+import Link from "next/link";
+import { LEGAL_PAGES } from "../lib/legalContent";
 
 export default function Footer() {
   return (
@@ -71,27 +72,32 @@ export default function Footer() {
           </h2>
 
           <nav className="mt-4 space-y-2 text-sm text-slate-300">
-            <Link href="/terms" className="block hover:text-white">
-              Terms of Use
+            <Link href="/legal" className="block hover:text-white">
+              Legal Hub
             </Link>
-
-            <Link href="/privacy" className="block hover:text-white">
-              Privacy Policy
-            </Link>
-
-            <Link href="/refund" className="block hover:text-white">
-              Refund Policy
-            </Link>
-
-            <Link href="/disclaimer" className="block hover:text-white">
-              Disclaimer
-            </Link>
+            {LEGAL_PAGES.slice(0, 6).map((page) => (
+              <Link
+                key={page.slug}
+                href={`/legal/${page.slug}`}
+                className="block hover:text-white"
+              >
+                {page.enTitle}
+              </Link>
+            ))}
           </nav>
         </div>
       </div>
 
-      <div className="mx-auto mt-8 max-w-7xl border-t border-slate-800 pt-5 text-sm text-slate-400">
-        <p>© 2026 My Classifieds. All rights reserved.</p>
+      <div className="mx-auto mt-8 max-w-7xl border-t border-slate-800 pt-5 text-xs leading-6 text-slate-400">
+        <p>
+          My Classifieds is owned and operated by SAHIL KOTHARI ENTERPRISES
+          PRIVATE LIMITED | CIN: U74999PN2014PTC150594 | Registered Office:
+          Vardhaman Capital, Plot No. 13, Gat No. 42/1, Mouje Rui, Taluka
+          Baramati, District Pune, Maharashtra – 413133 | Tel: +91 9673931166 |
+          Email: connect@myclassifieds.in | Contact person for queries/grievances:
+          Shekhar V. K., Contact Person under Rule 26.
+        </p>
+        <p className="mt-3">© 2026 My Classifieds. All rights reserved.</p>
       </div>
     </footer>
   );

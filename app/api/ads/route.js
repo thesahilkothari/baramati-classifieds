@@ -29,6 +29,22 @@ function cleanMobile(value) {
   return String(value || "").replace(/\D/g, "");
 }
 
+function normalizePrice(value) {
+  const rawPrice = String(value || "").trim();
+
+  if (!rawPrice) {
+    return null;
+  }
+
+  const numericPrice = Number(rawPrice.replace(/,/g, ""));
+
+  if (!Number.isFinite(numericPrice) || numericPrice < 0) {
+    return null;
+  }
+
+  return numericPrice;
+}
+
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -38,10 +54,10 @@ export async function POST(request) {
     const whatsapp = cleanMobile(body.whatsapp || body.mobile);
     const title = String(body.title || "").trim();
     const description = String(body.description || "").trim();
-    const price = String(body.price || "").trim();
     const address = String(body.address || "").trim();
     const categoryId = Number(body.categoryId);
     const cityId = Number(body.cityId);
+    const price = normalizePrice(body.price);
 
     if (!name || name.length < 2) {
       return NextResponse.json(
@@ -109,24 +125,21 @@ export async function POST(request) {
     const slug = await createUniqueSlug(title);
 
     const ad = await prisma.ad.create({
-  data: {
-    title,
-    slug,
-    description,
-    price: price ? price : null,
-    mobile,
-    whatsapp,
-    address,
-    status: "PENDING",
-    adType: "FREE",
-    isFeatured: false,
-    userId: user.id,
-    categoryId,
-    cityId,
-    images: {
-      create: images
-    }
-  }
+      data: {
+        title,
+        slug,
+        description,
+        price,
+        mobile,
+        whatsapp,
+        address,
+        status: "PENDING",
+        adType: "FREE",
+        isFeatured: false,
+        userId: user.id,
+        categoryId,
+        cityId
+      }
     });
 
     return NextResponse.json({

@@ -9,7 +9,7 @@ export const metadata = {
 const plans = [
   {
     name: "Free Classified",
-    price: "?0",
+    price: "Rs. 0",
     duration: "7 Days",
     badge: "Free",
     border: "border-slate-300",
@@ -26,7 +26,7 @@ const plans = [
   },
   {
     name: "Paid Classified",
-    price: "?199",
+    price: "Rs. 199",
     duration: "7 Days",
     badge: "Popular",
     border: "border-blue-600",
@@ -35,15 +35,15 @@ const plans = [
     description: "Better option for sellers who want paid listing visibility.",
     features: [
       "Visible for 7 days",
+      "GST inclusive price",
       "Paid classified listing",
-      "Category-wise display",
       "Admin approval required",
       "Eligible for Featured add-on"
     ]
   },
   {
     name: "Premium Classified",
-    price: "?499",
+    price: "Rs. 499",
     duration: "30 Days",
     badge: "Premium",
     border: "border-red-600",
@@ -52,15 +52,15 @@ const plans = [
     description: "Best for property, jobs, business and urgent advertisements.",
     features: [
       "Visible for 30 days",
+      "GST inclusive price",
       "Premium classified listing",
-      "Longer validity",
       "Admin approval required",
       "Eligible for Featured add-on"
     ]
   },
   {
     name: "Featured Add-on",
-    price: "?299",
+    price: "Rs. 299",
     duration: "10 Days",
     badge: "Add-on",
     border: "border-orange-500",
@@ -69,8 +69,8 @@ const plans = [
     description: "Highlight your paid or premium classified for faster response.",
     features: [
       "Featured highlighting for 10 days",
+      "GST inclusive price",
       "Only for paid/premium ads",
-      "Highlighted classified display",
       "Useful for urgent response",
       "Free ads must first be upgraded"
     ]
@@ -93,8 +93,7 @@ export default function PricingPage() {
               </h1>
 
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-700">
-                Choose a simple plan to publish your newspaper-style classified
-                advertisement on My Classifieds.
+                Choose a simple GST-inclusive plan to publish your newspaper-style classified advertisement on My Classifieds.
               </p>
             </div>
 
@@ -138,7 +137,7 @@ export default function PricingPage() {
               <ul className="mt-5 space-y-2 text-sm font-semibold text-slate-700">
                 {plan.features.map((feature) => (
                   <li key={feature} className="flex gap-2">
-                    <span className="font-black text-green-700">?</span>
+                    <span className="font-black text-green-700">✓</span>
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -161,20 +160,9 @@ export default function PricingPage() {
             </h2>
 
             <div className="mt-5 space-y-4 text-sm leading-6 text-slate-700">
-              <p>
-                Free classifieds stop displaying after 7 days unless upgraded or
-                renewed.
-              </p>
-
-              <p>
-                Users may be notified 2 days before free ad expiry and offered
-                paid, premium and featured upgrade options.
-              </p>
-
-              <p>
-                Featured add-on is available only for paid or premium classified
-                ads.
-              </p>
+              <p>Free classifieds stop displaying after 7 days unless upgraded or renewed.</p>
+              <p>Users may be notified 2 days before free ad expiry and offered paid, premium and featured upgrade options.</p>
+              <p>Featured add-on is available only for paid or premium classified ads.</p>
             </div>
           </div>
 
@@ -184,31 +172,17 @@ export default function PricingPage() {
             </h2>
 
             <div className="mt-5 space-y-4 text-sm leading-6 text-yellow-900">
-              <p>
-                All classifieds are subject to admin approval before publication.
-              </p>
-
-              <p>
-                Payment does not guarantee approval of illegal, misleading,
-                fraudulent or prohibited advertisements.
-              </p>
-
+              <p>All classifieds are subject to admin approval before publication.</p>
+              <p>Payment does not guarantee approval, verification, enquiries, ranking, sale, purchase or transaction completion.</p>
               <p>
                 For support, contact{" "}
-                <a
-                  href="mailto:connect@myclassifieds.in"
-                  className="font-bold text-blue-700 hover:underline"
-                >
+                <a href="mailto:connect@myclassifieds.in" className="font-bold text-blue-700 hover:underline">
                   connect@myclassifieds.in
                 </a>{" "}
                 or WhatsApp{" "}
-                <a
-                  href="https://wa.me/919673931166"
-                  className="font-bold text-blue-700 hover:underline"
-                >
+                <a href="https://wa.me/919673931166" className="font-bold text-blue-700 hover:underline">
                   +91 9673931166
-                </a>
-                .
+                </a>.
               </p>
             </div>
           </div>
