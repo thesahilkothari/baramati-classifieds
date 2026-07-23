@@ -1,6 +1,7 @@
 import Link from "next/link";
 import SearchBar from "../components/SearchBar";
 import AdCard from "../components/AdCard";
+import CategoryChips from "../components/CategoryChips";
 import { prisma } from "../lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -11,17 +12,66 @@ export const metadata = {
     "Browse newspaper-style classified ads for Baramati and Maharashtra."
 };
 
-function groupAdsByCategory(ads) {
-  return ads.reduce((groups, ad) => {
-    const categoryName = ad.category?.nameEn || "Other Classifieds";
+function buildCommonWhere({ q, city, category }) {
+  return {
+    status: "ACTIVE",
+    ...(q
+      ? {
+          OR: [
+            { title: { contains: q } },
+            { description: { contains: q } },
+            { address: { contains: q } }
+          ]
+        }
+      : {}),
+    ...(city
+      ? {
+          city: {
+            slug: city
+          }
+        }
+      : {}),
+    ...(category
+      ? {
+          category: {
+            slug: category
+          }
+        }
+      : {})
+  };
+}
 
-    if (!groups[categoryName]) {
-      groups[categoryName] = [];
-    }
+function ClassifiedSection({ title, label, borderClass, ads }) {
+  if (!ads.length) {
+    return null;
+  }
 
-    groups[categoryName].push(ad);
-    return groups;
-  }, {});
+  return (
+    <section className={`rounded-2xl border-2 bg-white p-3 shadow-sm ${borderClass}`}>
+      <div className="mb-3 flex items-center justify-between gap-3 border-b-2 border-slate-900 pb-2">
+        <div>
+          {label && (
+            <p className="text-xs font-black uppercase text-red-600">
+              {label}
+            </p>
+          )}
+          <h2 className="text-xl font-black uppercase text-slate-950">
+            {title}
+          </h2>
+        </div>
+
+        <span className="rounded bg-slate-950 px-3 py-1 text-xs font-black uppercase text-white">
+          {ads.length} Ads
+        </span>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {ads.map((ad, index) => (
+          <AdCard key={ad.id} ad={ad} index={index} />
+        ))}
+      </div>
+    </section>
+  );
 }
 
 export default async function AdsPage({ searchParams }) {
@@ -31,53 +81,87 @@ export default async function AdsPage({ searchParams }) {
   const city = params?.city?.trim() || "";
   const category = params?.category?.trim() || "";
 
-  let ads = [];
   let categories = [];
+  let premiumAds = [];
+  let featuredAds = [];
+  let paidAds = [];
+  let freeAds = [];
+
+  const commonWhere = buildCommonWhere({ q, city, category });
 
   try {
     categories = await prisma.category.findMany({
       orderBy: { nameEn: "asc" }
     });
 
-    ads = await prisma.ad.findMany({
+    premiumAds = await prisma.ad.findMany({
       where: {
-        status: "ACTIVE",
-        ...(q
-          ? {
-              OR: [
-                { title: { contains: q } },
-                { description: { contains: q } },
-                { address: { contains: q } }
-              ]
-            }
-          : {}),
-        ...(city
-          ? {
-              city: {
-                slug: city
-              }
-            }
-          : {}),
-        ...(category
-          ? {
-              category: {
-                slug: category
-              }
-            }
-          : {})
+        ...commonWhere,
+        adType: "PREMIUM"
       },
       include: {
         category: true,
         city: true
       },
-      orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
+      orderBy: { createdAt: "desc" },
+      take: 100
+    });
+
+    featuredAds = await prisma.ad.findMany({
+      where: {
+        ...commonWhere,
+        adType: "FEATURED"
+      },
+      include: {
+        category: true,
+        city: true
+      },
+      orderBy: { createdAt: "desc" },
+      take: 100
+    });
+
+    paidAds = await prisma.ad.findMany({
+      where: {
+        ...commonWhere,
+        adType: "FREE",
+        payments: {
+          some: {
+            status: "PAID"
+          }
+        }
+      },
+      include: {
+        category: true,
+        city: true
+      },
+      orderBy: { createdAt: "desc" },
+      take: 100
+    });
+
+    freeAds = await prisma.ad.findMany({
+      where: {
+        ...commonWhere,
+        adType: "FREE",
+        payments: {
+          none: {
+            status: "PAID"
+          }
+        }
+      },
+      include: {
+        category: true,
+        city: true
+      },
+      orderBy: { createdAt: "desc" },
       take: 200
     });
   } catch (error) {
     console.error("Classified board fetch failed:", error);
   }
 
-  const groupedAds = groupAdsByCategory(ads);
+  const totalAds =
+    premiumAds.length + featuredAds.length + paidAds.length + freeAds.length;
+
   const today = new Date().toLocaleDateString("en-IN", {
     day: "2-digit",
     month: "short",
@@ -93,11 +177,13 @@ export default async function AdsPage({ searchParams }) {
               <p className="text-xs font-black uppercase tracking-wide text-red-600">
                 Baramati Local Classifieds
               </p>
+
               <h1 className="text-3xl font-black uppercase text-slate-950 md:text-5xl">
                 My Classifieds Board
               </h1>
+
               <p className="mt-1 text-sm font-semibold text-slate-600">
-                Good-old newspaper classifieds, now on every mobile phone.
+                Newspaper-style local classifieds on mobile.
               </p>
             </div>
 
@@ -109,25 +195,7 @@ export default async function AdsPage({ searchParams }) {
 
           <div className="mt-5">
             <SearchBar />
-          </div>
-
-          <div className="mt-5 flex flex-wrap gap-2">
-            <Link
-              href="/ads"
-              className="rounded-full bg-slate-950 px-4 py-2 text-xs font-black uppercase text-white"
-            >
-              All
-            </Link>
-
-            {categories.map((item) => (
-              <Link
-                key={item.id}
-                href={`/ads?category=${item.slug}`}
-                className="rounded-full border bg-white px-4 py-2 text-xs font-black uppercase text-slate-800 hover:bg-blue-50"
-              >
-                {item.nameEn}
-              </Link>
-            ))}
+            <CategoryChips categories={categories} />
           </div>
         </div>
       </section>
@@ -135,7 +203,7 @@ export default async function AdsPage({ searchParams }) {
       <section className="mx-auto max-w-7xl px-3 py-5 md:px-4">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm font-black uppercase text-slate-700">
-            {ads.length} Active Classifieds
+            {totalAds} Active Classifieds
           </p>
 
           <Link
@@ -146,14 +214,16 @@ export default async function AdsPage({ searchParams }) {
           </Link>
         </div>
 
-        {ads.length === 0 ? (
+        {totalAds === 0 ? (
           <div className="rounded-2xl border-2 border-dashed bg-white p-10 text-center">
             <h2 className="text-2xl font-black text-slate-900">
               No classifieds published yet
             </h2>
+
             <p className="mt-3 text-slate-600">
               Post an ad and approve it from admin panel to publish it here.
             </p>
+
             <Link
               href="/post-ad"
               className="mt-6 inline-flex rounded-xl bg-blue-700 px-6 py-3 font-bold text-white"
@@ -163,28 +233,32 @@ export default async function AdsPage({ searchParams }) {
           </div>
         ) : (
           <div className="space-y-6">
-            {Object.entries(groupedAds).map(([categoryName, categoryAds]) => (
-              <section
-                key={categoryName}
-                className="rounded-2xl border-2 border-slate-900 bg-white p-3 shadow-sm"
-              >
-                <div className="mb-3 flex items-center justify-between gap-3 border-b-2 border-slate-900 pb-2">
-                  <h2 className="text-xl font-black uppercase text-slate-950">
-                    {categoryName}
-                  </h2>
+            <ClassifiedSection
+              title="Premium Classifieds"
+              label="Top Priority"
+              borderClass="border-red-600"
+              ads={premiumAds}
+            />
 
-                  <span className="rounded bg-slate-950 px-3 py-1 text-xs font-black text-white">
-                    {categoryAds.length} Ads
-                  </span>
-                </div>
+            <ClassifiedSection
+              title="Featured Classifieds"
+              label="Highlighted"
+              borderClass="border-orange-500"
+              ads={featuredAds}
+            />
 
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {categoryAds.map((ad, index) => (
-                    <AdCard key={ad.id} ad={ad} index={index} />
-                  ))}
-                </div>
-              </section>
-            ))}
+            <ClassifiedSection
+              title="Paid Classifieds"
+              label="Promoted"
+              borderClass="border-blue-700"
+              ads={paidAds}
+            />
+
+            <ClassifiedSection
+              title="Free Classifieds"
+              borderClass="border-slate-900"
+              ads={freeAds}
+            />
           </div>
         )}
       </section>
