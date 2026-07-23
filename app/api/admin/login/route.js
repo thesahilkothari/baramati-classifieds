@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export async function POST(request) {
   try {
     const body = await request.json();
-    const password = String(body.password || "");
+    const password = String(body.password || "x1(sKglo({0;");
 
     if (!process.env.ADMIN_PASSWORD) {
       return NextResponse.json(
