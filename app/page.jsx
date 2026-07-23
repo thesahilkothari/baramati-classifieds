@@ -12,10 +12,7 @@ export default async function HomePage() {
   const activeNotExpiredConditions = [
     { status: "ACTIVE" },
     {
-      OR: [
-        { expiresAt: null },
-        { expiresAt: { gt: now } }
-      ]
+      OR: [{ expiresAt: null }, { expiresAt: { gt: now } }]
     }
   ];
 
@@ -32,10 +29,7 @@ export default async function HomePage() {
 
     premiumAds = await prisma.ad.findMany({
       where: {
-        AND: [
-          ...activeNotExpiredConditions,
-          { adType: "PREMIUM" }
-        ]
+        AND: [...activeNotExpiredConditions, { adType: "PREMIUM" }]
       },
       include: {
         category: true,
@@ -68,10 +62,7 @@ export default async function HomePage() {
           ...activeNotExpiredConditions,
           { adType: "PAID" },
           {
-            OR: [
-              { featuredUntil: null },
-              { featuredUntil: { lte: now } }
-            ]
+            OR: [{ featuredUntil: null }, { featuredUntil: { lte: now } }]
           }
         ]
       },
@@ -85,10 +76,7 @@ export default async function HomePage() {
 
     freeAds = await prisma.ad.findMany({
       where: {
-        AND: [
-          ...activeNotExpiredConditions,
-          { adType: "FREE" }
-        ]
+        AND: [...activeNotExpiredConditions, { adType: "FREE" }]
       },
       include: {
         category: true,
@@ -269,13 +257,11 @@ export default async function HomePage() {
           </p>
 
           <h2 className="mt-2 text-3xl font-black text-slate-900">
-            Place your classified advertisement
+            Contact My Classifieds
           </h2>
 
           <div className="mt-5 rounded-2xl border bg-slate-50 p-5 text-slate-700">
-            <p className="font-bold">
-              SAHIL KOTHARI ENTERPRISES PRIVATE LIMITED
-            </p>
+            <p className="font-bold">My Classifieds Support</p>
 
             <p className="mt-2">
               WhatsApp:{" "}
@@ -290,10 +276,10 @@ export default async function HomePage() {
             <p>
               Email:{" "}
               <a
-                href="mailto:sahilkothariepl@gmail.com"
+                href="mailto:connect@myclassifieds.in"
                 className="font-bold text-blue-700"
               >
-                sahilkothariepl@gmail.com
+                connect@myclassifieds.in
               </a>
             </p>
           </div>
