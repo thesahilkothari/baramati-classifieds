@@ -30,11 +30,17 @@ export async function applyPaidPlanToAd(tx, { adId, planKey }) {
 
   if (shouldApplyPaid) {
     updateData.adType = "PAID";
+    updateData.expiryNoticeSentAt = null;
+    updateData.renewalNoticeSentAt = null;
+    updateData.followUpNoticeSentAt = null;
     if (ad.status === "ACTIVE") updateData.expiresAt = addDays(now, 7);
   }
 
   if (shouldApplyPremium) {
     updateData.adType = "PREMIUM";
+    updateData.expiryNoticeSentAt = null;
+    updateData.renewalNoticeSentAt = null;
+    updateData.followUpNoticeSentAt = null;
     if (ad.status === "ACTIVE") updateData.expiresAt = addDays(now, 30);
   }
 
