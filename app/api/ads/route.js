@@ -15,6 +15,13 @@ import {
   MANUAL_UPI_CONFIG
 } from "../../lib/manualPayment";
 import { canPlanUseFeatured, getPlanCharacterLimits } from "../../lib/planFeatures";
+import {
+  buildAdSubmissionEmail,
+  buildAdminNewAdNotification,
+  safeSendAdminEventEmail,
+  safeSendUserEventEmail,
+  getUserEmailFromAd
+} from "../../lib/userEventEmails";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -338,6 +345,11 @@ export async function POST(request) {
           userId: user.id,
           categoryId,
           cityId
+        },
+        include: {
+          user: true,
+          category: true,
+          city: true
         }
       });
 
@@ -440,11 +452,26 @@ export async function POST(request) {
       return { ad, user, paymentRecord };
     });
 
+    await safeSendUserEventEmail({
+      to: getUserEmailFromAd(result.ad),
+      email: buildAdSubmissionEmail({
+        ad: result.ad,
+        paymentRecord: result.paymentRecord
+      })
+    });
+
+    await safeSendAdminEventEmail(
+      buildAdminNewAdNotification({
+        ad: result.ad,
+        paymentRecord: result.paymentRecord
+      })
+    );
+
     return NextResponse.json({
       success: true,
       message: requiresPayment
-        ? "Classified and payment reference submitted successfully. It is pending payment verification and admin approval."
-        : "Free classified submitted successfully and is pending admin approval.",
+        ? "Classified and payment reference submitted successfully. It is pending payment verification and admin approval. Confirmation email has been sent."
+        : "Free classified submitted successfully and is pending admin approval. Confirmation email has been sent.",
       adId: result.ad.id,
       slug: result.ad.slug,
       manualReferenceNumber: result.paymentRecord?.manualReferenceNumber || null
