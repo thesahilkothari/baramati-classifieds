@@ -1,5 +1,7 @@
 export function getEmailFromAddress() {
-  return process.env.EMAIL_FROM || "My Classifieds <connect@myclassifieds.in>";
+  return (
+    process.env.EMAIL_FROM || "My Classifieds <connect@myclassifieds.in>"
+  ).trim();
 }
 
 export function getOtpExpiryMinutes() {
@@ -8,6 +10,45 @@ export function getOtpExpiryMinutes() {
 
 export function getUserSessionMinutes() {
   return Number(process.env.USER_EMAIL_SESSION_MINUTES || 120);
+}
+
+export function normalizeSecretValue(value, variableName) {
+  let normalized = String(value || "").trim();
+
+  if (!normalized) return "";
+
+  if (
+    (normalized.startsWith('"') && normalized.endsWith('"')) ||
+    (normalized.startsWith("'") && normalized.endsWith("'"))
+  ) {
+    normalized = normalized.slice(1, -1).trim();
+  }
+
+  const prefix = `${variableName}=`;
+
+  if (normalized.startsWith(prefix)) {
+    normalized = normalized.slice(prefix.length).trim();
+  }
+
+  return normalized;
+}
+
+export function getResendApiKey() {
+  return normalizeSecretValue(process.env.RESEND_API_KEY, "RESEND_API_KEY");
+}
+
+export function getEmailProviderStatus() {
+  const resendApiKey = getResendApiKey();
+  const hasSmtp = Boolean(
+    process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS
+  );
+
+  return {
+    hasResendApiKey: Boolean(resendApiKey),
+    resendKeyLooksValid: resendApiKey.startsWith("re_"),
+    hasSmtp,
+    from: getEmailFromAddress()
+  };
 }
 
 function getBaseUrl() {
@@ -54,11 +95,35 @@ function buildOtpEmailText({ code, email }) {
   ].join("\n");
 }
 
+function buildSafeResendError(errorText) {
+  try {
+    const parsed = JSON.parse(errorText);
+    const message = parsed.message || parsed.error || errorText;
+    const name = parsed.name || parsed.type || "resend_error";
+
+    return `${name}: ${message}`;
+  } catch {
+    return String(errorText || "Unknown Resend error").slice(0, 500);
+  }
+}
+
 async function sendWithResend({ to, subject, html, text }) {
+  const resendApiKey = getResendApiKey();
+
+  if (!resendApiKey) {
+    throw new Error("RESEND_API_KEY is not available in the deployment environment.");
+  }
+
+  if (!resendApiKey.startsWith("re_")) {
+    throw new Error(
+      "RESEND_API_KEY does not look valid. Paste only the key value starting with re_."
+    );
+  }
+
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      Authorization: `Bearer ${resendApiKey}`,
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
@@ -72,17 +137,14 @@ async function sendWithResend({ to, subject, html, text }) {
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Resend email failed: ${errorText}`);
+    throw new Error(`Resend rejected email: ${buildSafeResendError(errorText)}`);
   }
 
   return response.json();
 }
 
 async function loadNodemailer() {
-  const dynamicImport = new Function(
-    "specifier",
-    "return import(specifier)"
-  );
+  const dynamicImport = new Function("specifier", "return import(specifier)");
 
   return dynamicImport("nodemailer");
 }
@@ -119,12 +181,13 @@ export async function sendEmailOtp({ to, code }) {
   const subject = "Your My Classifieds OTP";
   const html = buildOtpEmailHtml({ code, email: to });
   const text = buildOtpEmailText({ code, email: to });
+  const providerStatus = getEmailProviderStatus();
 
-  if (process.env.RESEND_API_KEY) {
+  if (providerStatus.hasResendApiKey) {
     return sendWithResend({ to, subject, html, text });
   }
 
-  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+  if (providerStatus.hasSmtp) {
     return sendWithSmtp({ to, subject, html, text });
   }
 
