@@ -1,7 +1,11 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
-import { sendEmailOtp, getOtpExpiryMinutes } from "../../../../lib/emailService";
+import {
+  sendEmailOtp,
+  getOtpExpiryMinutes,
+  getEmailProviderStatus
+} from "../../../../lib/emailService";
 import { cleanEmail, isValidEmail } from "../../../../lib/userVerification";
 
 export const runtime = "nodejs";
@@ -13,6 +17,15 @@ function createOtpCode() {
 
 function getOtpKey(email) {
   return `email:${cleanEmail(email)}`;
+}
+
+function getSafeErrorDetails(error) {
+  const message = error instanceof Error ? error.message : String(error || "");
+
+  return message
+    .replace(/re_[A-Za-z0-9_\-]+/g, "re_***")
+    .replace(/Bearer\s+[^\s]+/gi, "Bearer ***")
+    .slice(0, 700);
 }
 
 export async function POST(request) {
@@ -77,10 +90,23 @@ export async function POST(request) {
     const code = createOtpCode();
     const expiresAt = new Date(Date.now() + getOtpExpiryMinutes() * 60 * 1000);
 
-    await sendEmailOtp({
-      to: email,
-      code
-    });
+    try {
+      await sendEmailOtp({
+        to: email,
+        code
+      });
+    } catch (emailError) {
+      console.error("Email OTP provider failed:", emailError);
+
+      return NextResponse.json(
+        {
+          error: "Unable to send OTP email.",
+          details: getSafeErrorDetails(emailError),
+          providerStatus: getEmailProviderStatus()
+        },
+        { status: 502 }
+      );
+    }
 
     await prisma.otp.create({
       data: {
@@ -101,8 +127,8 @@ export async function POST(request) {
 
     return NextResponse.json(
       {
-        error:
-          "Unable to send OTP email. Please check email service configuration or try again."
+        error: "Unable to process OTP request.",
+        details: getSafeErrorDetails(error)
       },
       { status: 500 }
     );
