@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import { prisma } from "../../../../../lib/prisma";
 import { getAdminSession } from "../../../../../lib/adminAuth";
 import { applyPaidPlanToAd } from "../../../../../lib/paymentApply";
+import {
+  buildPaymentRejectedEmail,
+  buildPaymentVerifiedEmail,
+  getUserEmailFromAd,
+  safeSendUserEventEmail
+} from "../../../../../lib/userEventEmails";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -49,7 +55,13 @@ export async function PATCH(request, { params }) {
     const payment = await prisma.payment.findUnique({
       where: { id: paymentId },
       include: {
-        ad: true
+        ad: {
+          include: {
+            user: true,
+            category: true,
+            city: true
+          }
+        }
       }
     });
 
@@ -75,7 +87,7 @@ export async function PATCH(request, { params }) {
     }
 
     if (action === "REJECT") {
-      await prisma.payment.update({
+      const rejectedPayment = await prisma.payment.update({
         where: { id: payment.id },
         data: {
           status: "REJECTED_MANUAL",
@@ -83,17 +95,36 @@ export async function PATCH(request, { params }) {
           manualVerifiedBy: "ADMIN",
           manualVerificationNote: note || "Rejected by admin.",
           verifiedAt: new Date()
+        },
+        include: {
+          ad: {
+            include: {
+              user: true,
+              category: true,
+              city: true
+            }
+          }
         }
+      });
+
+      await safeSendUserEventEmail({
+        to: getUserEmailFromAd(rejectedPayment.ad),
+        email: buildPaymentRejectedEmail({
+          ad: rejectedPayment.ad,
+          payment: rejectedPayment
+        })
       });
 
       return NextResponse.json({
         success: true,
-        message: "Manual payment rejected."
+        message: "Manual payment rejected and user email sent."
       });
     }
 
+    let verifiedPayment = null;
+
     await prisma.$transaction(async (tx) => {
-      await tx.payment.update({
+      verifiedPayment = await tx.payment.update({
         where: { id: payment.id },
         data: {
           status: "PAID",
@@ -101,6 +132,15 @@ export async function PATCH(request, { params }) {
           manualVerifiedBy: "ADMIN",
           manualVerificationNote: note || "Manual UPI payment verified by admin.",
           verifiedAt: new Date()
+        },
+        include: {
+          ad: {
+            include: {
+              user: true,
+              category: true,
+              city: true
+            }
+          }
         }
       });
 
@@ -117,10 +157,27 @@ export async function PATCH(request, { params }) {
       }
     });
 
+    const updatedAd = await prisma.ad.findUnique({
+      where: { id: payment.adId },
+      include: {
+        user: true,
+        category: true,
+        city: true
+      }
+    });
+
+    await safeSendUserEventEmail({
+      to: getUserEmailFromAd(updatedAd || verifiedPayment.ad),
+      email: buildPaymentVerifiedEmail({
+        ad: updatedAd || verifiedPayment.ad,
+        payment: verifiedPayment
+      })
+    });
+
     return NextResponse.json({
       success: true,
       message:
-        "Manual payment verified and selected plan applied to the classified."
+        "Manual payment verified, selected plan applied, and user email sent."
     });
   } catch (error) {
     console.error("Manual payment verification failed:", error);
