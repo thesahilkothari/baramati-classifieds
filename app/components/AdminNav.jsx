@@ -17,6 +17,11 @@ const adminLinks = [
     description: "Email and WhatsApp leads"
   },
   {
+    href: "/admin/system",
+    label: "System",
+    description: "Health and integration"
+  },
+  {
     href: "/admin",
     label: "Moderation",
     description: "Approve/reject ads"
@@ -77,7 +82,7 @@ export default function AdminNav() {
           </div>
         </div>
 
-        <nav className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
+        <nav className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-9">
           {adminLinks.map((link) => (
             <Link
               key={link.href}
