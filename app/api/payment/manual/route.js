@@ -7,6 +7,7 @@ import {
   MANUAL_UPI_CONFIG
 } from "../../../lib/manualPayment";
 import { canPlanUseFeatured } from "../../../lib/planFeatures";
+import { getVerifiedEmailFromRequest } from "../../../lib/userAuth";
 import {
   cleanEmail,
   cleanMobile,
@@ -39,6 +40,7 @@ function getPurposeForManualPayment(planKey, includeFeatured) {
 export async function POST(request) {
   try {
     const body = await request.json();
+    const verifiedEmail = getVerifiedEmailFromRequest(request);
 
     const adId = Number(body.adId);
     const planKey = cleanText(body.plan, 80);
@@ -49,7 +51,14 @@ export async function POST(request) {
     const manualPayerMobile = cleanMobile(body.payerMobile);
     const manualPaymentNote = cleanLongText(body.note, 500);
     const ownerMobile = cleanMobile(body.ownerMobile || body.mobile);
-    const ownerEmail = cleanEmail(body.ownerEmail || body.email);
+    const ownerEmail = cleanEmail(verifiedEmail || body.ownerEmail || body.email);
+
+    if (!verifiedEmail) {
+      return NextResponse.json(
+        { error: "Please verify your email OTP before renewing/upgrading this ad." },
+        { status: 401 }
+      );
+    }
 
     if (!adId) {
       return NextResponse.json(
@@ -161,8 +170,8 @@ export async function POST(request) {
         manualPayerMobile,
         manualPaymentNote: [
           manualPaymentNote,
-          `Verified renewal owner mobile: ${ownerMobile}`,
-          `Verified renewal owner email: ${ownerEmail}`
+          `Email OTP verified owner mobile: ${ownerMobile}`,
+          `Email OTP verified owner email: ${ownerEmail}`
         ]
           .filter(Boolean)
           .join("\n"),

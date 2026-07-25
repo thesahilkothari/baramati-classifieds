@@ -6,7 +6,7 @@ import { buildPageMetadata } from "../lib/seo";
 export const metadata = buildPageMetadata({
   title: "My Ads | Check Ad Status | My Classifieds",
   description:
-    "Securely check your My Classifieds ad approval status, payment verification, expiry, renewal and sold status.",
+    "Securely check your My Classifieds ad approval status, payment verification, expiry, renewal and sold status using email OTP.",
   path: "/my-ads",
   noIndex: true
 });

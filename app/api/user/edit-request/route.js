@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
+import { getVerifiedEmailFromRequest } from "../../../lib/userAuth";
 import {
   cleanEmail,
   cleanMobile,
-  isValidEmail,
   verifyAdOwnerByMobileAndEmail
 } from "../../../lib/userVerification";
 
@@ -43,14 +43,21 @@ function getRequestUserAgent(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
+    const verifiedEmail = getVerifiedEmailFromRequest(request);
 
     const adId = Number(body.adId);
     const mobile = cleanMobile(body.mobile);
-    const verificationEmail = cleanEmail(body.email || body.contactEmail);
     const requestType = cleanText(body.requestType, 60).toUpperCase();
     const details = cleanText(body.details, 2000);
     const contactName = cleanText(body.contactName, 120);
-    const contactEmail = cleanEmail(body.contactEmail || body.email);
+    const contactEmail = cleanEmail(body.contactEmail || verifiedEmail);
+
+    if (!verifiedEmail) {
+      return NextResponse.json(
+        { error: "Please verify your email OTP before submitting an edit request." },
+        { status: 401 }
+      );
+    }
 
     if (!adId) {
       return NextResponse.json(
@@ -62,13 +69,6 @@ export async function POST(request) {
     if (!mobile || mobile.length !== 10) {
       return NextResponse.json(
         { error: "Please enter the 10 digit mobile number used while posting." },
-        { status: 400 }
-      );
-    }
-
-    if (!verificationEmail || !isValidEmail(verificationEmail)) {
-      return NextResponse.json(
-        { error: "Please enter the email address used while posting." },
         { status: 400 }
       );
     }
@@ -105,7 +105,7 @@ export async function POST(request) {
 
     const verification = verifyAdOwnerByMobileAndEmail(ad, {
       mobile,
-      email: verificationEmail
+      email: verifiedEmail
     });
 
     if (!verification.ok) {
@@ -120,7 +120,7 @@ export async function POST(request) {
     const referenceNumber = createReferenceNumber();
 
     const description = [
-      "User requested correction/update for classified ad.",
+      "User requested correction/update for classified ad after email OTP verification.",
       "",
       `Ad ID: ${ad.id}`,
       `Ad Title: ${ad.title}`,
@@ -129,7 +129,7 @@ export async function POST(request) {
       `City: ${ad.city?.name || "-"}`,
       "",
       `Verification Mobile: ${mobile}`,
-      `Verification Email: ${verificationEmail}`,
+      `Verified Email: ${verifiedEmail}`,
       `Request Type: ${requestTypeLabels[requestType]}`,
       "",
       "Requested Change:",
@@ -158,11 +158,10 @@ export async function POST(request) {
       await tx.reportActionLog.create({
         data: {
           reportTicketId: createdTicket.id,
-          action: "EDIT_REQUEST_SUBMITTED_VERIFIED",
+          action: "EDIT_REQUEST_SUBMITTED_EMAIL_OTP_VERIFIED",
           fromStatus: null,
           toStatus: "NEW",
-          note:
-            "User submitted an ad edit/update request after mobile + email verification.",
+          note: "User submitted ad edit/update request after email OTP verification.",
           actor: "USER",
           ipAddress,
           userAgent

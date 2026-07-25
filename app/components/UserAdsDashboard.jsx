@@ -2,17 +2,17 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import EmailOtpGate from "./EmailOtpGate";
 
 const TEXT = {
   en: {
     lookupTitle: "Check Your Ad Status",
     lookupText:
-      "For privacy, enter both the mobile number and email address used while posting the ad.",
+      "After email OTP verification, enter the mobile number used while posting the ad.",
     mobile: "Mobile Number",
-    email: "Email Address Used While Posting",
-    search: "Verify and Search My Ads",
+    search: "Search My Ads",
     searching: "Searching...",
-    noAds: "No ads found for this verified mobile and email combination.",
+    noAds: "No ads found for this verified email and mobile combination.",
     paymentStatus: "Payment Status",
     category: "Category",
     city: "City",
@@ -49,18 +49,17 @@ const TEXT = {
     supportMessage:
       "Hello My Classifieds, I need help with my ad status.",
     statusUpdated: "Status updated successfully.",
-    privacyNote:
-      "Only ads matching both the posting mobile number and posting email address will be shown."
+    verifyFirst:
+      "Please complete email OTP verification first. Then your ads can be searched by posting mobile number."
   },
   mr: {
     lookupTitle: "आपल्या जाहिरातीचा Status तपासा",
     lookupText:
-      "Privacy साठी जाहिरात पोस्ट करताना वापरलेला mobile number आणि email address दोन्ही भरा.",
+      "Email OTP verification नंतर जाहिरात पोस्ट करताना वापरलेला mobile number भरा.",
     mobile: "मोबाईल नंबर",
-    email: "जाहिरात पोस्ट करताना वापरलेला ईमेल",
-    search: "Verify करून माझ्या जाहिराती शोधा",
+    search: "माझ्या जाहिराती शोधा",
     searching: "शोधत आहे...",
-    noAds: "या mobile आणि email combination साठी जाहिराती सापडल्या नाहीत.",
+    noAds: "या verified email आणि mobile combination साठी जाहिराती सापडल्या नाहीत.",
     paymentStatus: "Payment Status",
     category: "कॅटेगरी",
     city: "शहर",
@@ -97,17 +96,13 @@ const TEXT = {
     supportMessage:
       "नमस्कार My Classifieds, मला माझ्या जाहिरातीच्या status बाबत मदत हवी आहे.",
     statusUpdated: "Status update झाला.",
-    privacyNote:
-      "फक्त posting mobile number आणि posting email address दोन्ही match झाल्यासच जाहिराती दिसतील."
+    verifyFirst:
+      "कृपया आधी Email OTP verification पूर्ण करा. त्यानंतर posting mobile number ने जाहिराती शोधता येतील."
   }
 };
 
 function cleanMobile(value) {
   return String(value || "").replace(/\D/g, "").slice(0, 10);
-}
-
-function cleanEmail(value) {
-  return String(value || "").trim().toLowerCase().slice(0, 180);
 }
 
 function formatDate(value, language) {
@@ -197,9 +192,9 @@ export default function UserAdsDashboard({
   const language = initialLanguage === "mr" ? "mr" : "en";
   const text = TEXT[language];
   const [mobile, setMobile] = useState(cleanMobile(initialMobile));
-  const [email, setEmail] = useState(cleanEmail(initialEmail));
+  const [verifiedEmail, setVerifiedEmail] = useState("");
   const [ads, setAds] = useState([]);
-  const [hasSearched, setHasSearched] = useState(Boolean(initialMobile && initialEmail));
+  const [hasSearched, setHasSearched] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isSearching, setIsSearching] = useState(false);
@@ -213,29 +208,23 @@ export default function UserAdsDashboard({
     setError("");
     setMessage("");
 
+    if (!verifiedEmail) {
+      setError(text.verifyFirst);
+      return;
+    }
+
     const clean = cleanMobile(mobile);
-    const verifiedEmail = cleanEmail(email);
 
     if (clean.length !== 10) {
       setError("Please enter a valid 10 digit mobile number.");
       return;
     }
 
-    if (!verifiedEmail || !verifiedEmail.includes("@")) {
-      setError("Please enter the email address used while posting.");
-      return;
-    }
-
     setMobile(clean);
-    setEmail(verifiedEmail);
     setIsSearching(true);
 
     try {
-      const params = new URLSearchParams({
-        mobile: clean,
-        email: verifiedEmail
-      });
-
+      const params = new URLSearchParams({ mobile: clean });
       const response = await fetch(`/api/user/ads?${params.toString()}`);
       const data = await response.json();
 
@@ -249,7 +238,6 @@ export default function UserAdsDashboard({
 
       const nextUrl = new URL(window.location.href);
       nextUrl.searchParams.set("mobile", clean);
-      nextUrl.searchParams.set("email", verifiedEmail);
       window.history.replaceState(null, "", nextUrl.toString());
     } catch (lookupError) {
       console.error("User ad lookup failed:", lookupError);
@@ -273,7 +261,6 @@ export default function UserAdsDashboard({
         body: JSON.stringify({
           adId: ad.id,
           mobile,
-          email,
           soldStatus
         })
       });
@@ -297,6 +284,18 @@ export default function UserAdsDashboard({
 
   return (
     <div className="space-y-6">
+      <EmailOtpGate
+        initialEmail={initialEmail}
+        initialLanguage={language}
+        onVerified={(email) => {
+          setVerifiedEmail(email || "");
+          if (!email) {
+            setAds([]);
+            setHasSearched(false);
+          }
+        }}
+      />
+
       <section className="rounded-3xl border-2 border-slate-900 bg-white p-5 shadow-sm md:p-8">
         <p className="text-sm font-black uppercase tracking-wide text-blue-700">
           My Ads
@@ -310,11 +309,7 @@ export default function UserAdsDashboard({
           {text.lookupText}
         </p>
 
-        <div className="mt-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-bold text-blue-900">
-          {text.privacyNote}
-        </div>
-
-        <form onSubmit={fetchAds} className="mt-6 grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+        <form onSubmit={fetchAds} className="mt-6 grid gap-3 md:grid-cols-[1fr_auto]">
           <div>
             <label className="text-sm font-bold text-slate-700">
               {text.mobile}
@@ -327,27 +322,14 @@ export default function UserAdsDashboard({
               inputMode="numeric"
               maxLength={10}
               required
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-bold text-slate-700">
-              {text.email}
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(cleanEmail(event.target.value))}
-              className="mt-2 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-700"
-              placeholder="name@example.com"
-              required
+              disabled={!verifiedEmail}
             />
           </div>
 
           <button
             type="submit"
-            disabled={isSearching}
-            className="self-end rounded-xl bg-blue-700 px-6 py-3 font-black uppercase text-white hover:bg-blue-800 disabled:opacity-60"
+            disabled={isSearching || !verifiedEmail}
+            className="self-end rounded-xl bg-blue-700 px-6 py-3 font-black uppercase text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSearching ? text.searching : text.search}
           </button>
@@ -368,9 +350,7 @@ export default function UserAdsDashboard({
 
       {hasSearched && sortedAds.length === 0 && !isSearching && (
         <section className="rounded-3xl border bg-white p-8 text-center shadow-sm">
-          <h2 className="text-2xl font-black text-slate-950">
-            {text.noAds}
-          </h2>
+          <h2 className="text-2xl font-black text-slate-950">{text.noAds}</h2>
           <Link
             href="/post-ad"
             className="mt-5 inline-flex rounded-xl bg-red-600 px-6 py-3 text-sm font-black uppercase text-white"
@@ -388,96 +368,56 @@ export default function UserAdsDashboard({
             const paymentLabel = getPaymentLabel(ad.paymentSummary, text);
             const secureParams = new URLSearchParams({
               adId: String(ad.id),
-              mobile,
-              email
+              mobile
             }).toString();
 
             return (
-              <article
-                key={ad.id}
-                className="rounded-3xl border bg-white p-5 shadow-sm md:p-6"
-              >
+              <article key={ad.id} className="rounded-3xl border bg-white p-5 shadow-sm md:p-6">
                 <div className="grid gap-5 xl:grid-cols-[1fr_340px]">
                   <div>
                     <div className="flex flex-wrap gap-2">
                       <span className={`rounded px-3 py-1 text-xs font-black uppercase ${getStatusClass(ad.status)}`}>
                         {getStatusLabel(ad.status, text)}
                       </span>
-
                       {ad.isFeatured && (
                         <span className="rounded bg-orange-500 px-3 py-1 text-xs font-black uppercase text-white">
                           Featured
                         </span>
                       )}
-
                       <span className="rounded bg-slate-100 px-3 py-1 text-xs font-black uppercase text-slate-700">
                         #{ad.id}
                       </span>
                     </div>
 
-                    <h2 className="mt-4 text-2xl font-black text-slate-950">
-                      {ad.title}
-                    </h2>
-
-                    <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-700">
-                      {ad.description}
-                    </p>
+                    <h2 className="mt-4 text-2xl font-black text-slate-950">{ad.title}</h2>
+                    <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-700">{ad.description}</p>
 
                     <div className="mt-4 grid gap-3 text-sm md:grid-cols-2 lg:grid-cols-3">
                       <div className="rounded-2xl border bg-slate-50 p-4">
-                        <p className="text-xs font-black uppercase text-slate-500">
-                          {text.category}
-                        </p>
+                        <p className="text-xs font-black uppercase text-slate-500">{text.category}</p>
                         <p className="mt-1 font-bold text-slate-900">
-                          {language === "mr"
-                            ? ad.category?.nameMr || ad.category?.nameEn || "-"
-                            : ad.category?.nameEn || "-"}
+                          {language === "mr" ? ad.category?.nameMr || ad.category?.nameEn || "-" : ad.category?.nameEn || "-"}
                         </p>
                       </div>
-
                       <div className="rounded-2xl border bg-slate-50 p-4">
-                        <p className="text-xs font-black uppercase text-slate-500">
-                          {text.city}
-                        </p>
-                        <p className="mt-1 font-bold text-slate-900">
-                          {ad.city?.name || "-"}
-                        </p>
+                        <p className="text-xs font-black uppercase text-slate-500">{text.city}</p>
+                        <p className="mt-1 font-bold text-slate-900">{ad.city?.name || "-"}</p>
                       </div>
-
                       <div className="rounded-2xl border bg-slate-50 p-4">
-                        <p className="text-xs font-black uppercase text-slate-500">
-                          {text.price}
-                        </p>
-                        <p className="mt-1 font-bold text-slate-900">
-                          {formatPrice(ad.price)}
-                        </p>
+                        <p className="text-xs font-black uppercase text-slate-500">{text.price}</p>
+                        <p className="mt-1 font-bold text-slate-900">{formatPrice(ad.price)}</p>
                       </div>
-
                       <div className="rounded-2xl border bg-slate-50 p-4">
-                        <p className="text-xs font-black uppercase text-slate-500">
-                          {text.created}
-                        </p>
-                        <p className="mt-1 font-bold text-slate-900">
-                          {formatDate(ad.createdAt, language)}
-                        </p>
+                        <p className="text-xs font-black uppercase text-slate-500">{text.created}</p>
+                        <p className="mt-1 font-bold text-slate-900">{formatDate(ad.createdAt, language)}</p>
                       </div>
-
                       <div className="rounded-2xl border bg-slate-50 p-4">
-                        <p className="text-xs font-black uppercase text-slate-500">
-                          {text.expiry}
-                        </p>
-                        <p className="mt-1 font-bold text-slate-900">
-                          {formatDate(ad.expiresAt, language)}
-                        </p>
+                        <p className="text-xs font-black uppercase text-slate-500">{text.expiry}</p>
+                        <p className="mt-1 font-bold text-slate-900">{formatDate(ad.expiresAt, language)}</p>
                       </div>
-
                       <div className="rounded-2xl border bg-slate-50 p-4">
-                        <p className="text-xs font-black uppercase text-slate-500">
-                          {text.views}
-                        </p>
-                        <p className="mt-1 font-bold text-slate-900">
-                          {ad.views || 0}
-                        </p>
+                        <p className="text-xs font-black uppercase text-slate-500">{text.views}</p>
+                        <p className="mt-1 font-bold text-slate-900">{ad.views || 0}</p>
                       </div>
                     </div>
 
@@ -490,20 +430,13 @@ export default function UserAdsDashboard({
 
                   <aside className="rounded-3xl border bg-slate-50 p-4">
                     <div>
-                      <p className="text-xs font-black uppercase text-slate-500">
-                        {text.paymentStatus}
-                      </p>
-                      <p className="mt-2 font-black text-slate-950">
-                        {paymentLabel}
-                      </p>
-
+                      <p className="text-xs font-black uppercase text-slate-500">{text.paymentStatus}</p>
+                      <p className="mt-2 font-black text-slate-950">{paymentLabel}</p>
                       {ad.paymentSummary?.latestAmount && (
                         <p className="mt-1 text-sm text-slate-600">
-                          {formatPaymentAmount(ad.paymentSummary.latestAmount)} |{" "}
-                          {ad.paymentSummary.latestPlan}
+                          {formatPaymentAmount(ad.paymentSummary.latestAmount)} | {ad.paymentSummary.latestPlan}
                         </p>
                       )}
-
                       {ad.paymentSummary?.latestReference && (
                         <p className="mt-2 break-all rounded-xl bg-white p-3 font-mono text-xs text-slate-600">
                           {ad.paymentSummary.latestReference}
@@ -513,66 +446,35 @@ export default function UserAdsDashboard({
 
                     <div className="mt-5 grid gap-2">
                       {canViewPublic && (
-                        <Link
-                          href={`/ads/${ad.slug}`}
-                          target="_blank"
-                          className="rounded-xl bg-blue-700 px-4 py-3 text-center text-xs font-black uppercase text-white hover:bg-blue-800"
-                        >
+                        <Link href={`/ads/${ad.slug}`} target="_blank" className="rounded-xl bg-blue-700 px-4 py-3 text-center text-xs font-black uppercase text-white hover:bg-blue-800">
                           {text.viewPublicAd}
                         </Link>
                       )}
 
-                      <Link
-                        href={`/renew?${secureParams}`}
-                        className="rounded-xl bg-red-600 px-4 py-3 text-center text-xs font-black uppercase text-white hover:bg-red-700"
-                      >
+                      <Link href={`/renew?${secureParams}`} className="rounded-xl bg-red-600 px-4 py-3 text-center text-xs font-black uppercase text-white hover:bg-red-700">
                         {text.renewUpgrade}
                       </Link>
 
-                      <Link
-                        href={`/edit-request?${secureParams}`}
-                        className="rounded-xl border bg-white px-4 py-3 text-center text-xs font-black uppercase text-slate-700 hover:bg-slate-50"
-                      >
+                      <Link href={`/edit-request?${secureParams}`} className="rounded-xl border bg-white px-4 py-3 text-center text-xs font-black uppercase text-slate-700 hover:bg-slate-50">
                         {text.editRequest}
                       </Link>
 
                       {ad.status !== "SOLD" ? (
                         <>
-                          <button
-                            type="button"
-                            onClick={() => updateSoldStatus(ad, "SOLD_MYCLASSIFIEDS")}
-                            disabled={updatingAdId === ad.id}
-                            className="rounded-xl border bg-white px-4 py-3 text-xs font-black uppercase text-slate-700 hover:bg-slate-50 disabled:opacity-60"
-                          >
+                          <button type="button" onClick={() => updateSoldStatus(ad, "SOLD_MYCLASSIFIEDS")} disabled={updatingAdId === ad.id} className="rounded-xl border bg-white px-4 py-3 text-xs font-black uppercase text-slate-700 hover:bg-slate-50 disabled:opacity-60">
                             {text.soldThroughPlatform}
                           </button>
-
-                          <button
-                            type="button"
-                            onClick={() => updateSoldStatus(ad, "SOLD_ELSEWHERE")}
-                            disabled={updatingAdId === ad.id}
-                            className="rounded-xl border bg-white px-4 py-3 text-xs font-black uppercase text-slate-700 hover:bg-slate-50 disabled:opacity-60"
-                          >
+                          <button type="button" onClick={() => updateSoldStatus(ad, "SOLD_ELSEWHERE")} disabled={updatingAdId === ad.id} className="rounded-xl border bg-white px-4 py-3 text-xs font-black uppercase text-slate-700 hover:bg-slate-50 disabled:opacity-60">
                             {text.soldElsewhere}
                           </button>
                         </>
                       ) : (
-                        <button
-                          type="button"
-                          onClick={() => updateSoldStatus(ad, "AVAILABLE")}
-                          disabled={updatingAdId === ad.id}
-                          className="rounded-xl border bg-white px-4 py-3 text-xs font-black uppercase text-slate-700 hover:bg-slate-50 disabled:opacity-60"
-                        >
+                        <button type="button" onClick={() => updateSoldStatus(ad, "AVAILABLE")} disabled={updatingAdId === ad.id} className="rounded-xl border bg-white px-4 py-3 text-xs font-black uppercase text-slate-700 hover:bg-slate-50 disabled:opacity-60">
                           {text.markAvailable}
                         </button>
                       )}
 
-                      <a
-                        href={buildWhatsAppUrl(text.supportMessage, ad)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="rounded-xl border bg-white px-4 py-3 text-center text-xs font-black uppercase text-slate-700 hover:bg-slate-50"
-                      >
+                      <a href={buildWhatsAppUrl(text.supportMessage, ad)} target="_blank" rel="noreferrer" className="rounded-xl border bg-white px-4 py-3 text-center text-xs font-black uppercase text-slate-700 hover:bg-slate-50">
                         {text.reportIssue}
                       </a>
                     </div>

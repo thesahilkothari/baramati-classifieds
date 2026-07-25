@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
+import { getVerifiedEmailFromRequest } from "../../../lib/userAuth";
 import { verifyAdOwnerByMobileAndEmail } from "../../../lib/userVerification";
 
 export const runtime = "nodejs";
@@ -10,9 +11,16 @@ const allowedStatuses = ["SOLD_MYCLASSIFIEDS", "SOLD_ELSEWHERE", "AVAILABLE"];
 export async function PATCH(request) {
   try {
     const body = await request.json();
-
+    const verifiedEmail = getVerifiedEmailFromRequest(request);
     const adId = Number(body.adId);
     const soldStatus = String(body.soldStatus || "").toUpperCase();
+
+    if (!verifiedEmail) {
+      return NextResponse.json(
+        { error: "Please verify your email OTP before taking action." },
+        { status: 401 }
+      );
+    }
 
     if (!adId) {
       return NextResponse.json(
@@ -39,7 +47,7 @@ export async function PATCH(request) {
 
     const verification = verifyAdOwnerByMobileAndEmail(ad, {
       mobile: body.mobile,
-      email: body.email
+      email: verifiedEmail
     });
 
     if (!verification.ok) {
