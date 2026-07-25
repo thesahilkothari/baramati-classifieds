@@ -1,13 +1,29 @@
+import { getSiteUrl } from "./lib/seo";
+
 export default function robots() {
+  const siteUrl = getSiteUrl();
+
   return {
     rules: [
       {
         userAgent: "*",
-        allow: "/",
-        disallow: ["/admin", "/api"]
+        allow: [
+          "/",
+          "/ads",
+          "/post-ad",
+          "/pricing",
+          "/support",
+          "/legal"
+        ],
+        disallow: [
+          "/admin",
+          "/api",
+          "/renew",
+          "/sold-status"
+        ]
       }
     ],
-    sitemap: "https://myclassifieds.in/sitemap.xml",
-    host: "https://myclassifieds.in"
+    sitemap: `${siteUrl}/sitemap.xml`,
+    host: siteUrl
   };
 }

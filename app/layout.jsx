@@ -5,11 +5,14 @@ import Footer from "./components/Footer";
 import MobileBottomBar from "./components/MobileBottomBar";
 import WhatsAppSupportBot from "./components/WhatsAppSupportBot";
 import { getHtmlLang, getLanguageFromCookieStore } from "./lib/i18n";
+import { buildPageMetadata } from "./lib/seo";
 
-export const metadata = {
-  title: "My Classifieds | Baramati Classified Ads",
-  description:
-    "Post and browse local classified ads for Baramati and Maharashtra."
+export const metadata = buildPageMetadata();
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#dc2626"
 };
 
 export default async function RootLayout({ children }) {
