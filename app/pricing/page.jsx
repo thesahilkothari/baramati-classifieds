@@ -32,13 +32,14 @@ const plans = [
     border: "border-blue-600",
     button: "bg-blue-700 hover:bg-blue-800",
     href: "/post-ad?plan=paid",
-    description: "Better option for sellers who want paid listing visibility.",
+    description:
+      "Better option for sellers who want paid listing visibility after manual UPI payment verification.",
     features: [
       "Visible for 7 days",
-      "GST inclusive price",
       "Paid classified listing",
+      "Category-wise display",
       "Admin approval required",
-      "Eligible for Featured add-on"
+      "Manual UPI payment verification"
     ]
   },
   {
@@ -49,30 +50,14 @@ const plans = [
     border: "border-red-600",
     button: "bg-red-600 hover:bg-red-700",
     href: "/post-ad?plan=premium",
-    description: "Best for property, jobs, business and urgent advertisements.",
+    description:
+      "Best for property, jobs, business and urgent advertisements after manual UPI payment verification.",
     features: [
       "Visible for 30 days",
-      "GST inclusive price",
       "Premium classified listing",
+      "Longer validity",
       "Admin approval required",
-      "Eligible for Featured add-on"
-    ]
-  },
-  {
-    name: "Featured Add-on",
-    price: "Rs. 299",
-    duration: "10 Days",
-    badge: "Add-on",
-    border: "border-orange-500",
-    button: "bg-orange-500 hover:bg-orange-600",
-    href: "/post-ad?plan=featured",
-    description: "Highlight your paid or premium classified for faster response.",
-    features: [
-      "Featured highlighting for 10 days",
-      "GST inclusive price",
-      "Only for paid/premium ads",
-      "Useful for urgent response",
-      "Free ads must first be upgraded"
+      "Manual UPI payment verification"
     ]
   }
 ];
@@ -93,7 +78,8 @@ export default function PricingPage() {
               </h1>
 
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-700">
-                Choose a simple GST-inclusive plan to publish your newspaper-style classified advertisement on My Classifieds.
+                Choose a simple plan to publish your newspaper-style classified
+                advertisement on My Classifieds.
               </p>
             </div>
 
@@ -106,7 +92,13 @@ export default function PricingPage() {
           </div>
         </div>
 
-        <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 p-5 text-sm leading-6 text-blue-900">
+          Online gateway checkout is currently not active. Paid plans are
+          processed through manual UPI payment to the company UPI ID and admin
+          verification from the bank/UPI statement. All prices are GST inclusive.
+        </div>
+
+        <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {plans.map((plan) => (
             <article
               key={plan.name}
@@ -127,7 +119,7 @@ export default function PricingPage() {
               </p>
 
               <p className="mt-1 text-xs font-black uppercase text-slate-600">
-                Valid for {plan.duration}
+                GST inclusive | Valid for {plan.duration}
               </p>
 
               <p className="mt-4 min-h-12 text-sm leading-6 text-slate-700">
@@ -152,41 +144,6 @@ export default function PricingPage() {
             </article>
           ))}
         </div>
-
-        <section className="mt-8 grid gap-5 lg:grid-cols-2">
-          <div className="rounded-3xl border bg-white p-6 shadow-sm">
-            <h2 className="text-2xl font-black uppercase text-slate-950">
-              Expiry & Upgrade
-            </h2>
-
-            <div className="mt-5 space-y-4 text-sm leading-6 text-slate-700">
-              <p>Free classifieds stop displaying after 7 days unless upgraded or renewed.</p>
-              <p>Users may be notified 2 days before free ad expiry and offered paid, premium and featured upgrade options.</p>
-              <p>Featured add-on is available only for paid or premium classified ads.</p>
-            </div>
-          </div>
-
-          <div className="rounded-3xl border bg-yellow-50 p-6 shadow-sm">
-            <h2 className="text-2xl font-black uppercase text-yellow-950">
-              Important Note
-            </h2>
-
-            <div className="mt-5 space-y-4 text-sm leading-6 text-yellow-900">
-              <p>All classifieds are subject to admin approval before publication.</p>
-              <p>Payment does not guarantee approval, verification, enquiries, ranking, sale, purchase or transaction completion.</p>
-              <p>
-                For support, contact{" "}
-                <a href="mailto:connect@myclassifieds.in" className="font-bold text-blue-700 hover:underline">
-                  connect@myclassifieds.in
-                </a>{" "}
-                or WhatsApp{" "}
-                <a href="https://wa.me/919673931166" className="font-bold text-blue-700 hover:underline">
-                  +91 9673931166
-                </a>.
-              </p>
-            </div>
-          </div>
-        </section>
       </section>
     </main>
   );
