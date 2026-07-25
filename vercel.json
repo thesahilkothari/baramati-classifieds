@@ -1,6 +1,10 @@
 {
   "crons": [
     {
+      "path": "/api/cron/ad-lifecycle",
+      "schedule": "15 4 * * *"
+    },
+    {
       "path": "/api/cron/ad-reminders",
       "schedule": "30 4 * * *"
     }
