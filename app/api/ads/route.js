@@ -6,11 +6,12 @@ import {
   POLICY_EFFECTIVE_DATE,
   getAllowedAdvertiserTypeValues,
   getPolicyEffectiveDateForDatabase,
+  hasAcceptedConsolidatedPostingTerms,
   validatePostAdDeclarations
 } from "../../lib/compliance";
 import {
+  calculatePostingTotal,
   createManualPaymentReference,
-  getPostAdSelection,
   MANUAL_UPI_CONFIG
 } from "../../lib/manualPayment";
 
@@ -18,17 +19,23 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 function slugify(text) {
-  return text.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
 }
 
 async function createUniqueSlug(title, db = prisma) {
   const baseSlug = slugify(title) || `classified-${Date.now()}`;
   let slug = baseSlug;
   let counter = 1;
+
   while (await db.ad.findUnique({ where: { slug } })) {
     slug = `${baseSlug}-${counter}`;
     counter += 1;
   }
+
   return slug;
 }
 
@@ -36,7 +43,7 @@ function cleanMobile(value) {
   return String(value || "").replace(/\D/g, "");
 }
 
-function cleanText(value, maxLength = 191) {
+function cleanShortText(value, maxLength = 191) {
   return String(value || "").trim().slice(0, maxLength);
 }
 
@@ -46,7 +53,11 @@ function cleanLongText(value, maxLength = 1000) {
 
 function getRequestIp(request) {
   const forwardedFor = request.headers.get("x-forwarded-for");
-  if (forwardedFor) return forwardedFor.split(",")[0].trim().slice(0, 191);
+
+  if (forwardedFor) {
+    return forwardedFor.split(",")[0].trim().slice(0, 191);
+  }
+
   return request.headers.get("x-real-ip")?.slice(0, 191) || null;
 }
 
@@ -55,91 +66,273 @@ function getRequestUserAgent(request) {
 }
 
 function normalizeDeclarations(value) {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+
   return value;
 }
 
-function getPaymentSelection(body) {
-  const basePlan = cleanText(body.basePlan || "FREE", 30).toUpperCase();
-  const includeFeatured = body.includeFeatured === true;
-  return getPostAdSelection(basePlan, includeFeatured);
+function getPurposeForManualPayment(planKey, includeFeatured) {
+  if (planKey === "PAID_7_DAYS" && includeFeatured) {
+    return "PAID_AD_WITH_FEATURED_ADDON";
+  }
+
+  if (planKey === "PREMIUM_30_DAYS" && includeFeatured) {
+    return "PREMIUM_AD_WITH_FEATURED_ADDON";
+  }
+
+  return getPlan(planKey)?.purpose || "MANUAL_UPI_PAYMENT";
 }
 
 export async function POST(request) {
   try {
     const body = await request.json();
 
-    const name = cleanText(body.name, 120);
+    const name = cleanShortText(body.name, 120);
     const mobile = cleanMobile(body.mobile);
     const whatsapp = cleanMobile(body.whatsapp || body.mobile);
-    const title = cleanText(body.title, 180);
+    const title = cleanShortText(body.title, 180);
     const description = String(body.description || "").trim();
     const price = String(body.price || "").trim();
-    const address = cleanText(body.address, 240);
+    const address = cleanShortText(body.address, 240);
     const categoryId = Number(body.categoryId);
     const cityId = Number(body.cityId);
-    const advertiserType = cleanText(body.advertiserType, 60);
-    const policyVersion = cleanText(body.policyVersion, 40);
-    const policyEffectiveDate = cleanText(body.policyEffectiveDate, 40);
+    const advertiserType = cleanShortText(body.advertiserType, 60);
+    const policyVersion = cleanShortText(body.policyVersion, 40);
+    const policyEffectiveDate = cleanShortText(body.policyEffectiveDate, 40);
+    const selectedPlan = cleanShortText(body.selectedPlan || "FREE_7_DAYS", 80);
+    const includeFeatured =
+      body.includeFeatured === true &&
+      ["PAID_7_DAYS", "PREMIUM_30_DAYS"].includes(selectedPlan);
     const declarations = normalizeDeclarations(body.declarations);
-    const paymentSelection = getPaymentSelection(body);
+    const payment = body.payment && typeof body.payment === "object"
+      ? body.payment
+      : null;
 
-    const manualTransactionRef = cleanText(body.transactionReference, 120);
-    const manualPayerName = cleanText(body.payerName, 120);
-    const manualPayerMobile = cleanMobile(body.payerMobile);
-    const manualPaymentNote = cleanLongText(body.paymentNote, 500);
-
-    if (!paymentSelection) {
-      return NextResponse.json({ error: "Please select a valid classified plan." }, { status: 400 });
+    if (!name || name.length < 2) {
+      return NextResponse.json(
+        { error: "Please enter your name." },
+        { status: 400 }
+      );
     }
 
-    if (!name || name.length < 2) return NextResponse.json({ error: "Please enter your name." }, { status: 400 });
-    if (!mobile || mobile.length !== 10) return NextResponse.json({ error: "Please enter a valid 10 digit mobile number." }, { status: 400 });
-    if (whatsapp && whatsapp.length !== 10) return NextResponse.json({ error: "Please enter a valid 10 digit WhatsApp number." }, { status: 400 });
-    if (!title || title.length < 8) return NextResponse.json({ error: "Ad title must be at least 8 characters." }, { status: 400 });
-    if (!description || description.length < 20) return NextResponse.json({ error: "Description must be at least 20 characters." }, { status: 400 });
-    if (!categoryId || !cityId) return NextResponse.json({ error: "Please select category and city." }, { status: 400 });
-    if (!getAllowedAdvertiserTypeValues().includes(advertiserType)) return NextResponse.json({ error: "Please select your advertiser type." }, { status: 400 });
+    if (!mobile || mobile.length !== 10) {
+      return NextResponse.json(
+        { error: "Please enter a valid 10 digit mobile number." },
+        { status: 400 }
+      );
+    }
 
-    if (policyVersion !== ACTIVE_POLICY_VERSION || policyEffectiveDate !== POLICY_EFFECTIVE_DATE) {
-      return NextResponse.json({ error: "The legal policy version has changed. Please refresh the page and submit again." }, { status: 409 });
+    if (whatsapp && whatsapp.length !== 10) {
+      return NextResponse.json(
+        { error: "Please enter a valid 10 digit WhatsApp number." },
+        { status: 400 }
+      );
+    }
+
+    if (!title || title.length < 8) {
+      return NextResponse.json(
+        { error: "Ad title must be at least 8 characters." },
+        { status: 400 }
+      );
+    }
+
+    if (!description || description.length < 20) {
+      return NextResponse.json(
+        { error: "Description must be at least 20 characters." },
+        { status: 400 }
+      );
+    }
+
+    if (!categoryId || !cityId) {
+      return NextResponse.json(
+        { error: "Please select category and city." },
+        { status: 400 }
+      );
+    }
+
+    if (!getAllowedAdvertiserTypeValues().includes(advertiserType)) {
+      return NextResponse.json(
+        { error: "Please select your advertiser type." },
+        { status: 400 }
+      );
+    }
+
+    if (
+      policyVersion !== ACTIVE_POLICY_VERSION ||
+      policyEffectiveDate !== POLICY_EFFECTIVE_DATE
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "The legal policy version has changed. Please refresh the page and submit again."
+        },
+        { status: 409 }
+      );
     }
 
     const declarationValidation = validatePostAdDeclarations(declarations);
+
     if (!declarationValidation.isValid) {
-      return NextResponse.json({ error: "Please complete all mandatory declarations and policy acceptances before submitting the classified." }, { status: 400 });
+      return NextResponse.json(
+        {
+          error:
+            "Please read and accept the Terms and Conditions for Posting a Classified."
+        },
+        { status: 400 }
+      );
     }
 
-    if (paymentSelection.amount > 0) {
-      if (!manualTransactionRef || manualTransactionRef.length < 6) return NextResponse.json({ error: "Please enter the UPI transaction ID / UTR after making payment." }, { status: 400 });
-      if (!manualPayerName || manualPayerName.length < 2) return NextResponse.json({ error: "Please enter the payer name used for UPI payment." }, { status: 400 });
-      if (!manualPayerMobile || manualPayerMobile.length !== 10) return NextResponse.json({ error: "Please enter a valid 10 digit payer mobile number." }, { status: 400 });
+    if (!["FREE_7_DAYS", "PAID_7_DAYS", "PREMIUM_30_DAYS"].includes(selectedPlan)) {
+      return NextResponse.json(
+        { error: "Invalid classified plan selected." },
+        { status: 400 }
+      );
+    }
+
+    const total = calculatePostingTotal({
+      planKey: selectedPlan,
+      includeFeatured
+    });
+
+    const requiresPayment = total.amountInPaise > 0;
+
+    let manualTransactionRef = "";
+    let manualPayerName = "";
+    let manualPayerMobile = "";
+    let manualPaymentNote = "";
+
+    if (requiresPayment) {
+      manualTransactionRef = cleanShortText(payment?.transactionReference, 120);
+      manualPayerName = cleanShortText(payment?.payerName, 120);
+      manualPayerMobile = cleanMobile(payment?.payerMobile);
+      manualPaymentNote = cleanLongText(payment?.note, 500);
+
+      if (!manualTransactionRef || manualTransactionRef.length < 6) {
+        return NextResponse.json(
+          {
+            error:
+              "Please enter a valid UPI transaction ID / UTR / bank reference number."
+          },
+          { status: 400 }
+        );
+      }
+
+      if (!manualPayerName || manualPayerName.length < 2) {
+        return NextResponse.json(
+          { error: "Please enter the payer name used for payment." },
+          { status: 400 }
+        );
+      }
+
+      if (!manualPayerMobile || manualPayerMobile.length !== 10) {
+        return NextResponse.json(
+          { error: "Please enter a valid 10 digit payer mobile number." },
+          { status: 400 }
+        );
+      }
 
       const duplicateReference = await prisma.payment.findFirst({
-        where: { provider: MANUAL_UPI_CONFIG.provider, manualTransactionRef }
+        where: {
+          provider: MANUAL_UPI_CONFIG.provider,
+          manualTransactionRef
+        }
       });
+
       if (duplicateReference) {
-        return NextResponse.json({ error: "This UPI transaction reference is already submitted. Please check the reference number or contact support." }, { status: 409 });
+        return NextResponse.json(
+          {
+            error:
+              "This UPI transaction reference is already submitted. Please check the reference number or contact support."
+          },
+          { status: 409 }
+        );
       }
     }
 
-    const category = await prisma.category.findUnique({ where: { id: categoryId } });
-    const city = await prisma.city.findUnique({ where: { id: cityId } });
-    if (!category || !city) return NextResponse.json({ error: "Selected category or city is invalid." }, { status: 400 });
+    const category = await prisma.category.findUnique({
+      where: { id: categoryId }
+    });
 
-    const selectedPlan = getPlan(paymentSelection.planKey);
-    if (!selectedPlan) return NextResponse.json({ error: "Selected payment plan is invalid." }, { status: 400 });
+    const city = await prisma.city.findUnique({
+      where: { id: cityId }
+    });
+
+    if (!category || !city) {
+      return NextResponse.json(
+        { error: "Selected category or city is invalid." },
+        { status: 400 }
+      );
+    }
 
     const ipAddress = getRequestIp(request);
     const userAgent = getRequestUserAgent(request);
 
     const result = await prisma.$transaction(async (tx) => {
-      const user = await tx.user.upsert({ where: { mobile }, update: { name, isVerified: true }, create: { name, mobile, isVerified: true } });
+      const user = await tx.user.upsert({
+        where: { mobile },
+        update: {
+          name,
+          isVerified: true
+        },
+        create: {
+          name,
+          mobile,
+          isVerified: true
+        }
+      });
+
       const slug = await createUniqueSlug(title, tx);
 
       const ad = await tx.ad.create({
-        data: { title, slug, description, price: price ? price : null, mobile, whatsapp, address, status: "PENDING", adType: "FREE", isFeatured: false, userId: user.id, categoryId, cityId }
+        data: {
+          title,
+          slug,
+          description,
+          price: price ? price : null,
+          mobile,
+          whatsapp,
+          address,
+          status: "PENDING",
+          adType: "FREE",
+          isFeatured: false,
+          userId: user.id,
+          categoryId,
+          cityId
+        }
       });
+
+      let paymentRecord = null;
+
+      if (requiresPayment) {
+        const manualReferenceNumber = createManualPaymentReference(
+          ad.id,
+          selectedPlan
+        );
+
+        paymentRecord = await tx.payment.create({
+          data: {
+            userId: user.id,
+            adId: ad.id,
+            razorpayOrderId: manualReferenceNumber,
+            amount: total.amountInPaise,
+            currency: "INR",
+            status: "PENDING_MANUAL_VERIFICATION",
+            plan: selectedPlan,
+            purpose: getPurposeForManualPayment(selectedPlan, includeFeatured),
+            provider: MANUAL_UPI_CONFIG.provider,
+            manualReferenceNumber,
+            manualTransactionRef,
+            manualPayerName,
+            manualPayerMobile,
+            manualPaymentNote,
+            manualSubmittedAt: new Date()
+          }
+        });
+      }
+
+      const acceptedAllTerms = hasAcceptedConsolidatedPostingTerms(declarations);
 
       await tx.policyAcceptance.create({
         data: {
@@ -150,21 +343,24 @@ export async function POST(request) {
           policyVersion: ACTIVE_POLICY_VERSION,
           effectiveDate: getPolicyEffectiveDateForDatabase(),
           source: "POST_AD_FORM",
-          acceptedTerms: declarations.acceptsTerms === true,
-          acceptedPrivacy: declarations.acceptsPrivacy === true,
-          acceptedRefund: declarations.acceptsRefundPolicy === true,
-          acceptedListingRules: declarations.acceptsListingRules === true,
-          acceptedModeration: declarations.acceptsModeration === true,
+          acceptedTerms: acceptedAllTerms,
+          acceptedPrivacy: acceptedAllTerms,
+          acceptedRefund: acceptedAllTerms,
+          acceptedListingRules: acceptedAllTerms,
+          acceptedModeration: acceptedAllTerms,
           declarations: {
             advertiserType,
-            isAdult: declarations.isAdult === true,
-            hasAuthority: declarations.hasAuthority === true,
-            truthfulInfo: declarations.truthfulInfo === true,
-            notProhibited: declarations.notProhibited === true,
-            acceptsContactDisplay: declarations.acceptsContactDisplay === true,
-            selectedPlan: paymentSelection.planKey,
-            amountDue: paymentSelection.amount,
-            includesFeatured: paymentSelection.includesFeatured,
+            acceptsAllTerms: acceptedAllTerms,
+            postingTermsUrl: "/legal/posting-terms",
+            selectedPlan,
+            includeFeatured,
+            totalAmount: total.amount,
+            totalAmountInPaise: total.amountInPaise,
+            isAdult: acceptedAllTerms,
+            hasAuthority: acceptedAllTerms,
+            truthfulInfo: acceptedAllTerms,
+            notProhibited: acceptedAllTerms,
+            acceptsContactDisplay: acceptedAllTerms,
             policyVersion: ACTIVE_POLICY_VERSION,
             policyEffectiveDate: POLICY_EFFECTIVE_DATE,
             submittedAt: new Date().toISOString()
@@ -176,51 +372,49 @@ export async function POST(request) {
 
       await tx.consentRecord.createMany({
         data: [
-          { userId: user.id, adId: ad.id, mobile, consentType: "TERMS_OF_USE", consentValue: declarations.acceptsTerms === true, policyVersion: ACTIVE_POLICY_VERSION, source: "POST_AD_FORM", ipAddress, userAgent },
-          { userId: user.id, adId: ad.id, mobile, consentType: "PRIVACY_POLICY", consentValue: declarations.acceptsPrivacy === true, policyVersion: ACTIVE_POLICY_VERSION, source: "POST_AD_FORM", ipAddress, userAgent },
-          { userId: user.id, adId: ad.id, mobile, consentType: "REFUND_CANCELLATION_POLICY", consentValue: declarations.acceptsRefundPolicy === true, policyVersion: ACTIVE_POLICY_VERSION, source: "POST_AD_FORM", ipAddress, userAgent },
-          { userId: user.id, adId: ad.id, mobile, consentType: "LISTING_RULES_PROHIBITED_CONTENT", consentValue: declarations.acceptsListingRules === true, policyVersion: ACTIVE_POLICY_VERSION, source: "POST_AD_FORM", ipAddress, userAgent },
-          { userId: user.id, adId: ad.id, mobile, consentType: "CONTACT_DISPLAY_AND_AD_RESPONSE", consentValue: declarations.acceptsContactDisplay === true, policyVersion: ACTIVE_POLICY_VERSION, source: "POST_AD_FORM", ipAddress, userAgent }
+          {
+            userId: user.id,
+            adId: ad.id,
+            mobile,
+            consentType: "CONSOLIDATED_POSTING_TERMS",
+            consentValue: acceptedAllTerms,
+            policyVersion: ACTIVE_POLICY_VERSION,
+            source: "POST_AD_FORM",
+            ipAddress,
+            userAgent
+          },
+          {
+            userId: user.id,
+            adId: ad.id,
+            mobile,
+            consentType: "TERMS_PRIVACY_REFUND_LISTING_RULES",
+            consentValue: acceptedAllTerms,
+            policyVersion: ACTIVE_POLICY_VERSION,
+            source: "POST_AD_FORM",
+            ipAddress,
+            userAgent
+          }
         ]
       });
 
-      let payment = null;
-      if (paymentSelection.amount > 0) {
-        const manualReferenceNumber = createManualPaymentReference(ad.id, paymentSelection.planKey);
-        payment = await tx.payment.create({
-          data: {
-            userId: user.id,
-            adId: ad.id,
-            razorpayOrderId: manualReferenceNumber,
-            amount: paymentSelection.amountInPaise,
-            currency: "INR",
-            status: "PENDING_MANUAL_VERIFICATION",
-            plan: paymentSelection.planKey,
-            purpose: selectedPlan.purpose,
-            provider: MANUAL_UPI_CONFIG.provider,
-            manualReferenceNumber,
-            manualTransactionRef,
-            manualPayerName,
-            manualPayerMobile,
-            manualPaymentNote,
-            manualSubmittedAt: new Date()
-          }
-        });
-      }
-      return { ad, payment };
+      return { ad, user, paymentRecord };
     });
 
     return NextResponse.json({
       success: true,
-      message: result.payment ? "Classified and payment reference submitted. The ad will go live after payment verification and admin approval." : "Free classified submitted successfully and is pending admin approval.",
+      message: requiresPayment
+        ? "Classified and payment reference submitted successfully. It is pending payment verification and admin approval."
+        : "Free classified submitted successfully and is pending admin approval.",
       adId: result.ad.id,
       slug: result.ad.slug,
-      paymentId: result.payment?.id || null,
-      manualReferenceNumber: result.payment?.manualReferenceNumber || null,
-      requiresPaymentVerification: Boolean(result.payment)
+      manualReferenceNumber: result.paymentRecord?.manualReferenceNumber || null
     });
   } catch (error) {
     console.error("Ad submission failed:", error);
-    return NextResponse.json({ error: "Unable to submit ad. Please try again." }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Unable to submit ad. Please try again." },
+      { status: 500 }
+    );
   }
 }

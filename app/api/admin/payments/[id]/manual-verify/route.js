@@ -10,23 +10,8 @@ function cleanText(value, maxLength = 1000) {
   return String(value || "").trim().slice(0, maxLength);
 }
 
-function stringifyNote(existingFailureReason, action, note) {
-  let existingData = {};
-
-  try {
-    existingData = JSON.parse(existingFailureReason || "{}");
-  } catch {
-    existingData = {
-      existingNote: existingFailureReason || ""
-    };
-  }
-
-  return JSON.stringify({
-    ...existingData,
-    adminAction: action,
-    adminNote: note,
-    adminActionAt: new Date().toISOString()
-  });
+function paymentIncludesFeatured(payment) {
+  return String(payment?.purpose || "").includes("FEATURED_ADDON");
 }
 
 export async function PATCH(request, { params }) {
@@ -63,7 +48,9 @@ export async function PATCH(request, { params }) {
 
     const payment = await prisma.payment.findUnique({
       where: { id: paymentId },
-      include: { ad: true }
+      include: {
+        ad: true
+      }
     });
 
     if (!payment) {
@@ -73,11 +60,7 @@ export async function PATCH(request, { params }) {
       );
     }
 
-    const isManualPayment =
-      payment.status === "PENDING_MANUAL_VERIFICATION" ||
-      String(payment.razorpayOrderId || "").startsWith("MC-");
-
-    if (!isManualPayment) {
+    if (payment.provider !== "MANUAL_UPI") {
       return NextResponse.json(
         { error: "This is not a manual UPI payment record." },
         { status: 400 }
@@ -96,11 +79,9 @@ export async function PATCH(request, { params }) {
         where: { id: payment.id },
         data: {
           status: "REJECTED_MANUAL",
-          failureReason: stringifyNote(
-            payment.failureReason,
-            "REJECT",
-            note || "Manual payment rejected by admin."
-          ),
+          failureReason: note || "Manual payment rejected by admin.",
+          manualVerifiedBy: "ADMIN",
+          manualVerificationNote: note || "Rejected by admin.",
           verifiedAt: new Date()
         }
       });
@@ -116,11 +97,9 @@ export async function PATCH(request, { params }) {
         where: { id: payment.id },
         data: {
           status: "PAID",
-          failureReason: stringifyNote(
-            payment.failureReason,
-            "APPROVE",
-            note || "Manual UPI payment verified by admin."
-          ),
+          failureReason: null,
+          manualVerifiedBy: "ADMIN",
+          manualVerificationNote: note || "Manual UPI payment verified by admin.",
           verifiedAt: new Date()
         }
       });
@@ -129,6 +108,13 @@ export async function PATCH(request, { params }) {
         adId: payment.adId,
         planKey: payment.plan
       });
+
+      if (paymentIncludesFeatured(payment)) {
+        await applyPaidPlanToAd(tx, {
+          adId: payment.adId,
+          planKey: "FEATURED_10_DAYS"
+        });
+      }
     });
 
     return NextResponse.json({
