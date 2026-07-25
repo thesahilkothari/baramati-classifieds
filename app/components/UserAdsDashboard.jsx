@@ -12,17 +12,15 @@ const TEXT = {
     search: "Search My Ads",
     searching: "Searching...",
     noAds: "No ads found for this mobile number.",
-    adStatus: "Ad Status",
     paymentStatus: "Payment Status",
-    approvalStatus: "Approval Status",
-    expiry: "Expiry",
-    created: "Created",
     category: "Category",
     city: "City",
+    price: "Price",
+    expiry: "Expiry",
+    created: "Created",
     views: "Views",
     viewPublicAd: "View Public Ad",
     renewUpgrade: "Renew / Upgrade",
-    markSold: "Mark Sold",
     markAvailable: "Mark Available",
     soldThroughPlatform: "Sold Through My Classifieds",
     soldElsewhere: "Sold Elsewhere",
@@ -45,13 +43,11 @@ const TEXT = {
     expiredNote:
       "Your classified has expired. Renew or upgrade it to make it visible again.",
     activeNote:
-      "Your classified is live. You can renew, upgrade or mark it as sold.",
+      "Your classified is live. You can renew, upgrade, request correction or mark it as sold.",
     soldNote:
       "This classified is marked as sold.",
     supportMessage:
       "Hello My Classifieds, I need help with my ad status.",
-    editMessage:
-      "Hello My Classifieds, I want to request correction/update in my classified ad.",
     statusUpdated: "Status updated successfully."
   },
   mr: {
@@ -62,17 +58,15 @@ const TEXT = {
     search: "माझ्या जाहिराती शोधा",
     searching: "शोधत आहे...",
     noAds: "या मोबाईल नंबरवर जाहिराती सापडल्या नाहीत.",
-    adStatus: "जाहिरातीचा Status",
     paymentStatus: "Payment Status",
-    approvalStatus: "Approval Status",
-    expiry: "Expiry",
-    created: "Created",
     category: "कॅटेगरी",
     city: "शहर",
+    price: "किंमत",
+    expiry: "Expiry",
+    created: "Created",
     views: "Views",
     viewPublicAd: "Public Ad पाहा",
     renewUpgrade: "Renew / Upgrade",
-    markSold: "Sold म्हणून Mark करा",
     markAvailable: "Available म्हणून Mark करा",
     soldThroughPlatform: "My Classifieds द्वारे विकले",
     soldElsewhere: "इतर ठिकाणी विकले",
@@ -95,13 +89,11 @@ const TEXT = {
     expiredNote:
       "आपली जाहिरात expired झाली आहे. पुन्हा visible करण्यासाठी renew किंवा upgrade करा.",
     activeNote:
-      "आपली जाहिरात live आहे. आपण renew, upgrade किंवा sold mark करू शकता.",
+      "आपली जाहिरात live आहे. आपण renew, upgrade, correction request किंवा sold mark करू शकता.",
     soldNote:
       "ही जाहिरात sold म्हणून mark केलेली आहे.",
     supportMessage:
       "नमस्कार My Classifieds, मला माझ्या जाहिरातीच्या status बाबत मदत हवी आहे.",
-    editMessage:
-      "नमस्कार My Classifieds, मला माझ्या classified ad मध्ये correction/update request करायची आहे.",
     statusUpdated: "Status update झाला."
   }
 };
@@ -487,6 +479,13 @@ export default function UserAdsDashboard({ initialMobile = "", initialLanguage =
                         {text.renewUpgrade}
                       </Link>
 
+                      <Link
+                        href={`/edit-request?adId=${ad.id}&mobile=${mobile}`}
+                        className="rounded-xl border bg-white px-4 py-3 text-center text-xs font-black uppercase text-slate-700 hover:bg-slate-50"
+                      >
+                        {text.editRequest}
+                      </Link>
+
                       {ad.status !== "SOLD" ? (
                         <>
                           <button
@@ -517,15 +516,6 @@ export default function UserAdsDashboard({ initialMobile = "", initialLanguage =
                           {text.markAvailable}
                         </button>
                       )}
-
-                      <a
-                        href={buildWhatsAppUrl(text.editMessage, ad)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="rounded-xl border bg-white px-4 py-3 text-center text-xs font-black uppercase text-slate-700 hover:bg-slate-50"
-                      >
-                        {text.editRequest}
-                      </a>
 
                       <a
                         href={buildWhatsAppUrl(text.supportMessage, ad)}

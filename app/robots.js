@@ -20,7 +20,8 @@ export default function robots() {
           "/admin",
           "/api",
           "/renew",
-          "/sold-status"
+          "/sold-status",
+          "/edit-request"
         ]
       }
     ],
