@@ -20,9 +20,11 @@ import {
   MANUAL_PAYMENT_PLANS,
   MANUAL_UPI_CONFIG
 } from "../lib/manualPayment";
+import { canPlanUseFeatured, getPlanCharacterLimits } from "../lib/planFeatures";
 
 const initialForm = {
   name: "",
+  email: "",
   mobile: "",
   whatsapp: "",
   advertiserType: "",
@@ -54,8 +56,11 @@ export default function PostAdForm({ categories = [], cities = [] }) {
     [form.selectedPlan]
   );
 
-  const canAddFeatured = ["PAID_7_DAYS", "PREMIUM_30_DAYS"].includes(
-    form.selectedPlan
+  const canAddFeatured = canPlanUseFeatured(form.selectedPlan);
+
+  const limits = useMemo(
+    () => getPlanCharacterLimits(form.selectedPlan),
+    [form.selectedPlan]
   );
 
   const total = useMemo(
@@ -89,13 +94,33 @@ export default function PostAdForm({ categories = [], cities = [] }) {
     }
   }, [canAddFeatured, form.includeFeatured]);
 
+  useEffect(() => {
+    setForm((current) => ({
+      ...current,
+      title: current.title.slice(0, limits.titleMaxLength),
+      description: current.description.slice(0, limits.descriptionMaxLength)
+    }));
+  }, [limits.titleMaxLength, limits.descriptionMaxLength]);
+
   function updateField(event) {
     const { name, value, type, checked } = event.target;
 
-    setForm((current) => ({
-      ...current,
-      [name]: type === "checkbox" ? checked : value
-    }));
+    setForm((current) => {
+      let nextValue = type === "checkbox" ? checked : value;
+
+      if (name === "title") {
+        nextValue = String(nextValue).slice(0, limits.titleMaxLength);
+      }
+
+      if (name === "description") {
+        nextValue = String(nextValue).slice(0, limits.descriptionMaxLength);
+      }
+
+      return {
+        ...current,
+        [name]: nextValue
+      };
+    });
   }
 
   async function handleSubmit(event) {
@@ -117,6 +142,23 @@ export default function PostAdForm({ categories = [], cities = [] }) {
 
     if (!form.advertiserType) {
       setError("Please select your advertiser type.");
+      return;
+    }
+
+    if (!form.email.trim()) {
+      setError("Please enter your email address for ad status and renewal reminders.");
+      return;
+    }
+
+    if (form.title.length > limits.titleMaxLength) {
+      setError(`Heading exceeds ${limits.titleMaxLength} characters for this plan.`);
+      return;
+    }
+
+    if (form.description.length > limits.descriptionMaxLength) {
+      setError(
+        `Description exceeds ${limits.descriptionMaxLength} characters for this plan.`
+      );
       return;
     }
 
@@ -208,15 +250,16 @@ export default function PostAdForm({ categories = [], cities = [] }) {
         </h2>
 
         <p className="mt-2 text-sm leading-6 text-slate-600">
-          Select the plan before submitting the advertisement. Paid plan payment
-          reference is collected before the ad is sent for admin approval.
+          Paid and premium plans allow longer ad content, faster approval and
+          stronger internal visibility. Paid selections require UPI payment
+          reference before submission.
         </p>
 
-        <div className="mt-5 grid gap-4 md:grid-cols-3">
+        <div className="mt-5 grid gap-4 lg:grid-cols-3">
           {MANUAL_PAYMENT_PLANS.map((plan) => (
             <label
               key={plan.key}
-              className={`cursor-pointer rounded-2xl border-2 p-4 ${
+              className={`flex cursor-pointer flex-col rounded-2xl border-2 p-4 ${
                 form.selectedPlan === plan.key
                   ? "border-blue-700 bg-blue-50"
                   : "border-slate-200 bg-white"
@@ -233,9 +276,16 @@ export default function PostAdForm({ categories = [], cities = [] }) {
 
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h3 className="font-black text-slate-950">{plan.name}</h3>
+                  <span className="rounded bg-slate-950 px-2 py-1 text-[10px] font-black uppercase text-white">
+                    {plan.badge}
+                  </span>
+
+                  <h3 className="mt-3 text-lg font-black text-slate-950">
+                    {plan.publicName}
+                  </h3>
+
                   <p className="mt-1 text-xs font-black uppercase text-slate-500">
-                    Valid for {plan.duration}
+                    Valid for {plan.durationLabel}
                   </p>
                 </div>
 
@@ -244,9 +294,34 @@ export default function PostAdForm({ categories = [], cities = [] }) {
                 </p>
               </div>
 
-              <p className="mt-3 text-sm leading-6 text-slate-600">
-                {plan.description}
-              </p>
+              <div className="mt-4 rounded-xl bg-white/70 p-3 text-xs leading-5 text-slate-700">
+                <p>
+                  <strong>Heading:</strong> up to {plan.titleMaxLength} characters
+                </p>
+                <p>
+                  <strong>Description:</strong> up to {plan.descriptionMaxLength} characters
+                </p>
+                <p>
+                  <strong>Approval:</strong> {plan.approvalTime}
+                </p>
+              </div>
+
+              <ul className="mt-4 flex-1 space-y-2 text-sm leading-5 text-slate-700">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex gap-2">
+                    <span className="font-black text-green-700">✓</span>
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {plan.limitations?.length > 0 && (
+                <ul className="mt-4 space-y-2 text-xs leading-5 text-slate-500">
+                  {plan.limitations.map((item) => (
+                    <li key={item}>• {item}</li>
+                  ))}
+                </ul>
+              )}
             </label>
           ))}
         </div>
@@ -272,8 +347,8 @@ export default function PostAdForm({ categories = [], cities = [] }) {
               Add Featured Placement - {formatManualAmount(FEATURED_ADDON_PLAN.price)}
             </span>
             <span className="mt-1 block text-sm leading-6 text-slate-600">
-              Featured placement is available only with Paid or Premium plans
-              and will be shown publicly as Featured.
+              Featured ads are shown at the top and publicly marked as Featured.
+              Available only with Paid or Premium plans.
             </span>
           </span>
         </label>
@@ -290,9 +365,10 @@ export default function PostAdForm({ categories = [], cities = [] }) {
             </div>
 
             <p className="max-w-md text-sm leading-6 text-slate-600">
-              GST inclusive. Free classifieds are submitted directly for admin
-              approval. Paid selections require UPI payment reference before
-              submission.
+              GST inclusive. Selected plan limit: heading{" "}
+              <strong>{limits.titleMaxLength}</strong> characters and
+              description <strong>{limits.descriptionMaxLength}</strong>{" "}
+              characters.
             </p>
           </div>
         </div>
@@ -345,7 +421,7 @@ export default function PostAdForm({ categories = [], cities = [] }) {
                 <span className="font-black">
                   {formatManualAmount(total.amount)}
                 </span>{" "}
-                for <span className="font-black">{selectedPlan.name}</span>
+                for <span className="font-black">{selectedPlan.publicName}</span>
                 {form.includeFeatured ? " with Featured Add-on" : ""}. After
                 payment, enter the UPI transaction ID / UTR below.
               </div>
@@ -431,6 +507,21 @@ export default function PostAdForm({ categories = [], cities = [] }) {
               onChange={updateField}
               className="mt-2 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-700"
               placeholder="Enter your name"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-bold text-slate-700">
+              Email Address
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={updateField}
+              className="mt-2 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-700"
+              placeholder="For ad status and renewal reminders"
               required
             />
           </div>
@@ -534,11 +625,18 @@ export default function PostAdForm({ categories = [], cities = [] }) {
         </div>
 
         <div className="mt-5">
-          <label className="text-sm font-bold text-slate-700">Ad Title</label>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <label className="text-sm font-bold text-slate-700">Ad Heading</label>
+            <span className="text-xs font-bold text-slate-500">
+              {form.title.length}/{limits.titleMaxLength} characters
+            </span>
+          </div>
+
           <input
             name="title"
             value={form.title}
             onChange={updateField}
+            maxLength={limits.titleMaxLength}
             className="mt-2 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-700"
             placeholder="Example: 2 BHK flat for sale in Baramati"
             required
@@ -546,13 +644,20 @@ export default function PostAdForm({ categories = [], cities = [] }) {
         </div>
 
         <div className="mt-5">
-          <label className="text-sm font-bold text-slate-700">
-            Classified Text
-          </label>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <label className="text-sm font-bold text-slate-700">
+              Classified Description
+            </label>
+            <span className="text-xs font-bold text-slate-500">
+              {form.description.length}/{limits.descriptionMaxLength} characters
+            </span>
+          </div>
+
           <textarea
             name="description"
             value={form.description}
             onChange={updateField}
+            maxLength={limits.descriptionMaxLength}
             className="mt-2 min-h-32 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-700"
             placeholder="Write your classified ad text. Keep it short, clear and useful."
             required

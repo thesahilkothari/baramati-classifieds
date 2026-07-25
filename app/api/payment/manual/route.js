@@ -2,9 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
 import { getPlan } from "../../../lib/adPlans";
 import {
+  calculatePostingTotal,
   createManualPaymentReference,
-  getManualPaymentPlan
+  MANUAL_UPI_CONFIG
 } from "../../../lib/manualPayment";
+import { canPlanUseFeatured } from "../../../lib/planFeatures";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,16 +23,31 @@ function cleanLongText(value, maxLength = 1000) {
   return String(value || "").trim().slice(0, maxLength);
 }
 
+function getPurposeForManualPayment(planKey, includeFeatured) {
+  if (planKey === "PAID_7_DAYS" && includeFeatured) {
+    return "PAID_AD_WITH_FEATURED_ADDON";
+  }
+
+  if (planKey === "PREMIUM_30_DAYS" && includeFeatured) {
+    return "PREMIUM_AD_WITH_FEATURED_ADDON";
+  }
+
+  return getPlan(planKey)?.purpose || "MANUAL_UPI_PAYMENT";
+}
+
 export async function POST(request) {
   try {
     const body = await request.json();
 
     const adId = Number(body.adId);
     const planKey = cleanText(body.plan, 80);
-    const transactionReference = cleanText(body.transactionReference, 120);
-    const payerName = cleanText(body.payerName, 120);
-    const payerMobile = cleanMobile(body.payerMobile);
-    const note = cleanLongText(body.note, 500);
+    const includeFeatured =
+      body.includeFeatured === true && canPlanUseFeatured(planKey);
+    const manualTransactionRef = cleanText(body.transactionReference, 120);
+    const manualPayerName = cleanText(body.payerName, 120);
+    const manualPayerMobile = cleanMobile(body.payerMobile);
+    const manualPaymentNote = cleanLongText(body.note, 500);
+    const ownerMobile = cleanMobile(body.ownerMobile);
 
     if (!adId) {
       return NextResponse.json(
@@ -39,17 +56,26 @@ export async function POST(request) {
       );
     }
 
-    const plan = getPlan(planKey);
-    const manualPlan = getManualPaymentPlan(planKey);
-
-    if (!plan || !manualPlan || plan.amount <= 0) {
+    if (!["PAID_7_DAYS", "PREMIUM_30_DAYS"].includes(planKey)) {
       return NextResponse.json(
-        { error: "Invalid manual payment plan." },
+        { error: "Please select a valid paid renewal plan." },
         { status: 400 }
       );
     }
 
-    if (!transactionReference || transactionReference.length < 6) {
+    const total = calculatePostingTotal({
+      planKey,
+      includeFeatured
+    });
+
+    if (total.amountInPaise <= 0) {
+      return NextResponse.json(
+        { error: "Invalid payment amount." },
+        { status: 400 }
+      );
+    }
+
+    if (!manualTransactionRef || manualTransactionRef.length < 6) {
       return NextResponse.json(
         {
           error:
@@ -59,14 +85,14 @@ export async function POST(request) {
       );
     }
 
-    if (!payerName || payerName.length < 2) {
+    if (!manualPayerName || manualPayerName.length < 2) {
       return NextResponse.json(
         { error: "Please enter the payer name used for payment." },
         { status: 400 }
       );
     }
 
-    if (!payerMobile || payerMobile.length !== 10) {
+    if (!manualPayerMobile || manualPayerMobile.length !== 10) {
       return NextResponse.json(
         { error: "Please enter a valid 10 digit payer mobile number." },
         { status: 400 }
@@ -75,7 +101,9 @@ export async function POST(request) {
 
     const ad = await prisma.ad.findUnique({
       where: { id: adId },
-      include: { user: true }
+      include: {
+        user: true
+      }
     });
 
     if (!ad) {
@@ -85,19 +113,17 @@ export async function POST(request) {
       );
     }
 
-    if (plan.key === "FEATURED_10_DAYS" && ad.adType === "FREE") {
+    if (ownerMobile && ownerMobile !== cleanMobile(ad.mobile || ad.user?.mobile)) {
       return NextResponse.json(
-        {
-          error:
-            "Featured add-on can be applied only after the classified is paid or premium."
-        },
-        { status: 400 }
+        { error: "Mobile number does not match this ad." },
+        { status: 403 }
       );
     }
 
     const duplicateReference = await prisma.payment.findFirst({
       where: {
-        razorpayPaymentId: transactionReference
+        provider: MANUAL_UPI_CONFIG.provider,
+        manualTransactionRef
       }
     });
 
@@ -105,35 +131,31 @@ export async function POST(request) {
       return NextResponse.json(
         {
           error:
-            "This transaction reference is already submitted. Please check the reference number or contact support."
+            "This UPI transaction reference is already submitted. Please check the reference number or contact support."
         },
         { status: 409 }
       );
     }
 
-    const manualReferenceNumber = createManualPaymentReference(ad.id, plan.key);
-
-    const paymentDetails = {
-      provider: "MANUAL_UPI",
-      payerName,
-      payerMobile,
-      note,
-      submittedAt: new Date().toISOString()
-    };
+    const manualReferenceNumber = createManualPaymentReference(ad.id, planKey);
 
     const payment = await prisma.payment.create({
       data: {
         userId: ad.userId,
         adId: ad.id,
         razorpayOrderId: manualReferenceNumber,
-        razorpayPaymentId: transactionReference,
-        razorpaySignature: null,
-        amount: manualPlan.amountInPaise,
+        amount: total.amountInPaise,
         currency: "INR",
         status: "PENDING_MANUAL_VERIFICATION",
-        plan: plan.key,
-        purpose: plan.purpose,
-        failureReason: JSON.stringify(paymentDetails)
+        plan: planKey,
+        purpose: getPurposeForManualPayment(planKey, includeFeatured),
+        provider: MANUAL_UPI_CONFIG.provider,
+        manualReferenceNumber,
+        manualTransactionRef,
+        manualPayerName,
+        manualPayerMobile,
+        manualPaymentNote,
+        manualSubmittedAt: new Date()
       }
     });
 
@@ -142,7 +164,7 @@ export async function POST(request) {
       message:
         "Your payment reference has been submitted for manual verification.",
       paymentId: payment.id,
-      manualReferenceNumber,
+      manualReferenceNumber: payment.manualReferenceNumber,
       status: payment.status
     });
   } catch (error) {

@@ -14,6 +14,7 @@ import {
   createManualPaymentReference,
   MANUAL_UPI_CONFIG
 } from "../../lib/manualPayment";
+import { canPlanUseFeatured, getPlanCharacterLimits } from "../../lib/planFeatures";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -49,6 +50,11 @@ function cleanShortText(value, maxLength = 191) {
 
 function cleanLongText(value, maxLength = 1000) {
   return String(value || "").trim().slice(0, maxLength);
+}
+
+function isValidEmail(value) {
+  const email = String(value || "").trim();
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 function getRequestIp(request) {
@@ -90,10 +96,17 @@ export async function POST(request) {
     const body = await request.json();
 
     const name = cleanShortText(body.name, 120);
+    const email = cleanShortText(body.email, 180).toLowerCase();
     const mobile = cleanMobile(body.mobile);
     const whatsapp = cleanMobile(body.whatsapp || body.mobile);
-    const title = cleanShortText(body.title, 180);
-    const description = String(body.description || "").trim();
+    const selectedPlan = cleanShortText(body.selectedPlan || "FREE_7_DAYS", 80);
+    const limits = getPlanCharacterLimits(selectedPlan);
+    const title = cleanShortText(body.title, limits.titleMaxLength);
+    const description = String(body.description || "")
+      .trim()
+      .slice(0, limits.descriptionMaxLength);
+    const rawTitle = String(body.title || "").trim();
+    const rawDescription = String(body.description || "").trim();
     const price = String(body.price || "").trim();
     const address = cleanShortText(body.address, 240);
     const categoryId = Number(body.categoryId);
@@ -101,18 +114,22 @@ export async function POST(request) {
     const advertiserType = cleanShortText(body.advertiserType, 60);
     const policyVersion = cleanShortText(body.policyVersion, 40);
     const policyEffectiveDate = cleanShortText(body.policyEffectiveDate, 40);
-    const selectedPlan = cleanShortText(body.selectedPlan || "FREE_7_DAYS", 80);
     const includeFeatured =
-      body.includeFeatured === true &&
-      ["PAID_7_DAYS", "PREMIUM_30_DAYS"].includes(selectedPlan);
+      body.includeFeatured === true && canPlanUseFeatured(selectedPlan);
     const declarations = normalizeDeclarations(body.declarations);
-    const payment = body.payment && typeof body.payment === "object"
-      ? body.payment
-      : null;
+    const payment =
+      body.payment && typeof body.payment === "object" ? body.payment : null;
 
     if (!name || name.length < 2) {
       return NextResponse.json(
         { error: "Please enter your name." },
+        { status: 400 }
+      );
+    }
+
+    if (!email || !isValidEmail(email)) {
+      return NextResponse.json(
+        { error: "Please enter a valid email address." },
         { status: 400 }
       );
     }
@@ -133,7 +150,16 @@ export async function POST(request) {
 
     if (!title || title.length < 8) {
       return NextResponse.json(
-        { error: "Ad title must be at least 8 characters." },
+        { error: "Ad heading must be at least 8 characters." },
+        { status: 400 }
+      );
+    }
+
+    if (rawTitle.length > limits.titleMaxLength) {
+      return NextResponse.json(
+        {
+          error: `Ad heading can be maximum ${limits.titleMaxLength} characters for the selected plan.`
+        },
         { status: 400 }
       );
     }
@@ -141,6 +167,15 @@ export async function POST(request) {
     if (!description || description.length < 20) {
       return NextResponse.json(
         { error: "Description must be at least 20 characters." },
+        { status: 400 }
+      );
+    }
+
+    if (rawDescription.length > limits.descriptionMaxLength) {
+      return NextResponse.json(
+        {
+          error: `Description can be maximum ${limits.descriptionMaxLength} characters for the selected plan.`
+        },
         { status: 400 }
       );
     }
@@ -274,10 +309,12 @@ export async function POST(request) {
         where: { mobile },
         update: {
           name,
+          email,
           isVerified: true
         },
         create: {
           name,
+          email,
           mobile,
           isVerified: true
         }
@@ -297,6 +334,7 @@ export async function POST(request) {
           status: "PENDING",
           adType: "FREE",
           isFeatured: false,
+          soldStatus: "UNKNOWN",
           userId: user.id,
           categoryId,
           cityId
@@ -356,6 +394,8 @@ export async function POST(request) {
             includeFeatured,
             totalAmount: total.amount,
             totalAmountInPaise: total.amountInPaise,
+            titleMaxLength: limits.titleMaxLength,
+            descriptionMaxLength: limits.descriptionMaxLength,
             isAdult: acceptedAllTerms,
             hasAuthority: acceptedAllTerms,
             truthfulInfo: acceptedAllTerms,
