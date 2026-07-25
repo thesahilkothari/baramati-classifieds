@@ -1,13 +1,104 @@
 import Link from "next/link";
-import { LEGAL_PAGES } from "../lib/legalContent";
+import { cookies } from "next/headers";
+import { getLanguageFromCookieStore, t } from "../lib/i18n";
 
-export default function Footer() {
+const legalLinks = [
+  { href: "/legal", labelEn: "Legal Hub", labelMr: "कायदेशीर माहिती" },
+  { href: "/legal/terms", labelEn: "Terms", labelMr: "वापराच्या अटी" },
+  { href: "/legal/privacy", labelEn: "Privacy", labelMr: "गोपनीयता" },
+  { href: "/legal/refunds", labelEn: "Refunds", labelMr: "परतावा" },
+  { href: "/legal/grievance", labelEn: "Grievance", labelMr: "तक्रार निवारण" },
+  { href: "/legal/corporate", labelEn: "Corporate Info", labelMr: "कंपनी माहिती" }
+];
+
+export default async function Footer() {
+  const cookieStore = await cookies();
+  const language = getLanguageFromCookieStore(cookieStore);
+
   return (
     <footer className="border-t bg-slate-950 px-4 py-10 text-white">
-      <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-4"><div className="md:col-span-2"><Link href="/" className="text-2xl font-black uppercase">My Classifieds</Link><p className="mt-3 max-w-xl text-sm leading-6 text-slate-300">Good-old newspaper-style local classifieds, now available on every mobile phone for Baramati and Maharashtra.</p><div className="mt-5 space-y-1 text-sm text-slate-300"><p>WhatsApp: <a href="https://wa.me/919673931166" className="font-bold text-white hover:text-blue-300">+91 9673931166</a></p><p>Email: <a href="mailto:connect@myclassifieds.in" className="font-bold text-white hover:text-blue-300">connect@myclassifieds.in</a></p></div></div>
-        <div><h2 className="text-sm font-black uppercase tracking-wide text-slate-200">Classifieds</h2><nav className="mt-4 space-y-2 text-sm text-slate-300"><Link href="/ads" className="block hover:text-white">Browse Ads</Link><Link href="/post-ad" className="block hover:text-white">Place Classified</Link><Link href="/pricing" className="block hover:text-white">Pricing</Link><Link href="/safety" className="block hover:text-white">Safety Tips</Link><Link href="/report" className="block hover:text-white">Report Listing / Grievance</Link><Link href="/contact" className="block hover:text-white">Contact</Link></nav></div>
-        <div><h2 className="text-sm font-black uppercase tracking-wide text-slate-200">Legal</h2><nav className="mt-4 space-y-2 text-sm text-slate-300"><Link href="/legal" className="block hover:text-white">Legal Hub</Link><Link href="/legal/grievance" className="block hover:text-white">Grievance Policy</Link>{LEGAL_PAGES.filter((page) => page.slug !== "grievance").slice(0, 5).map((page) => <Link key={page.slug} href={`/legal/${page.slug}`} className="block hover:text-white">{page.enTitle}</Link>)}</nav></div></div>
-      <div className="mx-auto mt-8 max-w-7xl border-t border-slate-800 pt-5 text-xs leading-6 text-slate-400"><p>My Classifieds is owned and operated by SAHIL KOTHARI ENTERPRISES PRIVATE LIMITED | CIN: U74999PN2014PTC150594 | Registered Office: Vardhaman Capital, Plot No. 13, Gat No. 42/1, Mouje Rui, Taluka Baramati, District Pune, Maharashtra – 413133 | Tel: +91 9673931166 | Email: connect@myclassifieds.in | Contact person for queries/grievances: Shekhar V. K., Contact Person under Rule 26.</p><p className="mt-3">© 2026 My Classifieds. All rights reserved.</p></div>
+      <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-4">
+        <div className="md:col-span-2">
+          <Link href="/" className="text-2xl font-black uppercase">
+            {t(language, "brand")}
+          </Link>
+
+          <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300">
+            {t(language, "footerAbout")}
+          </p>
+
+          <div className="mt-5 space-y-1 text-sm text-slate-300">
+            <p>
+              WhatsApp:{" "}
+              <a
+                href="https://wa.me/919673931166"
+                className="font-bold text-white hover:text-blue-300"
+              >
+                +91 9673931166
+              </a>
+            </p>
+
+            <p>
+              Email:{" "}
+              <a
+                href="mailto:connect@myclassifieds.in"
+                className="font-bold text-white hover:text-blue-300"
+              >
+                connect@myclassifieds.in
+              </a>
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-200">
+            {t(language, "classifieds")}
+          </h2>
+
+          <nav className="mt-4 space-y-2 text-sm text-slate-300">
+            <Link href="/ads" className="block hover:text-white">
+              {t(language, "browseAds")}
+            </Link>
+
+            <Link href="/post-ad" className="block hover:text-white">
+              {t(language, "postAd")}
+            </Link>
+
+            <Link href="/pricing" className="block hover:text-white">
+              {t(language, "pricing")}
+            </Link>
+
+            <Link href="/support" className="block hover:text-white">
+              {t(language, "support")}
+            </Link>
+
+            <Link href="/report" className="block hover:text-white">
+              {t(language, "report")}
+            </Link>
+          </nav>
+        </div>
+
+        <div>
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-200">
+            {t(language, "legal")}
+          </h2>
+
+          <nav className="mt-4 space-y-2 text-sm text-slate-300">
+            {legalLinks.map((link) => (
+              <Link key={link.href} href={link.href} className="block hover:text-white">
+                {language === "mr" ? link.labelMr : link.labelEn}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      </div>
+
+      <div className="mx-auto mt-8 max-w-7xl border-t border-slate-800 pt-5 text-xs leading-6 text-slate-400">
+        <p>{t(language, "companyDisclosure")}</p>
+        <p className="mt-3">
+          © 2026 {t(language, "brand")}. {t(language, "rightsReserved")}
+        </p>
+      </div>
     </footer>
   );
 }

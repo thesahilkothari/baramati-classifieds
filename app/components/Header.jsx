@@ -1,37 +1,52 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import LanguageToggle from "./LanguageToggle";
+import { getLanguageFromCookieStore, t } from "../lib/i18n";
 
-export default function Header() {
+export default async function Header() {
+  const cookieStore = await cookies();
+  const language = getLanguageFromCookieStore(cookieStore);
+
   return (
-    <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-        <Link href="/" className="text-xl font-extrabold text-blue-700">
-          My Classifieds
+    <header className="sticky top-0 z-30 border-b bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
+        <Link href="/" className="min-w-0">
+          <p className="truncate text-xl font-black uppercase text-slate-950">
+            {t(language, "brand")}
+          </p>
+          <p className="hidden text-xs font-bold uppercase tracking-wide text-slate-500 sm:block">
+            {t(language, "tagline")}
+          </p>
         </Link>
 
-        <nav className="hidden items-center gap-6 text-sm font-semibold text-slate-700 md:flex">
+        <nav className="hidden items-center gap-5 text-sm font-bold text-slate-700 lg:flex">
           <Link href="/ads" className="hover:text-blue-700">
-            Browse Ads
+            {t(language, "browseAds")}
           </Link>
           <Link href="/pricing" className="hover:text-blue-700">
-            Pricing
+            {t(language, "pricing")}
           </Link>
-          <Link href="/safety" className="hover:text-blue-700">
-            Safety
+          <Link href="/support" className="hover:text-blue-700">
+            {t(language, "support")}
           </Link>
           <Link href="/legal" className="hover:text-blue-700">
-            Legal
+            {t(language, "legal")}
           </Link>
           <Link href="/contact" className="hover:text-blue-700">
-            Contact
+            {t(language, "contact")}
           </Link>
         </nav>
 
-        <Link
-          href="/post-ad"
-          className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-bold text-white hover:bg-blue-800"
-        >
-          Place Classified
-        </Link>
+        <div className="flex shrink-0 items-center gap-2">
+          <LanguageToggle currentLanguage={language} />
+
+          <Link
+            href="/post-ad"
+            className="hidden rounded-xl bg-red-600 px-4 py-2 text-xs font-black uppercase text-white hover:bg-red-700 sm:inline-flex"
+          >
+            {t(language, "postAd")}
+          </Link>
+        </div>
       </div>
     </header>
   );

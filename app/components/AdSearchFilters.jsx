@@ -1,17 +1,47 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
 import { ITEM_CONDITIONS } from "../lib/itemConditions";
+import { LANGUAGE_COOKIE_NAME, normalizeLanguage, t } from "../lib/i18n";
 
 function getInitialValue(searchParams, key) {
   return searchParams.get(key) || "";
+}
+
+function readLanguageFromCookie() {
+  if (typeof document === "undefined") {
+    return "en";
+  }
+
+  const cookie = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith(`${LANGUAGE_COOKIE_NAME}=`));
+
+  return normalizeLanguage(cookie?.split("=")?.[1]);
+}
+
+function getConditionLabel(condition, language) {
+  if (language !== "mr") {
+    return condition.label;
+  }
+
+  if (condition.value === "NEW") return t(language, "new");
+  if (condition.value === "USED") return t(language, "used");
+  if (condition.value === "LIKE_NEW") return t(language, "likeNew");
+
+  return condition.label;
 }
 
 export default function AdSearchFilters({ categories = [], cities = [] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
+  const [language, setLanguage] = useState("en");
+
+  useEffect(() => {
+    setLanguage(readLanguageFromCookie());
+  }, []);
 
   const initialState = useMemo(
     () => ({
@@ -21,7 +51,8 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
       minPrice: getInitialValue(searchParams, "minPrice"),
       maxPrice: getInitialValue(searchParams, "maxPrice"),
       condition: getInitialValue(searchParams, "condition"),
-      posted: getInitialValue(searchParams, "posted")
+      posted: getInitialValue(searchParams, "posted"),
+      sort: getInitialValue(searchParams, "sort") || "recommended"
     }),
     [searchParams]
   );
@@ -30,7 +61,11 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
 
   function updateField(event) {
     const { name, value } = event.target;
-    setForm((current) => ({ ...current, [name]: value }));
+
+    setForm((current) => ({
+      ...current,
+      [name]: value
+    }));
   }
 
   function submitFilters(event) {
@@ -39,7 +74,9 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
     const params = new URLSearchParams();
 
     Object.entries(form).forEach(([key, value]) => {
-      if (value) params.set(key, value);
+      if (value) {
+        params.set(key, value);
+      }
     });
 
     router.push(`/ads?${params.toString()}`);
@@ -53,7 +90,8 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
       minPrice: "",
       maxPrice: "",
       condition: "",
-      posted: ""
+      posted: "",
+      sort: "recommended"
     });
 
     router.push("/ads");
@@ -64,10 +102,10 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-xs font-black uppercase tracking-wide text-blue-700">
-            Search Classifieds
+            {t(language, "searchClassifieds")}
           </p>
           <h2 className="mt-1 text-xl font-black uppercase text-slate-950">
-            Find faster with filters
+            {t(language, "findFaster")}
           </h2>
         </div>
 
@@ -76,49 +114,58 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
           onClick={() => setIsOpen((value) => !value)}
           className="rounded-xl border px-4 py-2 text-xs font-black uppercase text-slate-700 md:hidden"
         >
-          {isOpen ? "Hide Filters" : "Show Filters"}
+          {isOpen ? t(language, "hideFilters") : t(language, "showFilters")}
         </button>
       </div>
 
-      <form onSubmit={submitFilters} className={`mt-4 ${isOpen ? "block" : "hidden"} md:block`}>
+      <form
+        onSubmit={submitFilters}
+        className={`mt-4 ${isOpen ? "block" : "hidden"} md:block`}
+      >
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           <div className="md:col-span-2">
-            <label className="text-xs font-black uppercase text-slate-500">Keyword</label>
+            <label className="text-xs font-black uppercase text-slate-500">
+              {t(language, "keyword")}
+            </label>
             <input
               name="q"
               value={form.q}
               onChange={updateField}
               className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none focus:border-blue-700"
-              placeholder="Search property, jobs, vehicles, services..."
+              placeholder={t(language, "keywordPlaceholder")}
             />
           </div>
 
           <div>
-            <label className="text-xs font-black uppercase text-slate-500">Category</label>
+            <label className="text-xs font-black uppercase text-slate-500">
+              {t(language, "category")}
+            </label>
             <select
               name="category"
               value={form.category}
               onChange={updateField}
               className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none focus:border-blue-700"
             >
-              <option value="">All categories</option>
+              <option value="">{t(language, "allCategories")}</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.slug}>
-                  {category.nameEn}
+                  {language === "mr" ? category.nameMr || category.nameEn : category.nameEn}
                 </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="text-xs font-black uppercase text-slate-500">Location</label>
+            <label className="text-xs font-black uppercase text-slate-500">
+              {t(language, "location")}
+            </label>
             <select
               name="city"
               value={form.city}
               onChange={updateField}
               className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none focus:border-blue-700"
             >
-              <option value="">All locations</option>
+              <option value="">{t(language, "allLocations")}</option>
               {cities.map((city) => (
                 <option key={city.id} value={city.slug}>
                   {city.name}
@@ -128,7 +175,9 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
           </div>
 
           <div>
-            <label className="text-xs font-black uppercase text-slate-500">Min Price</label>
+            <label className="text-xs font-black uppercase text-slate-500">
+              {t(language, "minPrice")}
+            </label>
             <input
               name="minPrice"
               value={form.minPrice}
@@ -140,7 +189,9 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
           </div>
 
           <div>
-            <label className="text-xs font-black uppercase text-slate-500">Max Price</label>
+            <label className="text-xs font-black uppercase text-slate-500">
+              {t(language, "maxPrice")}
+            </label>
             <input
               name="maxPrice"
               value={form.maxPrice}
@@ -152,36 +203,40 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
           </div>
 
           <div>
-            <label className="text-xs font-black uppercase text-slate-500">Condition</label>
+            <label className="text-xs font-black uppercase text-slate-500">
+              {t(language, "condition")}
+            </label>
             <select
               name="condition"
               value={form.condition}
               onChange={updateField}
               className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none focus:border-blue-700"
             >
-              <option value="">Any condition</option>
+              <option value="">{t(language, "anyCondition")}</option>
               {ITEM_CONDITIONS.filter(
                 (condition) => condition.value !== "NOT_APPLICABLE"
               ).map((condition) => (
                 <option key={condition.value} value={condition.value}>
-                  {condition.label}
+                  {getConditionLabel(condition, language)}
                 </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="text-xs font-black uppercase text-slate-500">Posted</label>
+            <label className="text-xs font-black uppercase text-slate-500">
+              {t(language, "posted")}
+            </label>
             <select
               name="posted"
               value={form.posted}
               onChange={updateField}
               className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none focus:border-blue-700"
             >
-              <option value="">Any time</option>
-              <option value="today">Posted today</option>
-              <option value="7days">Last 7 days</option>
-              <option value="30days">Last 30 days</option>
+              <option value="">{t(language, "anyTime")}</option>
+              <option value="today">{t(language, "postedToday")}</option>
+              <option value="7days">{t(language, "last7Days")}</option>
+              <option value="30days">{t(language, "last30Days")}</option>
             </select>
           </div>
         </div>
@@ -191,7 +246,7 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
             type="submit"
             className="rounded-xl bg-blue-700 px-6 py-3 text-sm font-black uppercase text-white hover:bg-blue-800"
           >
-            Apply Filters
+            {t(language, "applyFilters")}
           </button>
 
           <button
@@ -199,7 +254,7 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
             onClick={clearFilters}
             className="rounded-xl border px-6 py-3 text-sm font-black uppercase text-slate-700 hover:bg-slate-50"
           >
-            Clear
+            {t(language, "clear")}
           </button>
         </div>
       </form>
