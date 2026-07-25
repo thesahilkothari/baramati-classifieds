@@ -1,148 +1,296 @@
 import Link from "next/link";
-import SearchBar from "../components/SearchBar";
-import CategoryChips from "../components/CategoryChips";
-import AdCard from "../components/AdCard";
 import { prisma } from "../lib/prisma";
+import AdCard from "../components/AdCard";
+import AdSearchFilters from "../components/AdSearchFilters";
 
 export const dynamic = "force-dynamic";
 
-function buildSearchConditions({ query, category }) {
-  const conditions = [];
+function getNumericValue(value) {
+  const cleaned = String(value || "").replace(/[^\d.]/g, "");
+  if (!cleaned) return null;
+  const number = Number(cleaned);
+  return Number.isFinite(number) ? number : null;
+}
 
-  if (query) {
-    conditions.push({
-      OR: [
-        { title: { contains: query } },
-        { description: { contains: query } },
-        { address: { contains: query } }
-      ]
+function getPostedDate(posted) {
+  const now = new Date();
+
+  if (posted === "today") {
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  }
+
+  if (posted === "7days") {
+    return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  }
+
+  if (posted === "30days") {
+    return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  }
+
+  return null;
+}
+
+function uniqueAds(ads) {
+  const seen = new Set();
+  const result = [];
+
+  for (const ad of ads) {
+    if (!seen.has(ad.id)) {
+      seen.add(ad.id);
+      result.push(ad);
+    }
+  }
+
+  return result;
+}
+
+function buildBaseWhere({ searchParams, now }) {
+  const q = String(searchParams.q || "").trim();
+  const category = String(searchParams.category || "").trim();
+  const city = String(searchParams.city || "").trim();
+  const condition = String(searchParams.condition || "").trim();
+  const posted = String(searchParams.posted || "").trim();
+  const minPrice = getNumericValue(searchParams.minPrice);
+  const maxPrice = getNumericValue(searchParams.maxPrice);
+  const postedDate = getPostedDate(posted);
+
+  const andConditions = [
+    { status: "ACTIVE" },
+    {
+      OR: [{ expiresAt: null }, { expiresAt: { gt: now } }]
+    }
+  ];
+
+  const keywordConditions = [];
+
+  if (q) {
+    keywordConditions.push(
+      { title: { contains: q } },
+      { description: { contains: q } },
+      { address: { contains: q } },
+      { category: { nameEn: { contains: q } } },
+      { category: { nameMr: { contains: q } } },
+      { city: { name: { contains: q } } }
+    );
+  }
+
+  if (condition === "NEW") {
+    keywordConditions.push(
+      { title: { contains: "new" } },
+      { description: { contains: "new" } },
+      { description: { contains: "brand new" } }
+    );
+  }
+
+  if (condition === "USED") {
+    keywordConditions.push(
+      { title: { contains: "used" } },
+      { description: { contains: "used" } },
+      { description: { contains: "second hand" } }
+    );
+  }
+
+  if (condition === "LIKE_NEW") {
+    keywordConditions.push(
+      { title: { contains: "like new" } },
+      { description: { contains: "like new" } },
+      { description: { contains: "almost new" } }
+    );
+  }
+
+  if (keywordConditions.length > 0) {
+    andConditions.push({
+      OR: keywordConditions
     });
   }
 
   if (category) {
-    conditions.push({ category: { slug: category } });
+    andConditions.push({
+      category: {
+        slug: category
+      }
+    });
   }
 
-  return conditions;
+  if (city) {
+    andConditions.push({
+      city: {
+        slug: city
+      }
+    });
+  }
+
+  if (minPrice !== null || maxPrice !== null) {
+    const priceFilter = {};
+    if (minPrice !== null) priceFilter.gte = minPrice;
+    if (maxPrice !== null) priceFilter.lte = maxPrice;
+    andConditions.push({ price: priceFilter });
+  }
+
+  if (postedDate) {
+    andConditions.push({
+      createdAt: {
+        gte: postedDate
+      }
+    });
+  }
+
+  return {
+    AND: andConditions
+  };
+}
+
+async function fetchRankedAds(baseWhere, now) {
+  const include = {
+    category: true,
+    city: true
+  };
+
+  const [featuredAds, premiumAds, paidAds, freeAds] = await Promise.all([
+    prisma.ad.findMany({
+      where: {
+        AND: [
+          baseWhere,
+          { isFeatured: true },
+          {
+            OR: [{ featuredUntil: null }, { featuredUntil: { gt: now } }]
+          }
+        ]
+      },
+      include,
+      orderBy: [{ createdAt: "desc" }],
+      take: 80
+    }),
+    prisma.ad.findMany({
+      where: {
+        AND: [
+          baseWhere,
+          { adType: "PREMIUM" },
+          {
+            OR: [
+              { isFeatured: false },
+              { featuredUntil: null },
+              { featuredUntil: { lte: now } }
+            ]
+          }
+        ]
+      },
+      include,
+      orderBy: [{ createdAt: "desc" }],
+      take: 80
+    }),
+    prisma.ad.findMany({
+      where: {
+        AND: [
+          baseWhere,
+          { adType: "PAID" },
+          {
+            OR: [
+              { isFeatured: false },
+              { featuredUntil: null },
+              { featuredUntil: { lte: now } }
+            ]
+          }
+        ]
+      },
+      include,
+      orderBy: [{ createdAt: "desc" }],
+      take: 80
+    }),
+    prisma.ad.findMany({
+      where: {
+        AND: [baseWhere, { adType: "FREE" }]
+      },
+      include,
+      orderBy: [{ createdAt: "desc" }],
+      take: 120
+    })
+  ]);
+
+  return uniqueAds([...featuredAds, ...premiumAds, ...paidAds, ...freeAds]);
 }
 
 export default async function AdsPage({ searchParams }) {
   const resolvedSearchParams = await searchParams;
-  const query = String(resolvedSearchParams?.q || "").trim();
-  const category = String(resolvedSearchParams?.category || "").trim();
   const now = new Date();
 
-  const activeNotExpiredConditions = [
-    { status: "ACTIVE" },
-    { OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
-    ...buildSearchConditions({ query, category })
-  ];
+  const [categories, cities] = await Promise.all([
+    prisma.category.findMany({ orderBy: { nameEn: "asc" } }),
+    prisma.city.findMany({ orderBy: { name: "asc" } })
+  ]);
 
-  const notCurrentlyFeaturedCondition = {
-    OR: [
-      { isFeatured: false },
-      { featuredUntil: null },
-      { featuredUntil: { lte: now } }
-    ]
-  };
+  const baseWhere = buildBaseWhere({
+    searchParams: resolvedSearchParams || {},
+    now
+  });
 
-  let categories = [];
-  let featuredAds = [];
-  let premiumAds = [];
-  let paidAds = [];
-  let freeAds = [];
-
-  try {
-    categories = await prisma.category.findMany({ orderBy: { nameEn: "asc" } });
-
-    featuredAds = await prisma.ad.findMany({
-      where: {
-        AND: [
-          ...activeNotExpiredConditions,
-          { isFeatured: true },
-          { featuredUntil: { gt: now } }
-        ]
-      },
-      include: { category: true, city: true },
-      orderBy: { createdAt: "desc" },
-      take: 24
-    });
-
-    premiumAds = await prisma.ad.findMany({
-      where: { AND: [...activeNotExpiredConditions, notCurrentlyFeaturedCondition, { adType: "PREMIUM" }] },
-      include: { category: true, city: true },
-      orderBy: { createdAt: "desc" },
-      take: 60
-    });
-
-    paidAds = await prisma.ad.findMany({
-      where: { AND: [...activeNotExpiredConditions, notCurrentlyFeaturedCondition, { adType: "PAID" }] },
-      include: { category: true, city: true },
-      orderBy: { createdAt: "desc" },
-      take: 60
-    });
-
-    freeAds = await prisma.ad.findMany({
-      where: { AND: [...activeNotExpiredConditions, notCurrentlyFeaturedCondition, { adType: "FREE" }] },
-      include: { category: true, city: true },
-      orderBy: { createdAt: "desc" },
-      take: 100
-    });
-  } catch (error) {
-    console.error("Ads page fetch failed:", error);
-  }
-
-  const latestClassifieds = [...premiumAds, ...paidAds, ...freeAds];
-  const hasResults = featuredAds.length > 0 || latestClassifieds.length > 0;
+  const ads = await fetchRankedAds(baseWhere, now);
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-6">
+    <main className="min-h-screen bg-slate-100 px-3 pb-24 pt-5 md:px-4 md:pb-8">
       <section className="mx-auto max-w-7xl">
-        <div className="rounded-2xl border-2 border-slate-900 bg-white p-5 shadow-sm">
+        <div className="rounded-3xl border-2 border-slate-900 bg-white p-5 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-black uppercase tracking-wide text-blue-700">Classified Board</p>
-              <h1 className="mt-1 text-3xl font-black uppercase text-slate-950 md:text-4xl">Browse Classifieds</h1>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-700">Find local listings across Baramati and Maharashtra.</p>
+              <p className="text-xs font-black uppercase tracking-wide text-red-600">
+                My Classifieds
+              </p>
+
+              <h1 className="mt-2 text-3xl font-black uppercase text-slate-950 md:text-5xl">
+                Browse Classified Ads
+              </h1>
+
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
+                Search faster using price, condition, location and date filters.
+                Featured classifieds are shown first.
+              </p>
             </div>
-            <Link href="/post-ad" className="rounded-xl bg-red-600 px-5 py-3 text-sm font-black uppercase text-white hover:bg-red-700">Place Classified</Link>
-          </div>
-          <div className="mt-5">
-            <SearchBar />
-            <CategoryChips categories={categories} />
+
+            <Link
+              href="/post-ad"
+              className="hidden rounded-xl bg-red-600 px-5 py-3 text-sm font-black uppercase text-white hover:bg-red-700 md:inline-flex"
+            >
+              Post Ad
+            </Link>
           </div>
         </div>
 
-        {featuredAds.length > 0 && (
-          <section className="mt-6 rounded-2xl border-2 border-orange-500 bg-white p-3 shadow-sm">
-            <div className="mb-3 border-b-2 border-orange-500 pb-2">
-              <p className="text-xs font-black uppercase text-orange-600">Highlighted Listings</p>
-              <h2 className="text-xl font-black uppercase text-slate-950">Featured Classifieds</h2>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {featuredAds.map((ad, index) => <AdCard key={ad.id} ad={ad} index={index} />)}
-            </div>
-          </section>
-        )}
+        <div className="mt-5">
+          <AdSearchFilters categories={categories} cities={cities} />
+        </div>
 
-        <section className="mt-6 rounded-2xl border-2 border-slate-900 bg-white p-3 shadow-sm">
-          <div className="mb-3 border-b-2 border-slate-900 pb-2">
-            <h2 className="text-xl font-black uppercase text-slate-950">Latest Classifieds</h2>
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm font-bold text-slate-600">
+            Showing {ads.length} active classified{ads.length === 1 ? "" : "s"}
+          </p>
+
+          <p className="text-xs font-bold uppercase text-slate-500">
+            Ranking: Featured first, then recommended listings
+          </p>
+        </div>
+
+        {ads.length === 0 ? (
+          <div className="mt-6 rounded-3xl border bg-white p-8 text-center shadow-sm">
+            <h2 className="text-2xl font-black text-slate-950">
+              No matching classifieds found
+            </h2>
+            <p className="mt-2 text-slate-600">
+              Try changing filters or browse all ads.
+            </p>
+            <Link
+              href="/ads"
+              className="mt-5 inline-flex rounded-xl bg-blue-700 px-5 py-3 text-sm font-black uppercase text-white"
+            >
+              Clear Filters
+            </Link>
           </div>
-
-          {!hasResults ? (
-            <div className="rounded-xl border-2 border-dashed bg-slate-50 p-8 text-center">
-              <h3 className="text-xl font-black text-slate-900">No matching classifieds found</h3>
-              <p className="mt-2 text-slate-600">Try another search or category.</p>
-            </div>
-          ) : latestClassifieds.length === 0 ? (
-            <p className="rounded-xl bg-slate-50 p-6 text-center text-slate-600">No more classifieds to show.</p>
-          ) : (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {latestClassifieds.map((ad, index) => <AdCard key={ad.id} ad={ad} index={index} />)}
-            </div>
-          )}
-        </section>
+        ) : (
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {ads.map((ad, index) => (
+              <AdCard key={ad.id} ad={ad} index={index} />
+            ))}
+          </div>
+        )}
       </section>
     </main>
   );
