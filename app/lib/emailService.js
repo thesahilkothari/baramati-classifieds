@@ -177,10 +177,7 @@ async function sendWithSmtp({ to, subject, html, text }) {
   });
 }
 
-export async function sendEmailOtp({ to, code }) {
-  const subject = "Your My Classifieds OTP";
-  const html = buildOtpEmailHtml({ code, email: to });
-  const text = buildOtpEmailText({ code, email: to });
+export async function sendTransactionalEmail({ to, subject, html, text }) {
   const providerStatus = getEmailProviderStatus();
 
   if (providerStatus.hasResendApiKey) {
@@ -192,11 +189,19 @@ export async function sendEmailOtp({ to, code }) {
   }
 
   if (process.env.NODE_ENV !== "production") {
-    console.log("EMAIL OTP DEV MODE", { to, code });
+    console.log("EMAIL DEV MODE", { to, subject, text });
     return { dev: true };
   }
 
   throw new Error(
     "Email service is not configured. Set RESEND_API_KEY or SMTP_HOST/SMTP_USER/SMTP_PASS."
   );
+}
+
+export async function sendEmailOtp({ to, code }) {
+  const subject = "Your My Classifieds OTP";
+  const html = buildOtpEmailHtml({ code, email: to });
+  const text = buildOtpEmailText({ code, email: to });
+
+  return sendTransactionalEmail({ to, subject, html, text });
 }
