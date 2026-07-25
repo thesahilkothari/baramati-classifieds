@@ -9,9 +9,21 @@ import {
   MANUAL_PAYMENT_PLANS,
   MANUAL_UPI_CONFIG
 } from "../lib/manualPayment";
-import { canPlanUseFeatured } from "../lib/planFeatures";
+import {
+  canPlanUseFeatured,
+  getLocalizedApprovalTime,
+  getLocalizedPlanDuration,
+  getLocalizedPlanFeatures,
+  getLocalizedPlanName
+} from "../lib/planFeatures";
+import { normalizeLanguage, t } from "../lib/i18n";
 
-export default function RenewAdForm({ initialAdId = "", initialMobile = "" }) {
+export default function RenewAdForm({
+  initialAdId = "",
+  initialMobile = "",
+  initialLanguage = "en"
+}) {
+  const language = normalizeLanguage(initialLanguage);
   const [adId, setAdId] = useState(initialAdId);
   const [mobile, setMobile] = useState(initialMobile);
   const [selectedPlan, setSelectedPlan] = useState("PAID_7_DAYS");
@@ -82,19 +94,21 @@ export default function RenewAdForm({ initialAdId = "", initialMobile = "" }) {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || "Unable to submit renewal payment reference.");
+        setError(data.error || (language === "mr" ? "Renewal payment reference सबमिट होऊ शकला नाही." : "Unable to submit renewal payment reference."));
         return;
       }
 
       setManualReferenceNumber(data.manualReferenceNumber);
       setMessage(
-        "Renewal/upgrade payment reference submitted. Admin will verify and apply the selected plan."
+        language === "mr"
+          ? "Renewal/upgrade payment reference सबमिट झाला आहे. Admin verification नंतर plan लागू होईल."
+          : "Renewal/upgrade payment reference submitted. Admin will verify and apply the selected plan."
       );
       setTransactionReference("");
       setNote("");
     } catch (submitError) {
       console.error("Renewal submit failed:", submitError);
-      setError("Something went wrong. Please try again.");
+      setError(language === "mr" ? "काहीतरी चूक झाली. कृपया पुन्हा प्रयत्न करा." : "Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -104,7 +118,9 @@ export default function RenewAdForm({ initialAdId = "", initialMobile = "" }) {
     <form onSubmit={submitRenewal} className="rounded-3xl border bg-white p-6 shadow-sm">
       <div className="grid gap-5 md:grid-cols-2">
         <div>
-          <label className="text-sm font-bold text-slate-700">Ad ID</label>
+          <label className="text-sm font-bold text-slate-700">
+            {t(language, "adId")}
+          </label>
           <input
             value={adId}
             onChange={(event) => setAdId(event.target.value)}
@@ -115,7 +131,7 @@ export default function RenewAdForm({ initialAdId = "", initialMobile = "" }) {
 
         <div>
           <label className="text-sm font-bold text-slate-700">
-            Posting Mobile Number
+            {t(language, "postingMobileNumber")}
           </label>
           <input
             value={mobile}
@@ -147,10 +163,11 @@ export default function RenewAdForm({ initialAdId = "", initialMobile = "" }) {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-lg font-black text-slate-950">
-                  {plan.publicName}
+                  {getLocalizedPlanName(plan, language)}
                 </h3>
                 <p className="mt-1 text-xs font-black uppercase text-slate-500">
-                  {plan.durationLabel} | {plan.approvalTime}
+                  {getLocalizedPlanDuration(plan, language)} |{" "}
+                  {getLocalizedApprovalTime(plan, language)}
                 </p>
               </div>
               <p className="font-black text-blue-700">
@@ -158,9 +175,11 @@ export default function RenewAdForm({ initialAdId = "", initialMobile = "" }) {
               </p>
             </div>
             <ul className="mt-3 space-y-1 text-sm leading-5 text-slate-700">
-              {plan.features.slice(0, 4).map((feature) => (
-                <li key={feature}>✓ {feature}</li>
-              ))}
+              {getLocalizedPlanFeatures(plan, language)
+                .slice(0, 4)
+                .map((feature) => (
+                  <li key={feature}>✓ {feature}</li>
+                ))}
             </ul>
           </label>
         ))}
@@ -182,23 +201,25 @@ export default function RenewAdForm({ initialAdId = "", initialMobile = "" }) {
         />
         <span>
           <span className="block font-black text-slate-950">
-            Add Featured Placement - {formatManualAmount(FEATURED_ADDON_PLAN.price)}
+            {t(language, "addFeaturedPlacement")} -{" "}
+            {formatManualAmount(FEATURED_ADDON_PLAN.price)}
           </span>
           <span className="mt-1 block text-sm leading-6 text-slate-600">
-            Show at the top and publicly mark as Featured for 10 days.
+            {t(language, "featuredPlacementText")}
           </span>
         </span>
       </label>
 
       <div className="mt-6 rounded-2xl border bg-slate-50 p-5">
         <p className="text-sm font-black uppercase text-slate-500">
-          Total Payable
+          {t(language, "totalPayable")}
         </p>
         <p className="mt-1 text-3xl font-black text-red-700">
           {formatManualAmount(total.amount)}
         </p>
         <p className="mt-2 text-sm text-slate-600">
-          Renewal plan: {selectedPlanMeta.publicName}
+          {t(language, "renewUpgrade")}:{" "}
+          {getLocalizedPlanName(selectedPlanMeta, language)}
           {includeFeatured ? " + Featured Add-on" : ""}
         </p>
       </div>
@@ -211,13 +232,14 @@ export default function RenewAdForm({ initialAdId = "", initialMobile = "" }) {
             className="mx-auto w-full max-w-[250px] rounded-2xl border bg-white p-2"
           />
           <p className="mt-3 text-sm font-bold">
-            UPI ID: <span className="font-black">{MANUAL_UPI_CONFIG.vpa}</span>
+            {t(language, "upiId")}:{" "}
+            <span className="font-black">{MANUAL_UPI_CONFIG.vpa}</span>
           </p>
           <a
             href={upiUrl}
             className="mt-4 flex justify-center rounded-xl bg-green-600 px-5 py-3 text-sm font-black uppercase text-white hover:bg-green-700"
           >
-            Open UPI App
+            {t(language, "openUpiApp")}
           </a>
         </div>
 
@@ -225,7 +247,7 @@ export default function RenewAdForm({ initialAdId = "", initialMobile = "" }) {
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="text-sm font-bold text-slate-700">
-                Payer Name
+                {t(language, "payerName")}
               </label>
               <input
                 value={payerName}
@@ -237,7 +259,7 @@ export default function RenewAdForm({ initialAdId = "", initialMobile = "" }) {
 
             <div>
               <label className="text-sm font-bold text-slate-700">
-                Payer Mobile
+                {t(language, "payerMobile")}
               </label>
               <input
                 value={payerMobile}
@@ -251,7 +273,7 @@ export default function RenewAdForm({ initialAdId = "", initialMobile = "" }) {
 
           <div className="mt-4">
             <label className="text-sm font-bold text-slate-700">
-              UPI Transaction ID / UTR
+              {t(language, "utrReference")}
             </label>
             <input
               value={transactionReference}
@@ -263,7 +285,7 @@ export default function RenewAdForm({ initialAdId = "", initialMobile = "" }) {
 
           <div className="mt-4">
             <label className="text-sm font-bold text-slate-700">
-              Optional Note
+              {t(language, "optionalPaymentNote")}
             </label>
             <textarea
               value={note}
@@ -294,7 +316,7 @@ export default function RenewAdForm({ initialAdId = "", initialMobile = "" }) {
         disabled={isSubmitting}
         className="mt-6 w-full rounded-xl bg-red-600 px-6 py-4 font-black uppercase text-white hover:bg-red-700 disabled:opacity-60"
       >
-        {isSubmitting ? "Submitting..." : "Submit Renewal Payment Reference"}
+        {isSubmitting ? t(language, "submitting") : t(language, "submitRenewalReference")}
       </button>
     </form>
   );

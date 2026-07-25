@@ -1,13 +1,16 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { prisma } from "../lib/prisma";
 import AdCard from "../components/AdCard";
 import AdSearchFilters from "../components/AdSearchFilters";
+import { getLanguageFromCookieStore, t } from "../lib/i18n";
 
 export const dynamic = "force-dynamic";
 
 function getNumericValue(value) {
   const cleaned = String(value || "").replace(/[^\d.]/g, "");
   if (!cleaned) return null;
+
   const number = Number(cleaned);
   return Number.isFinite(number) ? number : null;
 }
@@ -61,46 +64,16 @@ function buildBaseWhere({ searchParams, now }) {
     }
   ];
 
-  const keywordConditions = [];
-
   if (q) {
-    keywordConditions.push(
-      { title: { contains: q } },
-      { description: { contains: q } },
-      { address: { contains: q } },
-      { category: { nameEn: { contains: q } } },
-      { category: { nameMr: { contains: q } } },
-      { city: { name: { contains: q } } }
-    );
-  }
-
-  if (condition === "NEW") {
-    keywordConditions.push(
-      { title: { contains: "new" } },
-      { description: { contains: "new" } },
-      { description: { contains: "brand new" } }
-    );
-  }
-
-  if (condition === "USED") {
-    keywordConditions.push(
-      { title: { contains: "used" } },
-      { description: { contains: "used" } },
-      { description: { contains: "second hand" } }
-    );
-  }
-
-  if (condition === "LIKE_NEW") {
-    keywordConditions.push(
-      { title: { contains: "like new" } },
-      { description: { contains: "like new" } },
-      { description: { contains: "almost new" } }
-    );
-  }
-
-  if (keywordConditions.length > 0) {
     andConditions.push({
-      OR: keywordConditions
+      OR: [
+        { title: { contains: q } },
+        { description: { contains: q } },
+        { address: { contains: q } },
+        { category: { nameEn: { contains: q } } },
+        { category: { nameMr: { contains: q } } },
+        { city: { name: { contains: q } } }
+      ]
     });
   }
 
@@ -117,6 +90,12 @@ function buildBaseWhere({ searchParams, now }) {
       city: {
         slug: city
       }
+    });
+  }
+
+  if (condition) {
+    andConditions.push({
+      condition
     });
   }
 
@@ -207,10 +186,15 @@ async function fetchRankedAds(baseWhere, now) {
     })
   ]);
 
-  return uniqueAds([...featuredAds, ...premiumAds, ...paidAds, ...freeAds]);
+  return {
+    featuredAds,
+    allAds: uniqueAds([...featuredAds, ...premiumAds, ...paidAds, ...freeAds])
+  };
 }
 
 export default async function AdsPage({ searchParams }) {
+  const cookieStore = await cookies();
+  const language = getLanguageFromCookieStore(cookieStore);
   const resolvedSearchParams = await searchParams;
   const now = new Date();
 
@@ -224,7 +208,7 @@ export default async function AdsPage({ searchParams }) {
     now
   });
 
-  const ads = await fetchRankedAds(baseWhere, now);
+  const { allAds } = await fetchRankedAds(baseWhere, now);
 
   return (
     <main className="min-h-screen bg-slate-100 px-3 pb-24 pt-5 md:px-4 md:pb-8">
@@ -233,16 +217,15 @@ export default async function AdsPage({ searchParams }) {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-xs font-black uppercase tracking-wide text-red-600">
-                My Classifieds
+                {t(language, "brand")}
               </p>
 
               <h1 className="mt-2 text-3xl font-black uppercase text-slate-950 md:text-5xl">
-                Browse Classified Ads
+                {t(language, "browseAds")}
               </h1>
 
               <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
-                Search faster using price, condition, location and date filters.
-                Featured classifieds are shown first.
+                {t(language, "findFaster")}. {t(language, "rankingNote")}.
               </p>
             </div>
 
@@ -250,7 +233,7 @@ export default async function AdsPage({ searchParams }) {
               href="/post-ad"
               className="hidden rounded-xl bg-red-600 px-5 py-3 text-sm font-black uppercase text-white hover:bg-red-700 md:inline-flex"
             >
-              Post Ad
+              {t(language, "postAd")}
             </Link>
           </div>
         </div>
@@ -261,33 +244,34 @@ export default async function AdsPage({ searchParams }) {
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm font-bold text-slate-600">
-            Showing {ads.length} active classified{ads.length === 1 ? "" : "s"}
+            {t(language, "showingAds")} {allAds.length}{" "}
+            {t(language, "activeClassifieds")}
           </p>
 
           <p className="text-xs font-bold uppercase text-slate-500">
-            Ranking: Featured first, then recommended listings
+            {t(language, "rankingNote")}
           </p>
         </div>
 
-        {ads.length === 0 ? (
+        {allAds.length === 0 ? (
           <div className="mt-6 rounded-3xl border bg-white p-8 text-center shadow-sm">
             <h2 className="text-2xl font-black text-slate-950">
-              No matching classifieds found
+              {t(language, "noMatchingAds")}
             </h2>
             <p className="mt-2 text-slate-600">
-              Try changing filters or browse all ads.
+              {t(language, "tryChangingFilters")}
             </p>
             <Link
               href="/ads"
               className="mt-5 inline-flex rounded-xl bg-blue-700 px-5 py-3 text-sm font-black uppercase text-white"
             >
-              Clear Filters
+              {t(language, "clearFilters")}
             </Link>
           </div>
         ) : (
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {ads.map((ad, index) => (
-              <AdCard key={ad.id} ad={ad} index={index} />
+            {allAds.map((ad) => (
+              <AdCard key={ad.id} ad={ad} language={language} />
             ))}
           </div>
         )}

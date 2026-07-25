@@ -1,126 +1,209 @@
 import Link from "next/link";
-import SearchBar from "./components/SearchBar";
-import AdCard from "./components/AdCard";
-import CategoryChips from "./components/CategoryChips";
+import { cookies } from "next/headers";
 import { prisma } from "./lib/prisma";
+import AdCard from "./components/AdCard";
+import { getLanguageFromCookieStore, t } from "./lib/i18n";
 
 export const dynamic = "force-dynamic";
 
-export default async function HomePage() {
-  const now = new Date();
-  const activeNotExpiredConditions = [{ status: "ACTIVE" }, { OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] }];
-  const notCurrentlyFeaturedCondition = { OR: [{ isFeatured: false }, { featuredUntil: null }, { featuredUntil: { lte: now } }] };
+function uniqueAds(ads) {
+  const seen = new Set();
+  const result = [];
 
-  let categories = [];
-  let featuredAds = [];
-  let premiumAds = [];
-  let paidAds = [];
-  let freeAds = [];
-
-  try {
-    categories = await prisma.category.findMany({ orderBy: { nameEn: "asc" } });
-
-    featuredAds = await prisma.ad.findMany({
-      where: { AND: [...activeNotExpiredConditions, { isFeatured: true }, { featuredUntil: { gt: now } }] },
-      include: { category: true, city: true },
-      orderBy: { createdAt: "desc" },
-      take: 12
-    });
-
-    premiumAds = await prisma.ad.findMany({
-      where: { AND: [...activeNotExpiredConditions, notCurrentlyFeaturedCondition, { adType: "PREMIUM" }] },
-      include: { category: true, city: true },
-      orderBy: { createdAt: "desc" },
-      take: 24
-    });
-
-    paidAds = await prisma.ad.findMany({
-      where: { AND: [...activeNotExpiredConditions, notCurrentlyFeaturedCondition, { adType: "PAID" }] },
-      include: { category: true, city: true },
-      orderBy: { createdAt: "desc" },
-      take: 24
-    });
-
-    freeAds = await prisma.ad.findMany({
-      where: { AND: [...activeNotExpiredConditions, notCurrentlyFeaturedCondition, { adType: "FREE" }] },
-      include: { category: true, city: true },
-      orderBy: { createdAt: "desc" },
-      take: 36
-    });
-  } catch (error) {
-    console.error("Homepage classified fetch failed:", error);
+  for (const ad of ads) {
+    if (!seen.has(ad.id)) {
+      seen.add(ad.id);
+      result.push(ad);
+    }
   }
 
-  const latestClassifieds = [...premiumAds, ...paidAds, ...freeAds].slice(0, 48);
+  return result;
+}
+
+async function getHomeAds() {
+  const now = new Date();
+  const include = {
+    category: true,
+    city: true
+  };
+
+  const [featuredAds, premiumAds, paidAds, freeAds] = await Promise.all([
+    prisma.ad.findMany({
+      where: {
+        status: "ACTIVE",
+        isFeatured: true,
+        OR: [
+          { expiresAt: null },
+          { expiresAt: { gt: now } },
+          { featuredUntil: null },
+          { featuredUntil: { gt: now } }
+        ]
+      },
+      include,
+      orderBy: { createdAt: "desc" },
+      take: 8
+    }),
+    prisma.ad.findMany({
+      where: {
+        status: "ACTIVE",
+        adType: "PREMIUM",
+        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }]
+      },
+      include,
+      orderBy: { createdAt: "desc" },
+      take: 8
+    }),
+    prisma.ad.findMany({
+      where: {
+        status: "ACTIVE",
+        adType: "PAID",
+        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }]
+      },
+      include,
+      orderBy: { createdAt: "desc" },
+      take: 8
+    }),
+    prisma.ad.findMany({
+      where: {
+        status: "ACTIVE",
+        adType: "FREE",
+        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }]
+      },
+      include,
+      orderBy: { createdAt: "desc" },
+      take: 12
+    })
+  ]);
+
+  return {
+    featuredAds,
+    latestAds: uniqueAds([...featuredAds, ...premiumAds, ...paidAds, ...freeAds]).slice(0, 12)
+  };
+}
+
+export default async function HomePage() {
+  const cookieStore = await cookies();
+  const language = getLanguageFromCookieStore(cookieStore);
+  const { featuredAds, latestAds } = await getHomeAds();
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <section className="bg-gradient-to-br from-blue-700 to-indigo-900 px-4 py-12 text-white">
-        <div className="mx-auto max-w-7xl">
-          <div className="max-w-4xl">
-            <p className="mb-4 text-sm font-black uppercase tracking-wide text-blue-100">My Classifieds | Baramati & Maharashtra</p>
-            <h1 className="text-4xl font-black tracking-tight md:text-6xl">Buy, Sell, Rent & Find Jobs in Baramati</h1>
-            <p className="mt-5 max-w-3xl text-lg text-blue-50">Good-old newspaper style classifieds, now available on every mobile phone.</p>
-          </div>
+    <main className="bg-slate-100 px-3 pb-24 pt-5 md:px-4 md:pb-10">
+      <section className="mx-auto max-w-7xl">
+        <div className="overflow-hidden rounded-3xl border-2 border-slate-900 bg-white shadow-sm">
+          <div className="grid gap-6 p-6 md:grid-cols-[1.2fr_0.8fr] md:p-10">
+            <div>
+              <p className="text-sm font-black uppercase tracking-wide text-red-600">
+                {t(language, "homeHeroEyebrow")}
+              </p>
 
-          <div className="mt-8">
-            <SearchBar />
-            <CategoryChips categories={categories} />
-          </div>
+              <h1 className="mt-3 text-4xl font-black uppercase leading-tight text-slate-950 md:text-6xl">
+                {t(language, "homeHeroTitle")}
+              </h1>
 
-          <div className="mt-8 flex flex-wrap gap-4">
-            <Link href="/post-ad" className="rounded-xl bg-red-600 px-6 py-3 font-black uppercase text-white shadow-sm hover:bg-red-700">Place Your Classified</Link>
-            <Link href="/ads" className="rounded-xl border border-white/70 px-6 py-3 font-black uppercase text-white hover:bg-white/10">View Classified Board</Link>
-            <a href="#contact" className="rounded-xl border border-white/70 px-6 py-3 font-black uppercase text-white hover:bg-white/10">Contact</a>
+              <p className="mt-5 max-w-3xl text-base leading-8 text-slate-700">
+                {t(language, "homeHeroText")}
+              </p>
+
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/ads"
+                  className="rounded-xl bg-blue-700 px-6 py-4 text-center text-sm font-black uppercase text-white hover:bg-blue-800"
+                >
+                  {t(language, "startBrowsing")}
+                </Link>
+
+                <Link
+                  href="/post-ad"
+                  className="rounded-xl bg-red-600 px-6 py-4 text-center text-sm font-black uppercase text-white hover:bg-red-700"
+                >
+                  {t(language, "placeClassified")}
+                </Link>
+              </div>
+            </div>
+
+            <div className="rounded-3xl bg-slate-950 p-6 text-white">
+              <h2 className="text-2xl font-black uppercase">
+                {t(language, "whyChooseUs")}
+              </h2>
+
+              <div className="mt-6 space-y-5">
+                {[
+                  {
+                    title: t(language, "mobileFirst"),
+                    text: t(language, "mobileFirstText")
+                  },
+                  {
+                    title: t(language, "simplePricing"),
+                    text: t(language, "simplePricingText")
+                  },
+                  {
+                    title: t(language, "localReach"),
+                    text: t(language, "localReachText")
+                  }
+                ].map((item) => (
+                  <div key={item.title} className="rounded-2xl bg-white/10 p-4">
+                    <p className="font-black uppercase">{item.title}</p>
+                    <p className="mt-2 text-sm leading-6 text-slate-200">
+                      {item.text}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
-      </section>
 
-      <section className="mx-auto max-w-7xl px-3 py-5 md:px-4">
         {featuredAds.length > 0 && (
-          <section className="rounded-2xl border-2 border-orange-500 bg-white p-3 shadow-sm">
-            <div className="mb-3 flex items-center justify-between gap-3 border-b-2 border-orange-500 pb-2">
-              <div>
-                <p className="text-xs font-black uppercase text-orange-600">Highlighted Listings</p>
-                <h2 className="text-xl font-black uppercase text-slate-950">Featured Classifieds</h2>
-              </div>
-              <Link href="/pricing" className="rounded bg-orange-500 px-3 py-2 text-xs font-black uppercase text-white">Promote Ad</Link>
+          <section className="mt-8">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-3xl font-black uppercase text-slate-950">
+                {t(language, "featuredClassifieds")}
+              </h2>
+
+              <Link href="/ads" className="text-sm font-black uppercase text-blue-700">
+                {t(language, "viewAllAds")}
+              </Link>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {featuredAds.map((ad, index) => <AdCard key={ad.id} ad={ad} index={index} />)}
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {featuredAds.slice(0, 4).map((ad) => (
+                <AdCard key={ad.id} ad={ad} language={language} />
+              ))}
             </div>
           </section>
         )}
 
-        <section className="mt-6 rounded-2xl border-2 border-slate-900 bg-white p-3 shadow-sm">
-          <div className="mb-3 flex items-center justify-between gap-3 border-b-2 border-slate-900 pb-2">
-            <h2 className="text-xl font-black uppercase text-slate-950">Latest Classifieds</h2>
-            <Link href="/ads" className="rounded bg-slate-950 px-3 py-1 text-xs font-black uppercase text-white">View All</Link>
+        <section className="mt-8">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-3xl font-black uppercase text-slate-950">
+              {t(language, "latestClassifieds")}
+            </h2>
+
+            <Link href="/ads" className="text-sm font-black uppercase text-blue-700">
+              {t(language, "viewAllAds")}
+            </Link>
           </div>
-          {latestClassifieds.length === 0 ? (
-            <div className="rounded-xl border-2 border-dashed bg-slate-50 p-8 text-center">
-              <h3 className="text-xl font-black text-slate-900">No classifieds published yet</h3>
-              <p className="mt-2 text-slate-600">Post your first classified and approve it from admin panel.</p>
-              <Link href="/post-ad" className="mt-5 inline-flex rounded-xl bg-red-600 px-6 py-3 font-black uppercase text-white">Place Classified</Link>
+
+          {latestAds.length === 0 ? (
+            <div className="mt-5 rounded-3xl border bg-white p-8 text-center shadow-sm">
+              <p className="text-lg font-bold text-slate-600">
+                {t(language, "noAdsYet")}
+              </p>
+              <Link
+                href="/post-ad"
+                className="mt-5 inline-flex rounded-xl bg-red-600 px-6 py-3 text-sm font-black uppercase text-white"
+              >
+                {t(language, "placeClassified")}
+              </Link>
             </div>
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {latestClassifieds.map((ad, index) => <AdCard key={ad.id} ad={ad} index={index} />)}
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {latestAds.map((ad) => (
+                <AdCard key={ad.id} ad={ad} language={language} />
+              ))}
             </div>
           )}
         </section>
-      </section>
-
-      <section id="contact" className="border-t bg-white px-4 py-10">
-        <div className="mx-auto max-w-7xl">
-          <p className="text-sm font-black uppercase tracking-wide text-blue-700">Contact</p>
-          <h2 className="mt-2 text-3xl font-black text-slate-900">Contact My Classifieds</h2>
-          <div className="mt-5 rounded-2xl border bg-slate-50 p-5 text-slate-700">
-            <p className="font-bold">My Classifieds Support</p>
-            <p className="mt-2">WhatsApp: <a href="https://wa.me/919673931166" className="font-bold text-blue-700">+91 9673931166</a></p>
-            <p>Email: <a href="mailto:connect@myclassifieds.in" className="font-bold text-blue-700">connect@myclassifieds.in</a></p>
-          </div>
-        </div>
       </section>
     </main>
   );

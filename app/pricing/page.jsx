@@ -1,4 +1,15 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import {
+  FEATURED_FEATURES,
+  getLocalizedApprovalTime,
+  getLocalizedPlanDuration,
+  getLocalizedPlanFeatures,
+  getLocalizedPlanName,
+  getPlanFeatureList,
+  formatPlanAmount
+} from "../lib/planFeatures";
+import { getLanguageFromCookieStore, t } from "../lib/i18n";
 
 export const metadata = {
   title: "Pricing | My Classifieds",
@@ -6,63 +17,19 @@ export const metadata = {
     "Pricing plans for free, paid, premium and featured classified ads on My Classifieds."
 };
 
-const plans = [
-  {
-    name: "Free Classified",
-    price: "Rs. 0",
-    duration: "7 Days",
-    badge: "Free",
-    border: "border-slate-300",
-    button: "bg-slate-950 hover:bg-slate-800",
-    href: "/post-ad?plan=free",
-    description: "Simple local classified listing after admin approval.",
-    features: [
-      "Visible for 7 days",
-      "Text-only classified",
-      "Category-wise display",
-      "Admin approval required",
-      "Can be upgraded before expiry"
-    ]
-  },
-  {
-    name: "Paid Classified",
-    price: "Rs. 199",
-    duration: "7 Days",
-    badge: "Popular",
-    border: "border-blue-600",
-    button: "bg-blue-700 hover:bg-blue-800",
-    href: "/post-ad?plan=paid",
-    description:
-      "Better option for sellers who want paid listing visibility after manual UPI payment verification.",
-    features: [
-      "Visible for 7 days",
-      "Paid classified listing",
-      "Category-wise display",
-      "Admin approval required",
-      "Manual UPI payment verification"
-    ]
-  },
-  {
-    name: "Premium Classified",
-    price: "Rs. 499",
-    duration: "30 Days",
-    badge: "Premium",
-    border: "border-red-600",
-    button: "bg-red-600 hover:bg-red-700",
-    href: "/post-ad?plan=premium",
-    description:
-      "Best for property, jobs, business and urgent advertisements after manual UPI payment verification.",
-    features: [
-      "Visible for 30 days",
-      "Premium classified listing",
-      "Longer validity",
-      "Admin approval required",
-      "Manual UPI payment verification"
-    ]
-  }
-];
+function getPlanHref(planKey) {
+  if (planKey === "FREE_7_DAYS") return "/post-ad?plan=free";
+  if (planKey === "PAID_7_DAYS") return "/post-ad?plan=paid";
+  if (planKey === "PREMIUM_30_DAYS") return "/post-ad?plan=premium";
 
-export default function PricingPage() {
+  return "/post-ad";
+}
+
+export default async function PricingPage() {
+  const cookieStore = await cookies();
+  const language = getLanguageFromCookieStore(cookieStore);
+  const plans = getPlanFeatureList();
+
   return (
     <main className="bg-slate-100 px-4 py-6">
       <section className="mx-auto max-w-7xl">
@@ -70,16 +37,15 @@ export default function PricingPage() {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-xs font-black uppercase tracking-wide text-red-600">
-                Pricing
+                {t(language, "pricing")}
               </p>
 
               <h1 className="mt-1 text-2xl font-black uppercase text-slate-950 md:text-3xl">
-                Classified Advertisement Plans
+                {t(language, "pricingTitle")}
               </h1>
 
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-700">
-                Choose a simple plan to publish your newspaper-style classified
-                advertisement on My Classifieds.
+                {t(language, "pricingIntro")}
               </p>
             </div>
 
@@ -87,26 +53,24 @@ export default function PricingPage() {
               href="/post-ad"
               className="rounded-xl bg-red-600 px-5 py-3 text-sm font-black uppercase text-white hover:bg-red-700"
             >
-              Place Classified
+              {t(language, "placeClassified")}
             </Link>
           </div>
         </div>
 
         <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 p-5 text-sm leading-6 text-blue-900">
-          Online gateway checkout is currently not active. Paid plans are
-          processed through manual UPI payment to the company UPI ID and admin
-          verification from the bank/UPI statement. All prices are GST inclusive.
+          {t(language, "manualUpiNotice")} {t(language, "gstInclusive")}.
         </div>
 
         <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {plans.map((plan) => (
             <article
-              key={plan.name}
-              className={`rounded-3xl border-2 bg-white p-5 shadow-sm ${plan.border}`}
+              key={plan.key}
+              className="rounded-3xl border-2 border-slate-200 bg-white p-5 shadow-sm"
             >
               <div className="flex items-start justify-between gap-3">
                 <h2 className="text-xl font-black uppercase text-slate-950">
-                  {plan.name}
+                  {getLocalizedPlanName(plan, language)}
                 </h2>
 
                 <span className="rounded bg-slate-950 px-3 py-1 text-[11px] font-black uppercase text-white">
@@ -115,19 +79,31 @@ export default function PricingPage() {
               </div>
 
               <p className="mt-4 text-4xl font-black text-red-600">
-                {plan.price}
+                {formatPlanAmount(plan.price)}
               </p>
 
               <p className="mt-1 text-xs font-black uppercase text-slate-600">
-                GST inclusive | Valid for {plan.duration}
+                {t(language, "gstInclusive")} | {t(language, "validFor")}{" "}
+                {getLocalizedPlanDuration(plan, language)}
               </p>
 
-              <p className="mt-4 min-h-12 text-sm leading-6 text-slate-700">
-                {plan.description}
-              </p>
+              <div className="mt-4 rounded-xl bg-slate-50 p-3 text-sm leading-6 text-slate-700">
+                <p>
+                  <strong>{t(language, "headingLimit")}:</strong>{" "}
+                  {plan.titleMaxLength} characters
+                </p>
+                <p>
+                  <strong>{t(language, "descriptionLimit")}:</strong>{" "}
+                  {plan.descriptionMaxLength} characters
+                </p>
+                <p>
+                  <strong>{t(language, "approval")}:</strong>{" "}
+                  {getLocalizedApprovalTime(plan, language)}
+                </p>
+              </div>
 
               <ul className="mt-5 space-y-2 text-sm font-semibold text-slate-700">
-                {plan.features.map((feature) => (
+                {getLocalizedPlanFeatures(plan, language).map((feature) => (
                   <li key={feature} className="flex gap-2">
                     <span className="font-black text-green-700">✓</span>
                     <span>{feature}</span>
@@ -136,14 +112,62 @@ export default function PricingPage() {
               </ul>
 
               <Link
-                href={plan.href}
-                className={`mt-6 flex w-full justify-center rounded-xl px-5 py-3 text-sm font-black uppercase text-white ${plan.button}`}
+                href={getPlanHref(plan.key)}
+                className="mt-6 flex w-full justify-center rounded-xl bg-red-600 px-5 py-3 text-sm font-black uppercase text-white hover:bg-red-700"
               >
-                Choose Plan
+                {t(language, "choosePlanButton")}
               </Link>
             </article>
           ))}
+
+          <article className="rounded-3xl border-2 border-orange-400 bg-orange-50 p-5 shadow-sm">
+            <h2 className="text-xl font-black uppercase text-slate-950">
+              {language === "mr"
+                ? FEATURED_FEATURES.publicNameMr
+                : FEATURED_FEATURES.publicName}
+            </h2>
+
+            <p className="mt-4 text-4xl font-black text-orange-600">
+              {formatPlanAmount(FEATURED_FEATURES.price)}
+            </p>
+
+            <p className="mt-1 text-xs font-black uppercase text-slate-600">
+              {t(language, "validFor")}{" "}
+              {language === "mr"
+                ? FEATURED_FEATURES.durationLabelMr
+                : FEATURED_FEATURES.durationLabel}
+            </p>
+
+            <ul className="mt-5 space-y-2 text-sm font-semibold text-slate-700">
+              {(language === "mr"
+                ? FEATURED_FEATURES.featuresMr
+                : FEATURED_FEATURES.features
+              ).map((feature) => (
+                <li key={feature} className="flex gap-2">
+                  <span className="font-black text-green-700">✓</span>
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+
+            <Link
+              href="/post-ad?plan=featured"
+              className="mt-6 flex w-full justify-center rounded-xl bg-orange-500 px-5 py-3 text-sm font-black uppercase text-white hover:bg-orange-600"
+            >
+              {t(language, "choosePlanButton")}
+            </Link>
+          </article>
         </div>
+
+        <section className="mt-8 rounded-3xl border bg-yellow-50 p-6 shadow-sm">
+          <h2 className="text-2xl font-black uppercase text-yellow-950">
+            {t(language, "importantNote")}
+          </h2>
+
+          <p className="mt-4 text-sm leading-7 text-yellow-900">
+            {t(language, "moderationNote")}
+          </p>
+        </section>
       </section>
     </main>
   );

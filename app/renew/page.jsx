@@ -1,4 +1,6 @@
+import { cookies } from "next/headers";
 import RenewAdForm from "../components/RenewAdForm";
+import { getLanguageFromCookieStore, t } from "../lib/i18n";
 
 export const metadata = {
   title: "Renew or Upgrade Ad | My Classifieds",
@@ -7,6 +9,8 @@ export const metadata = {
 };
 
 export default async function RenewPage({ searchParams }) {
+  const cookieStore = await cookies();
+  const language = getLanguageFromCookieStore(cookieStore);
   const resolvedSearchParams = await searchParams;
   const adId = String(resolvedSearchParams?.adId || "");
   const mobile = String(resolvedSearchParams?.mobile || "");
@@ -16,21 +20,23 @@ export default async function RenewPage({ searchParams }) {
       <section className="mx-auto max-w-5xl">
         <div className="mb-8 rounded-3xl border-2 border-slate-900 bg-white p-6 shadow-sm md:p-8">
           <p className="text-sm font-black uppercase tracking-wide text-red-600">
-            Renew / Upgrade
+            {t(language, "renewUpgrade")}
           </p>
 
           <h1 className="mt-3 text-4xl font-black uppercase text-slate-950 md:text-5xl">
-            Renew or Upgrade Your Classified
+            {t(language, "renewUpgradeTitle")}
           </h1>
 
           <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-700">
-            Choose Paid or Premium visibility and optionally add Featured
-            placement. Submit the UPI transaction reference and admin will apply
-            the plan after verification.
+            {t(language, "renewUpgradeIntro")}
           </p>
         </div>
 
-        <RenewAdForm initialAdId={adId} initialMobile={mobile} />
+        <RenewAdForm
+          initialAdId={adId}
+          initialMobile={mobile}
+          initialLanguage={language}
+        />
       </section>
     </main>
   );
