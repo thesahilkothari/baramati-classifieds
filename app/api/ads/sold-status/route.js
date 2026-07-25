@@ -1,37 +1,22 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
+import { verifyAdOwnerByMobileAndEmail } from "../../../lib/userVerification";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const allowedStatuses = [
-  "SOLD_MYCLASSIFIEDS",
-  "SOLD_ELSEWHERE",
-  "AVAILABLE"
-];
-
-function cleanMobile(value) {
-  return String(value || "").replace(/\D/g, "");
-}
+const allowedStatuses = ["SOLD_MYCLASSIFIEDS", "SOLD_ELSEWHERE", "AVAILABLE"];
 
 export async function POST(request) {
   try {
     const body = await request.json();
 
     const adId = Number(body.adId);
-    const mobile = cleanMobile(body.mobile);
     const soldStatus = String(body.soldStatus || "").toUpperCase();
 
     if (!adId) {
       return NextResponse.json(
         { error: "Invalid ad reference." },
-        { status: 400 }
-      );
-    }
-
-    if (!mobile || mobile.length !== 10) {
-      return NextResponse.json(
-        { error: "Please enter the 10 digit mobile number used while posting." },
         { status: 400 }
       );
     }
@@ -45,9 +30,7 @@ export async function POST(request) {
 
     const ad = await prisma.ad.findUnique({
       where: { id: adId },
-      include: {
-        user: true
-      }
+      include: { user: true }
     });
 
     if (!ad) {
@@ -57,12 +40,15 @@ export async function POST(request) {
       );
     }
 
-    const ownerMobile = cleanMobile(ad.mobile || ad.user?.mobile);
+    const verification = verifyAdOwnerByMobileAndEmail(ad, {
+      mobile: body.mobile,
+      email: body.email
+    });
 
-    if (ownerMobile !== mobile) {
+    if (!verification.ok) {
       return NextResponse.json(
-        { error: "Mobile number does not match this ad." },
-        { status: 403 }
+        { error: verification.error },
+        { status: verification.status }
       );
     }
 

@@ -7,11 +7,12 @@ const TEXT = {
   en: {
     lookupTitle: "Check Your Ad Status",
     lookupText:
-      "Enter the mobile number used while posting the ad. You can check approval, payment, expiry, renewal and sold status from here.",
+      "For privacy, enter both the mobile number and email address used while posting the ad.",
     mobile: "Mobile Number",
-    search: "Search My Ads",
+    email: "Email Address Used While Posting",
+    search: "Verify and Search My Ads",
     searching: "Searching...",
-    noAds: "No ads found for this mobile number.",
+    noAds: "No ads found for this verified mobile and email combination.",
     paymentStatus: "Payment Status",
     category: "Category",
     city: "City",
@@ -44,20 +45,22 @@ const TEXT = {
       "Your classified has expired. Renew or upgrade it to make it visible again.",
     activeNote:
       "Your classified is live. You can renew, upgrade, request correction or mark it as sold.",
-    soldNote:
-      "This classified is marked as sold.",
+    soldNote: "This classified is marked as sold.",
     supportMessage:
       "Hello My Classifieds, I need help with my ad status.",
-    statusUpdated: "Status updated successfully."
+    statusUpdated: "Status updated successfully.",
+    privacyNote:
+      "Only ads matching both the posting mobile number and posting email address will be shown."
   },
   mr: {
     lookupTitle: "आपल्या जाहिरातीचा Status तपासा",
     lookupText:
-      "जाहिरात पोस्ट करताना वापरलेला मोबाईल नंबर भरा. येथे approval, payment, expiry, renewal आणि sold status तपासू शकता.",
+      "Privacy साठी जाहिरात पोस्ट करताना वापरलेला mobile number आणि email address दोन्ही भरा.",
     mobile: "मोबाईल नंबर",
-    search: "माझ्या जाहिराती शोधा",
+    email: "जाहिरात पोस्ट करताना वापरलेला ईमेल",
+    search: "Verify करून माझ्या जाहिराती शोधा",
     searching: "शोधत आहे...",
-    noAds: "या मोबाईल नंबरवर जाहिराती सापडल्या नाहीत.",
+    noAds: "या mobile आणि email combination साठी जाहिराती सापडल्या नाहीत.",
     paymentStatus: "Payment Status",
     category: "कॅटेगरी",
     city: "शहर",
@@ -90,16 +93,21 @@ const TEXT = {
       "आपली जाहिरात expired झाली आहे. पुन्हा visible करण्यासाठी renew किंवा upgrade करा.",
     activeNote:
       "आपली जाहिरात live आहे. आपण renew, upgrade, correction request किंवा sold mark करू शकता.",
-    soldNote:
-      "ही जाहिरात sold म्हणून mark केलेली आहे.",
+    soldNote: "ही जाहिरात sold म्हणून mark केलेली आहे.",
     supportMessage:
       "नमस्कार My Classifieds, मला माझ्या जाहिरातीच्या status बाबत मदत हवी आहे.",
-    statusUpdated: "Status update झाला."
+    statusUpdated: "Status update झाला.",
+    privacyNote:
+      "फक्त posting mobile number आणि posting email address दोन्ही match झाल्यासच जाहिराती दिसतील."
   }
 };
 
 function cleanMobile(value) {
   return String(value || "").replace(/\D/g, "").slice(0, 10);
+}
+
+function cleanEmail(value) {
+  return String(value || "").trim().toLowerCase().slice(0, 180);
 }
 
 function formatDate(value, language) {
@@ -181,12 +189,17 @@ Ad Title: ${ad?.title || ""}`;
   return `https://wa.me/919673931166?text=${encodeURIComponent(detailedMessage)}`;
 }
 
-export default function UserAdsDashboard({ initialMobile = "", initialLanguage = "en" }) {
+export default function UserAdsDashboard({
+  initialMobile = "",
+  initialEmail = "",
+  initialLanguage = "en"
+}) {
   const language = initialLanguage === "mr" ? "mr" : "en";
   const text = TEXT[language];
   const [mobile, setMobile] = useState(cleanMobile(initialMobile));
+  const [email, setEmail] = useState(cleanEmail(initialEmail));
   const [ads, setAds] = useState([]);
-  const [hasSearched, setHasSearched] = useState(Boolean(initialMobile));
+  const [hasSearched, setHasSearched] = useState(Boolean(initialMobile && initialEmail));
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isSearching, setIsSearching] = useState(false);
@@ -201,17 +214,29 @@ export default function UserAdsDashboard({ initialMobile = "", initialLanguage =
     setMessage("");
 
     const clean = cleanMobile(mobile);
+    const verifiedEmail = cleanEmail(email);
 
     if (clean.length !== 10) {
       setError("Please enter a valid 10 digit mobile number.");
       return;
     }
 
+    if (!verifiedEmail || !verifiedEmail.includes("@")) {
+      setError("Please enter the email address used while posting.");
+      return;
+    }
+
     setMobile(clean);
+    setEmail(verifiedEmail);
     setIsSearching(true);
 
     try {
-      const response = await fetch(`/api/user/ads?mobile=${clean}`);
+      const params = new URLSearchParams({
+        mobile: clean,
+        email: verifiedEmail
+      });
+
+      const response = await fetch(`/api/user/ads?${params.toString()}`);
       const data = await response.json();
 
       if (!response.ok) {
@@ -224,6 +249,7 @@ export default function UserAdsDashboard({ initialMobile = "", initialLanguage =
 
       const nextUrl = new URL(window.location.href);
       nextUrl.searchParams.set("mobile", clean);
+      nextUrl.searchParams.set("email", verifiedEmail);
       window.history.replaceState(null, "", nextUrl.toString());
     } catch (lookupError) {
       console.error("User ad lookup failed:", lookupError);
@@ -247,6 +273,7 @@ export default function UserAdsDashboard({ initialMobile = "", initialLanguage =
         body: JSON.stringify({
           adId: ad.id,
           mobile,
+          email,
           soldStatus
         })
       });
@@ -283,7 +310,11 @@ export default function UserAdsDashboard({ initialMobile = "", initialLanguage =
           {text.lookupText}
         </p>
 
-        <form onSubmit={fetchAds} className="mt-6 grid gap-3 md:grid-cols-[1fr_auto]">
+        <div className="mt-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-bold text-blue-900">
+          {text.privacyNote}
+        </div>
+
+        <form onSubmit={fetchAds} className="mt-6 grid gap-3 md:grid-cols-[1fr_1fr_auto]">
           <div>
             <label className="text-sm font-bold text-slate-700">
               {text.mobile}
@@ -295,6 +326,20 @@ export default function UserAdsDashboard({ initialMobile = "", initialLanguage =
               placeholder="9876543210"
               inputMode="numeric"
               maxLength={10}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-bold text-slate-700">
+              {text.email}
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(cleanEmail(event.target.value))}
+              className="mt-2 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-700"
+              placeholder="name@example.com"
               required
             />
           </div>
@@ -341,6 +386,11 @@ export default function UserAdsDashboard({ initialMobile = "", initialLanguage =
             const canViewPublic = ["ACTIVE", "SOLD"].includes(ad.status);
             const statusNote = getStatusNote(ad, text);
             const paymentLabel = getPaymentLabel(ad.paymentSummary, text);
+            const secureParams = new URLSearchParams({
+              adId: String(ad.id),
+              mobile,
+              email
+            }).toString();
 
             return (
               <article
@@ -473,14 +523,14 @@ export default function UserAdsDashboard({ initialMobile = "", initialLanguage =
                       )}
 
                       <Link
-                        href={`/renew?adId=${ad.id}&mobile=${mobile}`}
+                        href={`/renew?${secureParams}`}
                         className="rounded-xl bg-red-600 px-4 py-3 text-center text-xs font-black uppercase text-white hover:bg-red-700"
                       >
                         {text.renewUpgrade}
                       </Link>
 
                       <Link
-                        href={`/edit-request?adId=${ad.id}&mobile=${mobile}`}
+                        href={`/edit-request?${secureParams}`}
                         className="rounded-xl border bg-white px-4 py-3 text-center text-xs font-black uppercase text-slate-700 hover:bg-slate-50"
                       >
                         {text.editRequest}

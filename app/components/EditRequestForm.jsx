@@ -7,11 +7,11 @@ const TEXT = {
   en: {
     title: "Request Ad Correction / Update",
     intro:
-      "Use this form to request correction of your ad heading, description, price, contact, location or category. Admin will review before making changes.",
+      "For privacy, enter both the posting mobile number and posting email address. Admin will review before making changes.",
     adId: "Ad ID",
     mobile: "Posting Mobile Number",
+    email: "Posting Email Address",
     contactName: "Your Name",
-    contactEmail: "Email Address",
     requestType: "Update Type",
     selectRequestType: "Select update type",
     details: "Required Correction / Update",
@@ -29,11 +29,11 @@ const TEXT = {
   mr: {
     title: "जाहिरात Correction / Update Request",
     intro:
-      "आपल्या जाहिरातीचे heading, description, price, contact, location किंवा category बदलण्यासाठी हा form वापरा. Admin review नंतरच बदल केले जातील.",
+      "Privacy साठी posting mobile number आणि posting email address दोन्ही भरा. Admin review नंतरच बदल केले जातील.",
     adId: "Ad ID",
     mobile: "पोस्टिंग मोबाईल नंबर",
+    email: "पोस्टिंग ईमेल पत्ता",
     contactName: "आपले नाव",
-    contactEmail: "ईमेल पत्ता",
     requestType: "Update Type",
     selectRequestType: "Update type निवडा",
     details: "आवश्यक Correction / Update",
@@ -51,45 +51,21 @@ const TEXT = {
 };
 
 const requestTypes = [
-  {
-    value: "TITLE",
-    en: "Ad heading/title correction",
-    mr: "Ad heading/title correction"
-  },
-  {
-    value: "DESCRIPTION",
-    en: "Ad description correction",
-    mr: "Ad description correction"
-  },
-  {
-    value: "PRICE",
-    en: "Price correction",
-    mr: "किंमत correction"
-  },
-  {
-    value: "CONTACT",
-    en: "Contact detail correction",
-    mr: "Contact detail correction"
-  },
-  {
-    value: "LOCATION",
-    en: "Location/address correction",
-    mr: "Location/address correction"
-  },
-  {
-    value: "CATEGORY",
-    en: "Category correction",
-    mr: "Category correction"
-  },
-  {
-    value: "OTHER",
-    en: "Other correction/update",
-    mr: "Other correction/update"
-  }
+  { value: "TITLE", en: "Ad heading/title correction", mr: "Ad heading/title correction" },
+  { value: "DESCRIPTION", en: "Ad description correction", mr: "Ad description correction" },
+  { value: "PRICE", en: "Price correction", mr: "किंमत correction" },
+  { value: "CONTACT", en: "Contact detail correction", mr: "Contact detail correction" },
+  { value: "LOCATION", en: "Location/address correction", mr: "Location/address correction" },
+  { value: "CATEGORY", en: "Category correction", mr: "Category correction" },
+  { value: "OTHER", en: "Other correction/update", mr: "Other correction/update" }
 ];
 
 function cleanMobile(value) {
   return String(value || "").replace(/\D/g, "").slice(0, 10);
+}
+
+function cleanEmail(value) {
+  return String(value || "").trim().toLowerCase().slice(0, 180);
 }
 
 function buildWhatsAppUrl(referenceNumber, adId) {
@@ -104,6 +80,7 @@ Ad ID: ${adId}`;
 export default function EditRequestForm({
   initialAdId = "",
   initialMobile = "",
+  initialEmail = "",
   initialLanguage = "en"
 }) {
   const language = initialLanguage === "mr" ? "mr" : "en";
@@ -112,8 +89,8 @@ export default function EditRequestForm({
   const [form, setForm] = useState({
     adId: initialAdId,
     mobile: cleanMobile(initialMobile),
+    email: cleanEmail(initialEmail),
     contactName: "",
-    contactEmail: "",
     requestType: "",
     details: ""
   });
@@ -126,7 +103,12 @@ export default function EditRequestForm({
 
     setForm((current) => ({
       ...current,
-      [name]: name === "mobile" ? cleanMobile(value) : value
+      [name]:
+        name === "mobile"
+          ? cleanMobile(value)
+          : name === "email"
+            ? cleanEmail(value)
+            : value
     }));
   }
 
@@ -143,7 +125,10 @@ export default function EditRequestForm({
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(form)
+        body: JSON.stringify({
+          ...form,
+          contactEmail: form.email
+        })
       });
 
       const data = await response.json();
@@ -203,7 +188,7 @@ export default function EditRequestForm({
 
             <div className="mt-4 flex flex-wrap gap-3">
               <Link
-                href={`/my-ads?mobile=${form.mobile}`}
+                href={`/my-ads?mobile=${form.mobile}&email=${encodeURIComponent(form.email)}`}
                 className="rounded-xl bg-blue-700 px-4 py-2 text-xs font-black uppercase text-white"
               >
                 {text.backMyAds}
@@ -254,25 +239,26 @@ export default function EditRequestForm({
 
           <div>
             <label className="text-sm font-bold text-slate-700">
-              {text.contactName}
+              {text.email}
             </label>
             <input
-              name="contactName"
-              value={form.contactName}
+              type="email"
+              name="email"
+              value={form.email}
               onChange={updateField}
               className="mt-2 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-700"
-              placeholder="Optional"
+              placeholder="name@example.com"
+              required
             />
           </div>
 
           <div>
             <label className="text-sm font-bold text-slate-700">
-              {text.contactEmail}
+              {text.contactName}
             </label>
             <input
-              type="email"
-              name="contactEmail"
-              value={form.contactEmail}
+              name="contactName"
+              value={form.contactName}
               onChange={updateField}
               className="mt-2 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-700"
               placeholder="Optional"
@@ -324,7 +310,7 @@ export default function EditRequestForm({
           </button>
 
           <Link
-            href={`/my-ads?mobile=${form.mobile}`}
+            href={`/my-ads?mobile=${form.mobile}&email=${encodeURIComponent(form.email)}`}
             className="rounded-xl border px-6 py-4 text-center text-sm font-black uppercase text-slate-700 hover:bg-slate-50"
           >
             {text.backMyAds}

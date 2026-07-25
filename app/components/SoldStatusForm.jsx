@@ -2,16 +2,23 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { normalizeLanguage, t } from "../lib/i18n";
+
+function cleanMobile(value) {
+  return String(value || "").replace(/\D/g, "").slice(0, 10);
+}
+
+function cleanEmail(value) {
+  return String(value || "").trim().toLowerCase().slice(0, 180);
+}
 
 export default function SoldStatusForm({
   initialAdId = "",
   initialMobile = "",
-  initialLanguage = "en"
+  initialEmail = ""
 }) {
-  const language = normalizeLanguage(initialLanguage);
   const [adId, setAdId] = useState(initialAdId);
-  const [mobile, setMobile] = useState(initialMobile);
+  const [mobile, setMobile] = useState(cleanMobile(initialMobile));
+  const [email, setEmail] = useState(cleanEmail(initialEmail));
   const [soldStatus, setSoldStatus] = useState("AVAILABLE");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -35,6 +42,7 @@ export default function SoldStatusForm({
         body: JSON.stringify({
           adId,
           mobile,
+          email,
           soldStatus
         })
       });
@@ -42,7 +50,7 @@ export default function SoldStatusForm({
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || (language === "mr" ? "Status update होऊ शकला नाही." : "Unable to update status."));
+        setError(data.error || "Unable to update status.");
         return;
       }
 
@@ -50,7 +58,7 @@ export default function SoldStatusForm({
       setUpdatedAd(data.ad);
     } catch (statusError) {
       console.error("Sold status submit failed:", statusError);
-      setError(language === "mr" ? "काहीतरी चूक झाली. कृपया पुन्हा प्रयत्न करा." : "Something went wrong. Please try again.");
+      setError("Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -70,100 +78,58 @@ export default function SoldStatusForm({
         </div>
       )}
 
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-bold text-blue-900">
+        For privacy, both posting mobile number and posting email address are required.
+      </div>
+
+      <div className="mt-5 grid gap-5 md:grid-cols-3">
         <div>
-          <label className="text-sm font-bold text-slate-700">
-            {t(language, "adId")}
-          </label>
-          <input
-            value={adId}
-            onChange={(event) => setAdId(event.target.value)}
-            className="mt-2 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-700"
-            placeholder="25"
-            required
-          />
+          <label className="text-sm font-bold text-slate-700">Ad ID</label>
+          <input value={adId} onChange={(event) => setAdId(event.target.value)} className="mt-2 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-700" required />
         </div>
 
         <div>
-          <label className="text-sm font-bold text-slate-700">
-            {t(language, "postingMobileNumber")}
-          </label>
-          <input
-            value={mobile}
-            onChange={(event) => setMobile(event.target.value)}
-            className="mt-2 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-700"
-            inputMode="numeric"
-            maxLength={10}
-            required
-          />
+          <label className="text-sm font-bold text-slate-700">Posting Mobile Number</label>
+          <input value={mobile} onChange={(event) => setMobile(cleanMobile(event.target.value))} className="mt-2 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-700" inputMode="numeric" maxLength={10} required />
+        </div>
+
+        <div>
+          <label className="text-sm font-bold text-slate-700">Posting Email Address</label>
+          <input type="email" value={email} onChange={(event) => setEmail(cleanEmail(event.target.value))} className="mt-2 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue-700" required />
         </div>
       </div>
 
       <div className="mt-5">
         <p className="text-sm font-bold text-slate-700">
-          {t(language, "currentStatus")}
+          Current status of your product/service
         </p>
 
         <div className="mt-3 grid gap-3">
           {[
-            {
-              value: "AVAILABLE",
-              label: t(language, "available")
-            },
-            {
-              value: "SOLD_MYCLASSIFIEDS",
-              label: t(language, "soldMyclassifieds")
-            },
-            {
-              value: "SOLD_ELSEWHERE",
-              label: t(language, "soldElsewhere")
-            }
+            { value: "AVAILABLE", label: "Not sold / still available" },
+            { value: "SOLD_MYCLASSIFIEDS", label: "Sold through My Classifieds" },
+            { value: "SOLD_ELSEWHERE", label: "Sold elsewhere" }
           ].map((option) => (
-            <label
-              key={option.value}
-              className={`flex cursor-pointer gap-3 rounded-2xl border-2 p-4 ${
-                soldStatus === option.value
-                  ? "border-blue-700 bg-blue-50"
-                  : "border-slate-200 bg-white"
-              }`}
-            >
-              <input
-                type="radio"
-                name="soldStatus"
-                value={option.value}
-                checked={soldStatus === option.value}
-                onChange={(event) => setSoldStatus(event.target.value)}
-                className="mt-1 h-4 w-4"
-              />
-              <span className="font-semibold text-slate-800">
-                {option.label}
-              </span>
+            <label key={option.value} className={`flex cursor-pointer gap-3 rounded-2xl border-2 p-4 ${soldStatus === option.value ? "border-blue-700 bg-blue-50" : "border-slate-200 bg-white"}`}>
+              <input type="radio" name="soldStatus" value={option.value} checked={soldStatus === option.value} onChange={(event) => setSoldStatus(event.target.value)} className="mt-1 h-4 w-4" />
+              <span className="font-semibold text-slate-800">{option.label}</span>
             </label>
           ))}
         </div>
       </div>
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="mt-6 w-full rounded-xl bg-red-600 px-6 py-4 font-black uppercase text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {isSubmitting ? t(language, "updating") : t(language, "confirmStatus")}
+      <button type="submit" disabled={isSubmitting} className="mt-6 w-full rounded-xl bg-red-600 px-6 py-4 font-black uppercase text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60">
+        {isSubmitting ? "Updating..." : "Confirm Status"}
       </button>
 
       {updatedAd?.soldStatus === "AVAILABLE" && (
         <div className="mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-5 text-sm leading-6 text-blue-900">
-          <p className="font-black uppercase">{t(language, "renewUpgrade")}</p>
+          <p className="font-black uppercase">Renew or upgrade your ad</p>
           <p className="mt-2">
-            {language === "mr"
-              ? "आपली जाहिरात अजून available असल्याने renew किंवा upgrade करू शकता."
-              : "Since your item/service is still available, renew your ad or upgrade to Paid, Premium or Featured visibility."}
+            Since your item/service is still available, renew your ad or upgrade to Paid, Premium or Featured visibility.
           </p>
-          <Link
-            href={`/renew?adId=${updatedAd.id}&mobile=${mobile}`}
-            className="mt-4 inline-flex rounded-xl bg-blue-700 px-5 py-3 text-sm font-black uppercase text-white"
-          >
-            {t(language, "renewUpgrade")}
+          <Link href={`/renew?adId=${updatedAd.id}&mobile=${mobile}&email=${encodeURIComponent(email)}`} className="mt-4 inline-flex rounded-xl bg-blue-700 px-5 py-3 text-sm font-black uppercase text-white">
+            Renew / Upgrade
           </Link>
         </div>
       )}

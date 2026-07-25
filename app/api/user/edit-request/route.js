@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
+import {
+  cleanEmail,
+  cleanMobile,
+  isValidEmail,
+  verifyAdOwnerByMobileAndEmail
+} from "../../../lib/userVerification";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,37 +20,19 @@ const requestTypeLabels = {
   OTHER: "Other correction/update"
 };
 
-function cleanMobile(value) {
-  return String(value || "").replace(/\D/g, "");
-}
-
 function cleanText(value, maxLength = 1000) {
   return String(value || "").trim().slice(0, maxLength);
 }
 
-function isValidEmail(value) {
-  if (!value) return true;
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value).trim());
-}
-
 function createReferenceNumber() {
-  const date = new Date();
-  const datePart = date
-    .toISOString()
-    .slice(0, 10)
-    .replace(/-/g, "");
+  const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, "");
   const randomPart = Math.random().toString(36).slice(2, 8).toUpperCase();
-
   return `EDIT-${datePart}-${randomPart}`;
 }
 
 function getRequestIp(request) {
   const forwardedFor = request.headers.get("x-forwarded-for");
-
-  if (forwardedFor) {
-    return forwardedFor.split(",")[0].trim().slice(0, 191);
-  }
-
+  if (forwardedFor) return forwardedFor.split(",")[0].trim().slice(0, 191);
   return request.headers.get("x-real-ip")?.slice(0, 191) || null;
 }
 
@@ -58,10 +46,11 @@ export async function POST(request) {
 
     const adId = Number(body.adId);
     const mobile = cleanMobile(body.mobile);
+    const verificationEmail = cleanEmail(body.email || body.contactEmail);
     const requestType = cleanText(body.requestType, 60).toUpperCase();
     const details = cleanText(body.details, 2000);
     const contactName = cleanText(body.contactName, 120);
-    const contactEmail = cleanText(body.contactEmail, 180).toLowerCase();
+    const contactEmail = cleanEmail(body.contactEmail || body.email);
 
     if (!adId) {
       return NextResponse.json(
@@ -73,6 +62,13 @@ export async function POST(request) {
     if (!mobile || mobile.length !== 10) {
       return NextResponse.json(
         { error: "Please enter the 10 digit mobile number used while posting." },
+        { status: 400 }
+      );
+    }
+
+    if (!verificationEmail || !isValidEmail(verificationEmail)) {
+      return NextResponse.json(
+        { error: "Please enter the email address used while posting." },
         { status: 400 }
       );
     }
@@ -94,17 +90,8 @@ export async function POST(request) {
       );
     }
 
-    if (!isValidEmail(contactEmail)) {
-      return NextResponse.json(
-        { error: "Please enter a valid email address." },
-        { status: 400 }
-      );
-    }
-
     const ad = await prisma.ad.findUnique({
-      where: {
-        id: adId
-      },
+      where: { id: adId },
       include: {
         user: true,
         category: true,
@@ -116,14 +103,15 @@ export async function POST(request) {
       return NextResponse.json({ error: "Ad not found." }, { status: 404 });
     }
 
-    const ownerNumbers = [ad.mobile, ad.whatsapp, ad.user?.mobile]
-      .filter(Boolean)
-      .map(cleanMobile);
+    const verification = verifyAdOwnerByMobileAndEmail(ad, {
+      mobile,
+      email: verificationEmail
+    });
 
-    if (!ownerNumbers.includes(mobile)) {
+    if (!verification.ok) {
       return NextResponse.json(
-        { error: "Mobile number does not match this ad." },
-        { status: 403 }
+        { error: verification.error },
+        { status: verification.status }
       );
     }
 
@@ -132,17 +120,19 @@ export async function POST(request) {
     const referenceNumber = createReferenceNumber();
 
     const description = [
-      `User requested correction/update for classified ad.`,
-      ``,
+      "User requested correction/update for classified ad.",
+      "",
       `Ad ID: ${ad.id}`,
       `Ad Title: ${ad.title}`,
       `Current Status: ${ad.status}`,
       `Category: ${ad.category?.nameEn || "-"}`,
       `City: ${ad.city?.name || "-"}`,
-      ``,
+      "",
+      `Verification Mobile: ${mobile}`,
+      `Verification Email: ${verificationEmail}`,
       `Request Type: ${requestTypeLabels[requestType]}`,
-      ``,
-      `Requested Change:`,
+      "",
+      "Requested Change:",
       details
     ].join("\n");
 
@@ -168,10 +158,11 @@ export async function POST(request) {
       await tx.reportActionLog.create({
         data: {
           reportTicketId: createdTicket.id,
-          action: "EDIT_REQUEST_SUBMITTED",
+          action: "EDIT_REQUEST_SUBMITTED_VERIFIED",
           fromStatus: null,
           toStatus: "NEW",
-          note: "User submitted an ad edit/update request from My Ads dashboard.",
+          note:
+            "User submitted an ad edit/update request after mobile + email verification.",
           actor: "USER",
           ipAddress,
           userAgent

@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
+import { cleanEmail, cleanMobile, isValidEmail } from "../../../lib/userVerification";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-function cleanMobile(value) {
-  return String(value || "").replace(/\D/g, "");
-}
 
 function serializeDate(value) {
   return value ? value.toISOString() : null;
@@ -44,6 +41,7 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const mobile = cleanMobile(searchParams.get("mobile"));
+    const email = cleanEmail(searchParams.get("email"));
 
     if (!mobile || mobile.length !== 10) {
       return NextResponse.json(
@@ -52,14 +50,26 @@ export async function GET(request) {
       );
     }
 
+    if (!email || !isValidEmail(email)) {
+      return NextResponse.json(
+        { error: "Please enter the email address used while posting the ad." },
+        { status: 400 }
+      );
+    }
+
     const ads = await prisma.ad.findMany({
       where: {
-        OR: [
-          { mobile },
-          { whatsapp: mobile },
+        AND: [
+          {
+            OR: [
+              { mobile },
+              { whatsapp: mobile },
+              { user: { mobile } }
+            ]
+          },
           {
             user: {
-              mobile
+              email
             }
           }
         ]
@@ -90,6 +100,7 @@ export async function GET(request) {
     return NextResponse.json({
       success: true,
       mobile,
+      email,
       count: ads.length,
       ads: ads.map((ad) => ({
         id: ad.id,

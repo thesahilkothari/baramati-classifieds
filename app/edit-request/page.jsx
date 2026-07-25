@@ -18,6 +18,7 @@ export default async function EditRequestPage({ searchParams }) {
 
   const adId = String(resolvedSearchParams?.adId || "");
   const mobile = String(resolvedSearchParams?.mobile || "");
+  const email = String(resolvedSearchParams?.email || "");
 
   return (
     <main className="min-h-screen bg-slate-100 px-3 pb-24 pt-6 md:px-4 md:pb-10">
@@ -25,6 +26,7 @@ export default async function EditRequestPage({ searchParams }) {
         <EditRequestForm
           initialAdId={adId}
           initialMobile={mobile}
+          initialEmail={email}
           initialLanguage={language}
         />
       </section>

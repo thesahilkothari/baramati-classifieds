@@ -1,33 +1,22 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
+import { verifyAdOwnerByMobileAndEmail } from "../../../lib/userVerification";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const allowedStatuses = ["SOLD_MYCLASSIFIEDS", "SOLD_ELSEWHERE", "AVAILABLE"];
 
-function cleanMobile(value) {
-  return String(value || "").replace(/\D/g, "");
-}
-
 export async function PATCH(request) {
   try {
     const body = await request.json();
 
     const adId = Number(body.adId);
-    const mobile = cleanMobile(body.mobile);
     const soldStatus = String(body.soldStatus || "").toUpperCase();
 
     if (!adId) {
       return NextResponse.json(
         { error: "Invalid ad reference." },
-        { status: 400 }
-      );
-    }
-
-    if (!mobile || mobile.length !== 10) {
-      return NextResponse.json(
-        { error: "Please enter the 10 digit mobile number used while posting." },
         { status: 400 }
       );
     }
@@ -40,26 +29,23 @@ export async function PATCH(request) {
     }
 
     const ad = await prisma.ad.findUnique({
-      where: {
-        id: adId
-      },
-      include: {
-        user: true
-      }
+      where: { id: adId },
+      include: { user: true }
     });
 
     if (!ad) {
       return NextResponse.json({ error: "Ad not found." }, { status: 404 });
     }
 
-    const ownerNumbers = [ad.mobile, ad.whatsapp, ad.user?.mobile]
-      .filter(Boolean)
-      .map(cleanMobile);
+    const verification = verifyAdOwnerByMobileAndEmail(ad, {
+      mobile: body.mobile,
+      email: body.email
+    });
 
-    if (!ownerNumbers.includes(mobile)) {
+    if (!verification.ok) {
       return NextResponse.json(
-        { error: "Mobile number does not match this ad." },
-        { status: 403 }
+        { error: verification.error },
+        { status: verification.status }
       );
     }
 
@@ -77,9 +63,7 @@ export async function PATCH(request) {
     }
 
     const updatedAd = await prisma.ad.update({
-      where: {
-        id: ad.id
-      },
+      where: { id: ad.id },
       data: updateData
     });
 

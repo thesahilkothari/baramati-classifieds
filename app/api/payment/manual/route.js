@@ -7,13 +7,14 @@ import {
   MANUAL_UPI_CONFIG
 } from "../../../lib/manualPayment";
 import { canPlanUseFeatured } from "../../../lib/planFeatures";
+import {
+  cleanEmail,
+  cleanMobile,
+  verifyAdOwnerByMobileAndEmail
+} from "../../../lib/userVerification";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-function cleanMobile(value) {
-  return String(value || "").replace(/\D/g, "");
-}
 
 function cleanText(value, maxLength = 191) {
   return String(value || "").trim().slice(0, maxLength);
@@ -47,7 +48,8 @@ export async function POST(request) {
     const manualPayerName = cleanText(body.payerName, 120);
     const manualPayerMobile = cleanMobile(body.payerMobile);
     const manualPaymentNote = cleanLongText(body.note, 500);
-    const ownerMobile = cleanMobile(body.ownerMobile);
+    const ownerMobile = cleanMobile(body.ownerMobile || body.mobile);
+    const ownerEmail = cleanEmail(body.ownerEmail || body.email);
 
     if (!adId) {
       return NextResponse.json(
@@ -60,6 +62,30 @@ export async function POST(request) {
       return NextResponse.json(
         { error: "Please select a valid paid renewal plan." },
         { status: 400 }
+      );
+    }
+
+    const ad = await prisma.ad.findUnique({
+      where: { id: adId },
+      include: { user: true }
+    });
+
+    if (!ad) {
+      return NextResponse.json(
+        { error: "Classified advertisement not found." },
+        { status: 404 }
+      );
+    }
+
+    const verification = verifyAdOwnerByMobileAndEmail(ad, {
+      mobile: ownerMobile,
+      email: ownerEmail
+    });
+
+    if (!verification.ok) {
+      return NextResponse.json(
+        { error: verification.error },
+        { status: verification.status }
       );
     }
 
@@ -99,27 +125,6 @@ export async function POST(request) {
       );
     }
 
-    const ad = await prisma.ad.findUnique({
-      where: { id: adId },
-      include: {
-        user: true
-      }
-    });
-
-    if (!ad) {
-      return NextResponse.json(
-        { error: "Classified advertisement not found." },
-        { status: 404 }
-      );
-    }
-
-    if (ownerMobile && ownerMobile !== cleanMobile(ad.mobile || ad.user?.mobile)) {
-      return NextResponse.json(
-        { error: "Mobile number does not match this ad." },
-        { status: 403 }
-      );
-    }
-
     const duplicateReference = await prisma.payment.findFirst({
       where: {
         provider: MANUAL_UPI_CONFIG.provider,
@@ -154,7 +159,13 @@ export async function POST(request) {
         manualTransactionRef,
         manualPayerName,
         manualPayerMobile,
-        manualPaymentNote,
+        manualPaymentNote: [
+          manualPaymentNote,
+          `Verified renewal owner mobile: ${ownerMobile}`,
+          `Verified renewal owner email: ${ownerEmail}`
+        ]
+          .filter(Boolean)
+          .join("\n"),
         manualSubmittedAt: new Date()
       }
     });

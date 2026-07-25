@@ -14,6 +14,7 @@ export default async function RenewPage({ searchParams }) {
   const resolvedSearchParams = await searchParams;
   const adId = String(resolvedSearchParams?.adId || "");
   const mobile = String(resolvedSearchParams?.mobile || "");
+  const email = String(resolvedSearchParams?.email || "");
 
   return (
     <main className="bg-slate-100 px-4 py-10">
@@ -35,6 +36,7 @@ export default async function RenewPage({ searchParams }) {
         <RenewAdForm
           initialAdId={adId}
           initialMobile={mobile}
+          initialEmail={email}
           initialLanguage={language}
         />
       </section>
