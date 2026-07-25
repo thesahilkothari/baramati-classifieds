@@ -11,6 +11,10 @@ const legalLinks = [
   { href: "/legal/corporate", labelEn: "Corporate Info", labelMr: "कंपनी माहिती" }
 ];
 
+function label(language, en, mr) {
+  return language === "mr" ? mr : en;
+}
+
 export default async function Footer() {
   const cookieStore = await cookies();
   const language = getLanguageFromCookieStore(cookieStore);
@@ -62,6 +66,10 @@ export default async function Footer() {
 
             <Link href="/post-ad" className="block hover:text-white">
               {t(language, "postAd")}
+            </Link>
+
+            <Link href="/my-ads" className="block hover:text-white">
+              {label(language, "My Ads / Ad Status", "माझ्या जाहिराती / Status")}
             </Link>
 
             <Link href="/pricing" className="block hover:text-white">

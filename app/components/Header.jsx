@@ -3,6 +3,10 @@ import { cookies } from "next/headers";
 import LanguageToggle from "./LanguageToggle";
 import { getLanguageFromCookieStore, t } from "../lib/i18n";
 
+function label(language, en, mr) {
+  return language === "mr" ? mr : en;
+}
+
 export default async function Header() {
   const cookieStore = await cookies();
   const language = getLanguageFromCookieStore(cookieStore);
@@ -23,6 +27,9 @@ export default async function Header() {
           <Link href="/ads" className="hover:text-blue-700">
             {t(language, "browseAds")}
           </Link>
+          <Link href="/my-ads" className="hover:text-blue-700">
+            {label(language, "My Ads", "माझ्या जाहिराती")}
+          </Link>
           <Link href="/pricing" className="hover:text-blue-700">
             {t(language, "pricing")}
           </Link>
@@ -31,9 +38,6 @@ export default async function Header() {
           </Link>
           <Link href="/legal" className="hover:text-blue-700">
             {t(language, "legal")}
-          </Link>
-          <Link href="/contact" className="hover:text-blue-700">
-            {t(language, "contact")}
           </Link>
         </nav>
 

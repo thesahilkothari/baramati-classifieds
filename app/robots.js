@@ -13,7 +13,8 @@ export default function robots() {
           "/post-ad",
           "/pricing",
           "/support",
-          "/legal"
+          "/legal",
+          "/my-ads"
         ],
         disallow: [
           "/admin",
