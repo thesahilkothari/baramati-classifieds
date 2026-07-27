@@ -15,11 +15,18 @@ const categories = [
 
 const cities = [
   { name: "Baramati", slug: "baramati", latitude: 18.1517, longitude: 74.5776 },
-  { name: "Pune", slug: "pune", latitude: 18.5204, longitude: 73.8567 },
+  { name: "Phaltan", slug: "phaltan", latitude: 17.9911, longitude: 74.4318 },
+  { name: "Akluj", slug: "akluj", latitude: 17.8833, longitude: 75.0167 },
+  { name: "Solapur", slug: "solapur", latitude: 17.6599, longitude: 75.9064 },
+  { name: "Karad", slug: "karad", latitude: 17.2851, longitude: 74.1844 },
+  { name: "Satara", slug: "satara", latitude: 17.6805, longitude: 74.0183 },
+  { name: "Sangli", slug: "sangli", latitude: 16.8524, longitude: 74.5815 },
   { name: "Indapur", slug: "indapur", latitude: 18.1187, longitude: 75.0236 },
   { name: "Daund", slug: "daund", latitude: 18.4655, longitude: 74.5833 },
-  { name: "Phaltan", slug: "phaltan", latitude: 17.9911, longitude: 74.4318 },
-  { name: "Akluj", slug: "akluj", latitude: 17.8833, longitude: 75.0167 }
+  { name: "Shirur", slug: "shirur", latitude: 18.8276, longitude: 74.3747 },
+  { name: "Nashik", slug: "nashik", latitude: 19.9975, longitude: 73.7898 },
+  { name: "Chhatrapati Sambhajinagar", slug: "chhatrapati-sambhajinagar", latitude: 19.8762, longitude: 75.3433 },
+  { name: "Ahilyanagar", slug: "ahilyanagar", latitude: 19.0948, longitude: 74.748 }
 ];
 
 function slugify(text) {
@@ -30,7 +37,7 @@ function slugify(text) {
 }
 
 async function main() {
-  console.log("Seeding categories and cities...");
+  console.log("Seeding categories and approved tier-2 Maharashtra cities...");
 
   for (const category of categories) {
     await prisma.category.upsert({
@@ -49,15 +56,15 @@ async function main() {
   }
 
   const user = await prisma.user.upsert({
-    where: { mobile: "9673931666" },
+    where: { mobile: "9673931166" },
     update: {
       name: "My Classifieds Demo User",
       isVerified: true
     },
     create: {
       name: "My Classifieds Demo User",
-      mobile: "9673931666",
-      email: "thesahilkothari@gmail.com",
+      mobile: "9673931166",
+      email: "connect@myclassifieds.in",
       isVerified: true
     }
   });
@@ -69,7 +76,7 @@ async function main() {
   const agri = await prisma.category.findUnique({ where: { slug: "agriculture-equipment" } });
 
   const baramati = await prisma.city.findUnique({ where: { slug: "baramati" } });
-  const pune = await prisma.city.findUnique({ where: { slug: "pune" } });
+  const nashik = await prisma.city.findUnique({ where: { slug: "nashik" } });
 
   const demoAds = [
     {
@@ -77,8 +84,8 @@ async function main() {
       description:
         "Spacious 2 BHK flat available in a good residential area of Baramati. Suitable for family residence or investment.",
       price: "4200000",
-      mobile: "9673931666",
-      whatsapp: "9673931666",
+      mobile: "9673931166",
+      whatsapp: "9673931166",
       address: "Baramati, Maharashtra",
       status: "ACTIVE",
       adType: "FEATURED",
@@ -91,8 +98,8 @@ async function main() {
       description:
         "Local business requires office assistant with basic computer knowledge, communication skills and document handling ability.",
       price: "12000",
-      mobile: "9673931666",
-      whatsapp: "9673931666",
+      mobile: "9673931166",
+      whatsapp: "9673931166",
       address: "Baramati MIDC",
       status: "ACTIVE",
       adType: "FREE",
@@ -105,8 +112,8 @@ async function main() {
       description:
         "Well-maintained two wheeler available for sale. Documents available. Genuine buyers may contact.",
       price: "45000",
-      mobile: "9673931666",
-      whatsapp: "9673931666",
+      mobile: "9673931166",
+      whatsapp: "9673931166",
       address: "Baramati",
       status: "ACTIVE",
       adType: "FREE",
@@ -119,22 +126,22 @@ async function main() {
       description:
         "Good condition laptop suitable for students, office work, online classes and basic business use.",
       price: "18000",
-      mobile: "9673931666",
-      whatsapp: "9673931666",
-      address: "Pune",
+      mobile: "9673931166",
+      whatsapp: "9673931166",
+      address: "Nashik",
       status: "ACTIVE",
       adType: "FREE",
       isFeatured: false,
       categoryId: electronics.id,
-      cityId: pune.id
+      cityId: nashik.id
     },
     {
       title: "Agriculture Sprayer Machine Available",
       description:
         "Agriculture sprayer machine available for sale. Suitable for farm use. Contact for details.",
       price: "8500",
-      mobile: "9673931666",
-      whatsapp: "9673931666",
+      mobile: "9673931166",
+      whatsapp: "9673931166",
       address: "Baramati rural area",
       status: "ACTIVE",
       adType: "FEATURED",
