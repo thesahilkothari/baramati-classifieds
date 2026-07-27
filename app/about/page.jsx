@@ -1,13 +1,13 @@
-import Image from "next/image";
 import Link from "next/link";
 import { buildPageMetadata } from "../lib/seo";
+import BrandHeroGraphic from "../components/BrandHeroGraphic";
 import JsonLd from "../components/JsonLd";
 import { buildBreadcrumbSchema, buildOrganizationSchema } from "../lib/jsonLd";
 
 export const metadata = buildPageMetadata({
-  title: "About My Classifieds | Baramati and Maharashtra Classifieds",
+  title: "About My Classifieds | Online Classifieds Platform",
   description:
-    "Learn why My Classifieds was created as a lightweight newspaper-style classified platform for Baramati and Maharashtra.",
+    "Learn why My Classifieds was created as a lightweight online classifieds platform for Baramati and Maharashtra.",
   path: "/about"
 });
 
@@ -55,83 +55,91 @@ export default function AboutPage() {
         ]}
       />
 
-      <main className="min-h-screen bg-slate-100 px-3 pb-24 pt-5 md:px-4 md:pb-10">
-        <section className="mx-auto max-w-5xl">
-          <nav className="mb-4 text-xs font-bold uppercase text-slate-500">
-            <Link href="/" className="hover:text-blue-700">
+      <main className="min-h-screen bg-[#F8FAFC] px-3 pb-24 pt-5 md:px-4 md:pb-10">
+        <section className="mx-auto max-w-6xl">
+          <nav className="mb-4 text-xs font-bold uppercase text-[#475569]">
+            <Link href="/" className="hover:text-[#0F3D5E]">
               Home
             </Link>{" "}
             / About
           </nav>
 
-          <header className="overflow-hidden rounded-3xl border-2 border-slate-900 bg-white shadow-sm">
-            <div className="grid gap-0 md:grid-cols-[1.1fr_0.9fr]">
-              <div className="p-6 md:p-8">
-                <p className="text-xs font-black uppercase tracking-wide text-red-600">
+          <header className="overflow-hidden rounded-3xl border border-[#CBD5E1] bg-white shadow-sm">
+            <div className="grid gap-0 lg:grid-cols-[0.92fr_1fr]">
+              <div className="p-6 md:p-8 lg:p-10">
+                <p className="text-xs font-black uppercase tracking-wide text-[#C2410C]">
                   About My Classifieds
                 </p>
 
-                <h1 className="mt-3 text-3xl font-black uppercase leading-tight text-slate-950 md:text-5xl">
-                  A lightweight local classified platform for Baramati and Maharashtra
+                <h1 className="mt-3 text-3xl font-black leading-tight text-[#0F3D5E] md:text-5xl">
+                  A dependable online classifieds platform for Baramati and Maharashtra
                 </h1>
 
-                <p className="mt-5 text-base leading-8 text-slate-700">
+                <p className="mt-5 text-base leading-8 text-[#475569]">
                   My Classifieds keeps local advertising simple: users can post and browse classified advertisements, contact advertisers directly, and use clear paid visibility options without automatic renewal.
                 </p>
+
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                  <Link
+                    href="/ads"
+                    className="rounded-xl bg-[#0F3D5E] px-5 py-3 text-center text-sm font-black uppercase text-white"
+                  >
+                    Browse Ads
+                  </Link>
+
+                  <Link
+                    href="/post-ad"
+                    className="rounded-xl bg-[#C2410C] px-5 py-3 text-center text-sm font-black uppercase text-white"
+                  >
+                    Post Free Ad
+                  </Link>
+                </div>
               </div>
 
-              <div className="border-t bg-slate-950 p-4 md:border-l md:border-t-0">
-                <Image
-                  src="/og-image.jpg"
-                  alt="My Classifieds brand preview for local classified ads in Baramati and Maharashtra"
-                  width={1200}
-                  height={630}
-                  loading="lazy"
-                  sizes="(min-width: 768px) 420px, 100vw"
-                  className="h-auto w-full rounded-2xl border border-white/10"
-                />
+              <div className="border-t bg-[#F8FAFC] p-4 lg:border-l lg:border-t-0">
+                <BrandHeroGraphic />
               </div>
             </div>
           </header>
 
           <div className="mt-6 grid gap-4">
             {sections.map((section) => (
-              <article key={section.title} className="rounded-3xl border bg-white p-6 shadow-sm">
-                <h2 className="text-xl font-black uppercase text-slate-950">
+              <article key={section.title} className="rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm">
+                <h2 className="text-xl font-black uppercase text-[#0F172A]">
                   {section.title}
                 </h2>
 
-                <p className="mt-3 text-sm leading-7 text-slate-700">
+                <p className="mt-3 text-sm leading-7 text-[#475569]">
                   {section.text}
                 </p>
 
-                <p className="mt-3 rounded-2xl bg-slate-50 p-4 text-sm leading-7 text-slate-700">
+                <p className="mt-3 rounded-2xl bg-[#F8FAFC] p-4 text-sm leading-7 text-[#475569]">
                   {section.mr}
                 </p>
               </article>
             ))}
           </div>
 
-          <section className="mt-6 rounded-3xl border bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-black uppercase text-slate-950">
+          <section className="mt-6 rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm">
+            <h2 className="text-xl font-black uppercase text-[#0F172A]">
               Operator disclosure
             </h2>
 
-            <p className="mt-3 text-sm leading-7 text-slate-700">
+            <p className="mt-3 text-sm leading-7 text-[#475569]">
               My Classifieds is owned and operated by SAHIL KOTHARI ENTERPRISES PRIVATE LIMITED. CIN: U74999PN2014PTC150594. Registered Office: Vardhaman Capital, Plot No. 13, Gat No. 42/1, Mouje Rui, Taluka Baramati, District Pune, Maharashtra – 413133. Contact: connect@myclassifieds.in | +91 9673931166.
             </p>
 
             <div className="mt-5 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/ads"
-                className="rounded-xl bg-blue-700 px-5 py-3 text-center text-sm font-black uppercase text-white"
+                className="rounded-xl bg-[#0F3D5E] px-5 py-3 text-center text-sm font-black uppercase text-white"
               >
                 Browse Ads
               </Link>
 
               <Link
                 href="/legal/corporate"
-                className="rounded-xl border px-5 py-3 text-center text-sm font-black uppercase text-slate-700"
+                className="rounded-xl border border-[#CBD5E1] px-5 py-3 text-center text-sm font-black uppercase text-[#0F3D5E]"
               >
                 Legal Information
               </Link>
