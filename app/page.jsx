@@ -9,6 +9,46 @@ import { buildOrganizationSchema, buildWebSiteSchema } from "./lib/jsonLd";
 
 export const dynamic = "force-dynamic";
 
+const cityUtilityHighlights = [
+  {
+    title: "Affordable local advertising",
+    text:
+      "A practical alternative where newspaper, weekly or fortnightly classified ads may be costly for ordinary users.",
+    href: "/about"
+  },
+  {
+    title: "City-level yellow page",
+    text:
+      "Discover local services, professionals, freelancers, jobs, property, vehicles and everyday opportunities in one searchable place.",
+    href: "/ads"
+  },
+  {
+    title: "Text-first and mobile-first",
+    text:
+      "Designed for fast loading, simple posting and easy browsing without requiring photos for launch-stage classifieds.",
+    href: "/post-ad"
+  }
+];
+
+const useCases = [
+  "Property sale / rent",
+  "Vehicles",
+  "Furniture",
+  "Electronics",
+  "Jobs",
+  "Electricians",
+  "Plumbers",
+  "Carpenters",
+  "Tutors",
+  "Drivers",
+  "Contractors",
+  "Freelancers",
+  "Doctors",
+  "Lawyers",
+  "CAs",
+  "Architects"
+];
+
 function uniqueAds(ads) {
   const seen = new Set();
   const result = [];
@@ -126,15 +166,15 @@ export default async function HomePage() {
             <div className="grid gap-6 p-5 md:grid-cols-[1fr_0.92fr] md:p-8 lg:p-10">
               <div className="flex flex-col justify-center">
                 <p className="text-sm font-black uppercase tracking-wide text-[#C2410C]">
-                  Online Classifieds Platform
+                  My Classifieds • Online Classifieds Platform
                 </p>
 
                 <h1 className="mt-3 text-4xl font-black leading-tight text-[#0F3D5E] md:text-6xl">
-                  Buy, Sell, Rent & Find Jobs Across Baramati
+                  Affordable local classifieds for Baramati and Maharashtra
                 </h1>
 
                 <p className="mt-5 max-w-3xl text-base leading-8 text-[#475569]">
-                  Post and browse local classified ads for property, jobs, vehicles, electronics, agriculture equipment and local services across Baramati and Maharashtra.
+                  A city-focused digital yellow page for tier-2 Maharashtra: post free classified ads, find property, jobs, vehicles, goods, local services and professionals, and connect with nearby people without depending only on costly newspaper classifieds.
                 </p>
 
                 <form
@@ -148,7 +188,7 @@ export default async function HomePage() {
                     <input
                       id="home-search-keyword"
                       name="q"
-                      placeholder="Search anything..."
+                      placeholder="Search property, jobs, services, vehicles..."
                       className="rounded-xl border border-[#64748B] bg-white px-4 py-3 text-sm font-semibold text-[#0F172A] outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20"
                     />
 
@@ -203,10 +243,10 @@ export default async function HomePage() {
                   </Link>
 
                   <Link
-                    href="/ads"
+                    href="/about"
                     className="rounded-xl border border-[#CBD5E1] bg-white px-6 py-4 text-center text-sm font-black uppercase text-[#0F3D5E] hover:bg-slate-50"
                   >
-                    {t(language, "startBrowsing")}
+                    Why My Classifieds?
                   </Link>
                 </div>
               </div>
@@ -214,6 +254,50 @@ export default async function HomePage() {
               <BrandHeroGraphic />
             </div>
           </div>
+
+          <section className="mt-8 grid gap-4 md:grid-cols-3">
+            {cityUtilityHighlights.map((item) => (
+              <Link
+                key={item.title}
+                href={item.href}
+                className="rounded-3xl border border-[#CBD5E1] bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <h2 className="text-lg font-black uppercase text-[#0F172A]">
+                  {item.title}
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-[#475569]">
+                  {item.text}
+                </p>
+              </Link>
+            ))}
+          </section>
+
+          <section className="mt-8 rounded-3xl border border-[#CBD5E1] bg-white p-5 shadow-sm md:p-6">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-xs font-black uppercase tracking-wide text-[#0F766E]">
+                  Local city directory
+                </p>
+                <h2 className="mt-2 text-2xl font-black uppercase text-[#0F172A] md:text-3xl">
+                  Use it like an affordable online yellow page
+                </h2>
+              </div>
+              <Link href="/ads" className="text-sm font-black uppercase text-[#0F3D5E]">
+                Browse all ads
+              </Link>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              {useCases.map((useCase) => (
+                <span
+                  key={useCase}
+                  className="rounded-full border border-[#CBD5E1] bg-[#F8FAFC] px-3 py-2 text-xs font-black uppercase text-[#475569]"
+                >
+                  {useCase}
+                </span>
+              ))}
+            </div>
+          </section>
 
           {featuredAds.length > 0 && (
             <section className="mt-8">
