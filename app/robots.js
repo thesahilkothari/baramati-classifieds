@@ -10,22 +10,24 @@ export default function robots() {
         allow: [
           "/",
           "/ads",
-          "/post-ad",
+          "/category",
           "/pricing",
           "/support",
-          "/legal",
-          "/my-ads"
+          "/about",
+          "/baramati",
+          "/maharashtra",
+          "/legal"
         ],
         disallow: [
           "/admin",
           "/api",
+          "/my-ads",
           "/renew",
           "/sold-status",
           "/edit-request"
         ]
       }
     ],
-    sitemap: `${siteUrl}/sitemap.xml`,
-    host: siteUrl
+    sitemap: `${siteUrl}/sitemap.xml`
   };
 }
