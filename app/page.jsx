@@ -175,8 +175,8 @@ export default async function HomePage() {
       <main className="bg-[#F8FAFC] px-3 pb-24 pt-5 md:px-4 md:pb-10">
         <section className="mx-auto max-w-7xl">
           <div className="overflow-hidden rounded-3xl border border-[#CBD5E1] bg-white shadow-sm">
-            <div className="grid gap-6 p-5 md:grid-cols-[1fr_0.92fr] md:p-8 lg:p-10">
-              <div className="flex flex-col justify-center">
+            <div className="grid items-start gap-6 p-5 md:grid-cols-[1fr_0.92fr] md:p-8 lg:p-10">
+              <div className="flex flex-col justify-start">
                 <p className="text-sm font-black uppercase tracking-wide text-[#C2410C]">
                   My Classifieds • Online Classifieds Platform
                 </p>
@@ -245,6 +245,26 @@ export default async function HomePage() {
                     </button>
                   </div>
                 </form>
+
+                <div className="mt-3 rounded-2xl border border-[#CBD5E1] bg-white p-4">
+                  <p className="text-xs font-black uppercase tracking-wide text-[#0F766E]">
+                    Available launch locations only
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {cities.map((city) => (
+                      <Link
+                        key={city.id}
+                        href={`/ads?city=${city.slug}`}
+                        className="rounded-full border border-[#CBD5E1] bg-[#F8FAFC] px-3 py-1.5 text-[11px] font-black uppercase text-[#475569] hover:border-[#0F3D5E] hover:text-[#0F3D5E]"
+                      >
+                        {city.name}
+                      </Link>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-[11px] font-semibold leading-5 text-[#475569]">
+                    Pune, Mumbai and similar tier-1 locations are intentionally not part of the current launch list.
+                  </p>
+                </div>
 
                 <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                   <Link
