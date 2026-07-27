@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
+import BrandLogo from "./BrandLogo";
 import { getLanguageFromCookieStore, t } from "../lib/i18n";
 
 const legalLinks = [
@@ -36,23 +37,23 @@ export default async function Footer() {
   const language = getLanguageFromCookieStore(cookieStore);
 
   return (
-    <footer className="border-t bg-slate-950 px-4 py-10 text-white">
+    <footer className="border-t border-[#0B2F49] bg-[#0F3D5E] px-4 py-10 text-white">
       <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-4">
         <div className="md:col-span-2">
-          <Link href="/" className="text-2xl font-black uppercase">
-            {t(language, "brand")}
+          <Link href="/" className="inline-flex rounded-2xl bg-white px-3 py-2 shadow-sm">
+            <BrandLogo compact />
           </Link>
 
-          <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300">
+          <p className="mt-3 max-w-xl text-sm leading-6 text-slate-200">
             {t(language, "footerAbout")}
           </p>
 
-          <div className="mt-5 space-y-1 text-sm text-slate-300">
+          <div className="mt-5 space-y-1 text-sm text-slate-200">
             <p>
               WhatsApp:{" "}
               <a
                 href="https://wa.me/919673931166"
-                className="font-bold text-white hover:text-blue-300"
+                className="font-bold text-white hover:text-orange-200"
               >
                 +91 9673931166
               </a>
@@ -62,7 +63,7 @@ export default async function Footer() {
               Email:{" "}
               <a
                 href="mailto:connect@myclassifieds.in"
-                className="font-bold text-white hover:text-blue-300"
+                className="font-bold text-white hover:text-orange-200"
               >
                 connect@myclassifieds.in
               </a>
@@ -71,47 +72,47 @@ export default async function Footer() {
         </div>
 
         <div>
-          <h2 className="text-sm font-black uppercase tracking-wide text-slate-200">
+          <h2 className="text-sm font-black uppercase tracking-wide text-white">
             {t(language, "classifieds")}
           </h2>
 
-          <nav className="mt-4 space-y-2 text-sm text-slate-300">
-            <Link href="/ads" className="block hover:text-white">
+          <nav className="mt-4 space-y-2 text-sm text-slate-200">
+            <Link href="/ads" className="block hover:text-orange-200">
               {t(language, "browseAds")}
             </Link>
 
-            <Link href="/post-ad" className="block hover:text-white">
-              {t(language, "postAd")}
+            <Link href="/post-ad" className="block hover:text-orange-200">
+              {label(language, "Post Free Ad", "मोफत जाहिरात द्या")}
             </Link>
 
-            <Link href="/my-ads" className="block hover:text-white">
+            <Link href="/my-ads" className="block hover:text-orange-200">
               {label(language, "My Ads / Ad Status", "माझ्या जाहिराती / Status")}
             </Link>
 
-            <Link href="/pricing" className="block hover:text-white">
+            <Link href="/pricing" className="block hover:text-orange-200">
               {t(language, "pricing")}
             </Link>
 
-            <Link href="/about" className="block hover:text-white">
+            <Link href="/about" className="block hover:text-orange-200">
               {label(language, "About", "आमच्याबद्दल")}
             </Link>
 
-            <Link href="/support" className="block hover:text-white">
+            <Link href="/support" className="block hover:text-orange-200">
               {t(language, "support")}
             </Link>
 
-            <Link href="/report" className="block hover:text-white">
+            <Link href="/report" className="block hover:text-orange-200">
               {t(language, "report")}
             </Link>
           </nav>
 
-          <h2 className="mt-6 text-sm font-black uppercase tracking-wide text-slate-200">
+          <h2 className="mt-6 text-sm font-black uppercase tracking-wide text-white">
             Local Pages
           </h2>
 
-          <nav className="mt-4 space-y-2 text-sm text-slate-300">
+          <nav className="mt-4 space-y-2 text-sm text-slate-200">
             {localLinks.map((link) => (
-              <Link key={link.href} href={link.href} className="block hover:text-white">
+              <Link key={link.href} href={link.href} className="block hover:text-orange-200">
                 {language === "mr" ? link.labelMr : link.labelEn}
               </Link>
             ))}
@@ -119,13 +120,13 @@ export default async function Footer() {
         </div>
 
         <div>
-          <h2 className="text-sm font-black uppercase tracking-wide text-slate-200">
+          <h2 className="text-sm font-black uppercase tracking-wide text-white">
             {t(language, "legal")}
           </h2>
 
-          <nav className="mt-4 grid grid-cols-1 gap-2 text-sm text-slate-300">
+          <nav className="mt-4 grid grid-cols-1 gap-2 text-sm text-slate-200">
             {legalLinks.map((link) => (
-              <Link key={link.href} href={link.href} className="block hover:text-white">
+              <Link key={link.href} href={link.href} className="block hover:text-orange-200">
                 {language === "mr" ? link.labelMr : link.labelEn}
               </Link>
             ))}
@@ -133,7 +134,7 @@ export default async function Footer() {
         </div>
       </div>
 
-      <div className="mx-auto mt-8 max-w-7xl border-t border-slate-800 pt-5 text-xs leading-6 text-slate-400">
+      <div className="mx-auto mt-8 max-w-7xl border-t border-white/15 pt-5 text-xs leading-6 text-slate-200">
         <p>{t(language, "companyDisclosure")}</p>
         <p className="mt-3">
           © 2026 {t(language, "brand")}. {t(language, "rightsReserved")}
