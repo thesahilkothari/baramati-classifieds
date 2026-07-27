@@ -1,7 +1,10 @@
-export const metadata = {
+import { buildPageMetadata } from "../lib/seo";
+
+export const metadata = buildPageMetadata({
   title: "Safety Tips | My Classifieds",
-  description: "Safety tips for buying and selling through classified ads."
-};
+  description: "Safety tips for buying and selling through classified ads.",
+  path: "/safety"
+});
 
 const tips = [
   "Meet buyers or sellers only in safe public places.",

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "../../lib/prisma";
+import { buildPageMetadata } from "../../lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -26,10 +27,24 @@ export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const ad = await prisma.ad.findFirst({
     where: { AND: [{ slug: resolvedParams.slug }, { status: "ACTIVE" }, { OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] }] },
-    include: { city: true, category: true }
+    include: { city: true, category: true, images: true }
   });
-  if (!ad) return { title: "Ad Not Found | My Classifieds" };
-  return { title: `${ad.title} | My Classifieds`, description: ad.description.slice(0, 150) };
+  if (!ad) {
+    return buildPageMetadata({
+      title: "Ad Not Found | My Classifieds",
+      path: `/ads/${resolvedParams.slug}`,
+      noIndex: true
+    });
+  }
+
+  const image = ad.images?.[0]?.url || "/og-image.jpg";
+
+  return buildPageMetadata({
+    title: `${ad.title} | My Classifieds`,
+    description: ad.description.slice(0, 150),
+    path: `/ads/${ad.slug}`,
+    image
+  });
 }
 
 export default async function AdDetailPage({ params }) {

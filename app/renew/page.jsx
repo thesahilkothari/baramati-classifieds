@@ -1,12 +1,15 @@
 import { cookies } from "next/headers";
 import RenewAdForm from "../components/RenewAdForm";
 import { getLanguageFromCookieStore, t } from "../lib/i18n";
+import { buildPageMetadata } from "../lib/seo";
 
-export const metadata = {
+export const metadata = buildPageMetadata({
   title: "Renew or Upgrade Ad | My Classifieds",
   description:
-    "Renew or upgrade your My Classifieds advertisement with paid, premium or featured options."
-};
+    "Renew or upgrade your My Classifieds advertisement with paid, premium or featured options.",
+  path: "/renew",
+  noIndex: true
+});
 
 export default async function RenewPage({ searchParams }) {
   const cookieStore = await cookies();

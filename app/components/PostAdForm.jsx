@@ -66,11 +66,17 @@ function getConditionLabel(condition, language) {
 export default function PostAdForm({
   categories = [],
   cities = [],
-  initialLanguage = "en"
+  initialLanguage = "en",
+  initialPlan = "FREE_7_DAYS"
 }) {
   const language = normalizeLanguage(initialLanguage);
   const router = useRouter();
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm] = useState(() => ({
+    ...initialForm,
+    selectedPlan: MANUAL_PAYMENT_PLANS.some((plan) => plan.key === initialPlan)
+      ? initialPlan
+      : initialForm.selectedPlan
+  }));
   const [acceptedAllTerms, setAcceptedAllTerms] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -439,10 +445,11 @@ export default function PostAdForm({
 
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 <div>
-                  <label className="text-sm font-bold text-slate-700">
+                  <label htmlFor="payerName" className="text-sm font-bold text-slate-700">
                     {t(language, "payerName")}
                   </label>
                   <input
+                    id="payerName"
                     name="payerName"
                     value={form.payerName}
                     onChange={updateField}
@@ -452,10 +459,11 @@ export default function PostAdForm({
                 </div>
 
                 <div>
-                  <label className="text-sm font-bold text-slate-700">
+                  <label htmlFor="payerMobile" className="text-sm font-bold text-slate-700">
                     {t(language, "payerMobile")}
                   </label>
                   <input
+                    id="payerMobile"
                     name="payerMobile"
                     value={form.payerMobile}
                     onChange={updateField}
@@ -468,10 +476,11 @@ export default function PostAdForm({
               </div>
 
               <div className="mt-4">
-                <label className="text-sm font-bold text-slate-700">
+                <label htmlFor="transactionReference" className="text-sm font-bold text-slate-700">
                   {t(language, "utrReference")}
                 </label>
                 <input
+                  id="transactionReference"
                   name="transactionReference"
                   value={form.transactionReference}
                   onChange={updateField}
@@ -481,10 +490,11 @@ export default function PostAdForm({
               </div>
 
               <div className="mt-4">
-                <label className="text-sm font-bold text-slate-700">
+                <label htmlFor="paymentNote" className="text-sm font-bold text-slate-700">
                   {t(language, "optionalPaymentNote")}
                 </label>
                 <textarea
+                  id="paymentNote"
                   name="paymentNote"
                   value={form.paymentNote}
                   onChange={updateField}
@@ -511,10 +521,11 @@ export default function PostAdForm({
 
         <div className="mt-5 grid gap-5 md:grid-cols-2">
           <div>
-            <label className="text-sm font-bold text-slate-700">
+            <label htmlFor="name" className="text-sm font-bold text-slate-700">
               {t(language, "yourName")}
             </label>
             <input
+              id="name"
               name="name"
               value={form.name}
               onChange={updateField}
@@ -524,10 +535,11 @@ export default function PostAdForm({
           </div>
 
           <div>
-            <label className="text-sm font-bold text-slate-700">
+            <label htmlFor="email" className="text-sm font-bold text-slate-700">
               {t(language, "emailAddress")}
             </label>
             <input
+              id="email"
               type="email"
               name="email"
               value={form.email}
@@ -539,10 +551,11 @@ export default function PostAdForm({
           </div>
 
           <div>
-            <label className="text-sm font-bold text-slate-700">
+            <label htmlFor="mobile" className="text-sm font-bold text-slate-700">
               {t(language, "mobileNumber")}
             </label>
             <input
+              id="mobile"
               name="mobile"
               value={form.mobile}
               onChange={updateField}
@@ -553,10 +566,11 @@ export default function PostAdForm({
           </div>
 
           <div>
-            <label className="text-sm font-bold text-slate-700">
+            <label htmlFor="whatsapp" className="text-sm font-bold text-slate-700">
               {t(language, "whatsappNumber")}
             </label>
             <input
+              id="whatsapp"
               name="whatsapp"
               value={form.whatsapp}
               onChange={updateField}
@@ -567,10 +581,11 @@ export default function PostAdForm({
           </div>
 
           <div>
-            <label className="text-sm font-bold text-slate-700">
+            <label htmlFor="advertiserType" className="text-sm font-bold text-slate-700">
               {t(language, "advertiserType")}
             </label>
             <select
+              id="advertiserType"
               name="advertiserType"
               value={form.advertiserType}
               onChange={updateField}
@@ -587,10 +602,11 @@ export default function PostAdForm({
           </div>
 
           <div>
-            <label className="text-sm font-bold text-slate-700">
+            <label htmlFor="condition" className="text-sm font-bold text-slate-700">
               {t(language, "condition")}
             </label>
             <select
+              id="condition"
               name="condition"
               value={form.condition}
               onChange={updateField}
@@ -605,10 +621,11 @@ export default function PostAdForm({
           </div>
 
           <div>
-            <label className="text-sm font-bold text-slate-700">
+            <label htmlFor="price" className="text-sm font-bold text-slate-700">
               {t(language, "price")}
             </label>
             <input
+              id="price"
               name="price"
               value={form.price}
               onChange={updateField}
@@ -618,10 +635,11 @@ export default function PostAdForm({
           </div>
 
           <div>
-            <label className="text-sm font-bold text-slate-700">
+            <label htmlFor="categoryId" className="text-sm font-bold text-slate-700">
               {t(language, "category")}
             </label>
             <select
+              id="categoryId"
               name="categoryId"
               value={form.categoryId}
               onChange={updateField}
@@ -638,10 +656,11 @@ export default function PostAdForm({
           </div>
 
           <div>
-            <label className="text-sm font-bold text-slate-700">
+            <label htmlFor="cityId" className="text-sm font-bold text-slate-700">
               {t(language, "city")}
             </label>
             <select
+              id="cityId"
               name="cityId"
               value={form.cityId}
               onChange={updateField}
@@ -660,7 +679,7 @@ export default function PostAdForm({
 
         <div className="mt-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <label className="text-sm font-bold text-slate-700">
+            <label htmlFor="title" className="text-sm font-bold text-slate-700">
               {t(language, "adHeading")}
             </label>
             <span className="text-xs font-bold text-slate-500">
@@ -669,6 +688,7 @@ export default function PostAdForm({
           </div>
 
           <input
+            id="title"
             name="title"
             value={form.title}
             onChange={updateField}
@@ -681,7 +701,7 @@ export default function PostAdForm({
 
         <div className="mt-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <label className="text-sm font-bold text-slate-700">
+            <label htmlFor="description" className="text-sm font-bold text-slate-700">
               {t(language, "classifiedDescription")}
             </label>
             <span className="text-xs font-bold text-slate-500">
@@ -690,6 +710,7 @@ export default function PostAdForm({
           </div>
 
           <textarea
+            id="description"
             name="description"
             value={form.description}
             onChange={updateField}
@@ -701,10 +722,11 @@ export default function PostAdForm({
         </div>
 
         <div className="mt-5">
-          <label className="text-sm font-bold text-slate-700">
+          <label htmlFor="address" className="text-sm font-bold text-slate-700">
             {t(language, "areaLocation")}
           </label>
           <input
+            id="address"
             name="address"
             value={form.address}
             onChange={updateField}

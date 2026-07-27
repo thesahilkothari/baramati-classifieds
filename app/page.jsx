@@ -77,7 +77,9 @@ async function getHomeAds() {
 
   return {
     featuredAds,
-    latestAds: uniqueAds([...featuredAds, ...premiumAds, ...paidAds, ...freeAds]).slice(0, 12)
+    latestAds: uniqueAds([...premiumAds, ...paidAds, ...freeAds])
+      .filter((ad) => !featuredAds.some((featuredAd) => featuredAd.id === ad.id))
+      .slice(0, 12)
   };
 }
 

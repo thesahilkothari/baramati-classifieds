@@ -3,12 +3,14 @@ import {
   ACTIVE_POLICY_VERSION,
   POLICY_EFFECTIVE_DATE_LABEL
 } from "../../lib/compliance";
+import { buildPageMetadata } from "../../lib/seo";
 
-export const metadata = {
+export const metadata = buildPageMetadata({
   title: "Terms and Conditions for Posting a Classified | My Classifieds",
   description:
-    "Consolidated terms and conditions accepted before posting a classified advertisement on My Classifieds."
-};
+    "Consolidated terms and conditions accepted before posting a classified advertisement on My Classifieds.",
+  path: "/legal/posting-terms"
+});
 
 export default function PostingTermsPage() {
   return (
