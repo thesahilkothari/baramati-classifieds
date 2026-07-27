@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { prisma } from "./lib/prisma";
@@ -161,6 +162,18 @@ export default async function HomePage() {
                       </p>
                     </div>
                   ))}
+                </div>
+
+                <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+                  <Image
+                    src="/og-image.jpg"
+                    alt="My Classifieds local classified ads preview for Baramati and Maharashtra"
+                    width={1200}
+                    height={630}
+                    priority
+                    sizes="(min-width: 1024px) 360px, 100vw"
+                    className="h-auto w-full"
+                  />
                 </div>
               </div>
             </div>
