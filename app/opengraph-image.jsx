@@ -37,7 +37,7 @@ function Mark() {
   );
 }
 
-function ListingCard({ top, badge, title, price, accent }) {
+function ListingCard({ top, badge, title, price, accent, city }) {
   return (
     <div
       style={{
@@ -45,7 +45,7 @@ function ListingCard({ top, badge, title, price, accent }) {
         right: 70,
         top,
         width: 390,
-        height: 112,
+        height: 118,
         borderRadius: 22,
         background: "#FFFFFF",
         border: "2px solid #CBD5E1",
@@ -58,7 +58,7 @@ function ListingCard({ top, badge, title, price, accent }) {
       <div
         style={{
           width: 112,
-          height: 84,
+          height: 90,
           borderRadius: 16,
           background: accent,
           display: "flex",
@@ -71,7 +71,7 @@ function ListingCard({ top, badge, title, price, accent }) {
       >
         ●
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
         <div
           style={{
             alignSelf: "flex-start",
@@ -85,11 +85,14 @@ function ListingCard({ top, badge, title, price, accent }) {
         >
           {badge}
         </div>
-        <div style={{ color: "#0F172A", fontSize: 22, fontWeight: 900 }}>
+        <div style={{ color: "#0F172A", fontSize: 21, fontWeight: 900 }}>
           {title}
         </div>
-        <div style={{ color: "#C2410C", fontSize: 20, fontWeight: 900 }}>
+        <div style={{ color: "#C2410C", fontSize: 18, fontWeight: 900 }}>
           {price}
+        </div>
+        <div style={{ color: "#475569", fontSize: 14, fontWeight: 700 }}>
+          {city}, Maharashtra
         </div>
       </div>
     </div>
@@ -131,7 +134,7 @@ export default function Image() {
             background: "#0F3D5E"
           }}
         />
-        <div style={{ padding: "72px 70px", display: "flex", flexDirection: "column" }}>
+        <div style={{ padding: "54px 70px", display: "flex", flexDirection: "column" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
             <Mark />
             <div style={{ display: "flex", flexDirection: "column" }}>
@@ -156,16 +159,16 @@ export default function Image() {
               </div>
             </div>
           </div>
-          <div style={{ marginTop: 52, color: "#0F3D5E", fontSize: 60, fontWeight: 900 }}>
+          <div style={{ marginTop: 42, color: "#0F3D5E", fontSize: 58, fontWeight: 900 }}>
             Buy, Sell, Rent & Find Jobs
           </div>
-          <div style={{ marginTop: 14, color: "#0F766E", fontSize: 34, fontWeight: 900 }}>
-            Baramati • Maharashtra • Local Classifieds
+          <div style={{ marginTop: 14, color: "#0F766E", fontSize: 31, fontWeight: 900 }}>
+            Tier-2 Maharashtra • 13 Launch Cities • Local Classifieds
           </div>
           <div
             style={{
-              marginTop: 38,
-              width: 600,
+              marginTop: 34,
+              width: 640,
               height: 66,
               borderRadius: 18,
               background: "#FFFFFF",
@@ -181,7 +184,7 @@ export default function Image() {
           >
             <span>⌕</span>
             <span>Search anything...</span>
-            <span style={{ marginLeft: "auto", color: "#0F3D5E" }}>Baramati</span>
+            <span style={{ marginLeft: "auto", color: "#0F3D5E" }}>13 cities</span>
             <span
               style={{
                 background: "#0F3D5E",
@@ -194,10 +197,22 @@ export default function Image() {
               Search
             </span>
           </div>
+          <div
+            style={{
+              marginTop: 24,
+              color: "#475569",
+              fontSize: 20,
+              fontWeight: 800,
+              width: 700,
+              lineHeight: 1.35
+            }}
+          >
+            Baramati • Phaltan • Akluj • Solapur • Karad • Satara • Sangli • Indapur • Daund • Shirur • Nashik • Sambhajinagar • Ahilyanagar
+          </div>
         </div>
-        <ListingCard top={158} badge="PROPERTY" title="2 BHK Duplex House" price="₹45,00,000" accent="#E0F2FE" />
-        <ListingCard top={292} badge="JOBS" title="Field Sales Executive" price="₹18,000 - ₹25,000" accent="#FFEDD5" />
-        <ListingCard top={426} badge="VEHICLES" title="Maruti Swift VXI" price="₹6,25,000" accent="#CCFBF1" />
+        <ListingCard top={142} badge="PROPERTY" title="2 BHK Duplex House" price="₹45,00,000" city="Baramati" accent="#E0F2FE" />
+        <ListingCard top={282} badge="JOBS" title="Field Sales Executive" price="₹18,000 - ₹25,000" city="Satara" accent="#FFEDD5" />
+        <ListingCard top={422} badge="VEHICLES" title="Maruti Swift VXI" price="₹6,25,000" city="Phaltan" accent="#CCFBF1" />
         <div
           style={{
             position: "absolute",
