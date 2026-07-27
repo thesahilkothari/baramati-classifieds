@@ -33,6 +33,9 @@ export default async function Header() {
           <Link href="/pricing" className="hover:text-blue-700">
             {t(language, "pricing")}
           </Link>
+          <Link href="/about" className="hover:text-blue-700">
+            {label(language, "About", "आमच्याबद्दल")}
+          </Link>
           <Link href="/support" className="hover:text-blue-700">
             {t(language, "support")}
           </Link>
