@@ -5,42 +5,95 @@ import JsonLd from "../components/JsonLd";
 import { buildBreadcrumbSchema, buildOrganizationSchema } from "../lib/jsonLd";
 
 export const metadata = buildPageMetadata({
-  title: "About My Classifieds | Online Classifieds Platform",
+  title: "About My Classifieds | Affordable Online Classifieds for Tier-2 Maharashtra",
   description:
-    "Learn why My Classifieds was created as a lightweight online classifieds platform for Baramati and Maharashtra.",
+    "My Classifieds is an affordable online classifieds platform designed for Baramati and tier-2 cities in Maharashtra, helping people post property, jobs, services and local ads easily.",
   path: "/about"
 });
 
-const sections = [
+const publicMissionPoints = [
+  "Built for tier-2 cities such as Baramati, where traditional newspaper classifieds can be costly for ordinary citizens and small businesses.",
+  "Designed as an affordable local yellow-page style service for people who want to buy, sell, rent, hire, work, offer services or find nearby opportunities.",
+  "Focused on simple text-first classifieds so the platform remains fast, searchable, mobile-friendly and accessible on ordinary internet connections.",
+  "Open to legally permissible classifieds only, subject to moderation, listing rules, safety checks and user reporting mechanisms."
+];
+
+const publicMissionPointsMr = [
+  "बारामतीसारख्या tier-2 शहरांसाठी तयार केलेले, जिथे वृत्तपत्रातील classified जाहिराती सामान्य नागरिक व छोट्या व्यवसायांसाठी खर्चिक ठरू शकतात.",
+  "खरेदी, विक्री, भाडे, नोकरी, सेवा, freelancers आणि स्थानिक संधींसाठी affordable local yellow-page style सेवा म्हणून विकसित केलेले.",
+  "जलद, शोधण्यास सोपे आणि mobile-first अनुभवासाठी text-first classifieds वर भर.",
+  "केवळ कायदेशीरदृष्ट्या अनुमत जाहिराती, moderation, listing rules, safety checks आणि user reporting mechanisms अंतर्गत."
+];
+
+const categoryGroups = [
   {
-    title: "Why My Classifieds was created",
+    title: "Buy, sell or rent",
     text:
-      "My Classifieds was created to give Baramati and nearby Maharashtra users a simple local classified board that feels familiar, fast and practical. The aim is to bring good-old newspaper-style classifieds to mobile and desktop users without making the website heavy or complicated.",
+      "Property, vehicles, furniture, electronics, appliances, equipment and other legally saleable or rentable items.",
     mr:
-      "My Classifieds हे बारामती व महाराष्ट्रातील वापरकर्त्यांसाठी साधे, जलद आणि स्थानिक classified board म्हणून तयार केले आहे. जुनी newspaper-style जाहिरात पद्धत mobile आणि desktop वर सोप्या पद्धतीने उपलब्ध करणे हा उद्देश आहे."
+      "मालमत्ता, वाहने, फर्निचर, electronics, appliances, equipment आणि कायदेशीररीत्या विक्री/भाड्याने देता येणाऱ्या वस्तू.",
+    accent: "#C2410C"
   },
   {
-    title: "Local focus",
+    title: "Jobs and work opportunities",
     text:
-      "The platform focuses on Baramati and Maharashtra categories such as property, jobs, vehicles, agriculture equipment, electronics and local services. Public pages are intentionally lightweight and text-first so that they work well on ordinary mobile networks.",
+      "Job seekers can discover local openings, while employers and businesses can post simple hiring classifieds.",
     mr:
-      "ही platform Baramati आणि Maharashtra मधील property, jobs, vehicles, agriculture equipment, electronics आणि local services यांसारख्या categories वर लक्ष केंद्रित करते. साध्या mobile network वरही website चांगली चालावी म्हणून public pages text-first व lightweight ठेवले आहेत."
+      "नोकरी शोधणाऱ्यांसाठी स्थानिक openings आणि employers/businesses साठी सोपी hiring classifieds.",
+    accent: "#0F3D5E"
   },
   {
-    title: "Moderation and user safety",
+    title: "Daily local services",
     text:
-      "Advertisements are subject to moderation, listing rules and report/takedown controls. Users should still independently verify property papers, vehicle documents, job offers, seller identity, service scope and payment details before any transaction.",
+      "Electricians, plumbers, carpenters, packers and movers, transporters, cabs, tutors, drivers, contractors and more.",
     mr:
-      "जाहिराती moderation, listing rules आणि report/takedown controls अंतर्गत असतात. तरीही व्यवहारापूर्वी property papers, vehicle documents, job offers, seller identity, service scope आणि payment details स्वतंत्रपणे तपासणे आवश्यक आहे."
+      "Electrician, plumber, carpenter, packers and movers, transporter, cab, tutor, driver, contractor आणि इतर स्थानिक सेवा.",
+    accent: "#0F766E"
   },
   {
-    title: "Platform role",
+    title: "Care, support and professionals",
     text:
-      "My Classifieds facilitates advertisements and paid listing visibility services. It does not own, inspect, deliver, verify, endorse or guarantee the advertised goods, property, employment, services or transactions unless expressly stated in a specific listing.",
+      "Nurses, caregivers, caretakers, freelancers and local professionals such as CAs, architects, doctors, lawyers and consultants.",
     mr:
-      "My Classifieds जाहिराती आणि paid listing visibility services उपलब्ध करून देते. विशिष्ट जाहिरातीत स्पष्ट नमूद केले नसेल तर advertised goods, property, employment, services किंवा transactions यांची मालकी, तपासणी, delivery, verification, endorsement किंवा guarantee platform देत नाही."
+      "Nurses, caregivers, caretakers, freelancers आणि CA, architect, doctor, lawyer, consultant यांसारखे local professionals.",
+    accent: "#0F3D5E"
   }
 ];
+
+const platformPrinciples = [
+  {
+    title: "Affordable reach",
+    text:
+      "Local visibility should not be limited only to those who can afford repeated print advertisements. My Classifieds gives a simpler digital route for public notices, local needs and everyday opportunities."
+  },
+  {
+    title: "Search-first utility",
+    text:
+      "The platform is designed around search, category and location rather than clutter. A user should be able to quickly find what is useful nearby."
+  },
+  {
+    title: "Local city focus",
+    text:
+      "The purpose is not to imitate a luxury marketplace. It is to become a practical city-level classifieds and yellow-page style layer for Baramati and similar Maharashtra cities."
+  },
+  {
+    title: "Responsible publishing",
+    text:
+      "Every ad remains subject to platform rules. My Classifieds facilitates publishing and contact, but users must independently verify people, documents, services and payments before transacting."
+  }
+];
+
+function NumberedStep({ number, title, text }) {
+  return (
+    <div className="rounded-3xl border border-[#CBD5E1] bg-white p-5 shadow-sm">
+      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#0F3D5E] text-sm font-black text-white">
+        {number}
+      </div>
+      <h3 className="mt-4 text-lg font-black uppercase text-[#0F172A]">{title}</h3>
+      <p className="mt-2 text-sm leading-7 text-[#475569]">{text}</p>
+    </div>
+  );
+}
 
 export default function AboutPage() {
   return (
@@ -65,33 +118,33 @@ export default function AboutPage() {
           </nav>
 
           <header className="overflow-hidden rounded-3xl border border-[#CBD5E1] bg-white shadow-sm">
-            <div className="grid gap-0 lg:grid-cols-[0.92fr_1fr]">
+            <div className="grid gap-0 lg:grid-cols-[0.96fr_1fr]">
               <div className="p-6 md:p-8 lg:p-10">
                 <p className="text-xs font-black uppercase tracking-wide text-[#C2410C]">
-                  About My Classifieds
+                  My Classifieds • Online Classifieds Platform
                 </p>
 
                 <h1 className="mt-3 text-3xl font-black leading-tight text-[#0F3D5E] md:text-5xl">
-                  A dependable online classifieds platform for Baramati and Maharashtra
+                  Local classifieds made affordable for Baramati and tier-2 Maharashtra
                 </h1>
 
                 <p className="mt-5 text-base leading-8 text-[#475569]">
-                  My Classifieds keeps local advertising simple: users can post and browse classified advertisements, contact advertisers directly, and use clear paid visibility options without automatic renewal.
+                  My Classifieds was created for cities where a simple classified advertisement in a newspaper, local weekly or fortnightly can still be costly and inconvenient for the common public. We bring everyday local needs to your fingertips: buy, sell, rent, hire, find jobs, offer services and connect with nearby people through a simple online classifieds platform.
                 </p>
 
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                   <Link
-                    href="/ads"
-                    className="rounded-xl bg-[#0F3D5E] px-5 py-3 text-center text-sm font-black uppercase text-white"
+                    href="/post-ad"
+                    className="rounded-xl bg-[#C2410C] px-5 py-3 text-center text-sm font-black uppercase text-white hover:bg-orange-800"
                   >
-                    Browse Ads
+                    Post Free Ad
                   </Link>
 
                   <Link
-                    href="/post-ad"
-                    className="rounded-xl bg-[#C2410C] px-5 py-3 text-center text-sm font-black uppercase text-white"
+                    href="/ads"
+                    className="rounded-xl bg-[#0F3D5E] px-5 py-3 text-center text-sm font-black uppercase text-white hover:bg-[#0B2F49]"
                   >
-                    Post Free Ad
+                    Browse Local Ads
                   </Link>
                 </div>
               </div>
@@ -102,23 +155,115 @@ export default function AboutPage() {
             </div>
           </header>
 
-          <div className="mt-6 grid gap-4">
-            {sections.map((section) => (
-              <article key={section.title} className="rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm">
-                <h2 className="text-xl font-black uppercase text-[#0F172A]">
-                  {section.title}
-                </h2>
+          <section className="mt-6 rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm md:p-8">
+            <p className="text-xs font-black uppercase tracking-wide text-[#0F766E]">
+              The idea behind the platform
+            </p>
+            <h2 className="mt-2 text-2xl font-black uppercase text-[#0F172A] md:text-3xl">
+              A digital yellow page for the local city
+            </h2>
+            <p className="mt-4 text-sm leading-8 text-[#475569] md:text-base">
+              My Classifieds is built as an affordable local utility. It is not meant to be a crowded luxury marketplace. It is meant to be useful: a clean, searchable, city-focused classifieds service where people in Baramati and similar Maharashtra cities can publish everyday requirements and discover nearby opportunities without depending only on costly print ads.
+            </p>
 
-                <p className="mt-3 text-sm leading-7 text-[#475569]">
-                  {section.text}
+            <div className="mt-6 grid gap-3 md:grid-cols-2">
+              {publicMissionPoints.map((point) => (
+                <div key={point} className="rounded-2xl border border-[#CBD5E1] bg-[#F8FAFC] p-4 text-sm leading-7 text-[#475569]">
+                  {point}
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              {publicMissionPointsMr.map((point) => (
+                <div key={point} className="rounded-2xl border border-[#CBD5E1] bg-white p-4 text-sm leading-7 text-[#475569]">
+                  {point}
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="mt-6">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-xs font-black uppercase tracking-wide text-[#C2410C]">
+                  What people can use it for
                 </p>
+                <h2 className="mt-2 text-2xl font-black uppercase text-[#0F172A] md:text-3xl">
+                  Classifieds for real local life
+                </h2>
+              </div>
+              <Link href="/post-ad" className="text-sm font-black uppercase text-[#0F3D5E]">
+                Start with a free ad
+              </Link>
+            </div>
 
-                <p className="mt-3 rounded-2xl bg-[#F8FAFC] p-4 text-sm leading-7 text-[#475569]">
-                  {section.mr}
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              {categoryGroups.map((group) => (
+                <article key={group.title} className="rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm">
+                  <div className="h-2 w-16 rounded-full" style={{ backgroundColor: group.accent }} />
+                  <h3 className="mt-4 text-xl font-black uppercase text-[#0F172A]">
+                    {group.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-7 text-[#475569]">{group.text}</p>
+                  <p className="mt-3 rounded-2xl bg-[#F8FAFC] p-4 text-sm leading-7 text-[#475569]">
+                    {group.mr}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="mt-6 grid gap-4 md:grid-cols-4">
+            {platformPrinciples.map((principle) => (
+              <article key={principle.title} className="rounded-3xl border border-[#CBD5E1] bg-white p-5 shadow-sm">
+                <h3 className="text-base font-black uppercase text-[#0F3D5E]">
+                  {principle.title}
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-[#475569]">
+                  {principle.text}
                 </p>
               </article>
             ))}
-          </div>
+          </section>
+
+          <section className="mt-6 rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm md:p-8">
+            <p className="text-xs font-black uppercase tracking-wide text-[#0F766E]">
+              How it works
+            </p>
+            <h2 className="mt-2 text-2xl font-black uppercase text-[#0F172A] md:text-3xl">
+              Simple for users, moderated for safety
+            </h2>
+            <div className="mt-5 grid gap-4 md:grid-cols-3">
+              <NumberedStep
+                number="1"
+                title="Post your need"
+                text="Write a plain-text classified for a legal item, property, job, service or local requirement. Keep it short, clear and useful."
+              />
+              <NumberedStep
+                number="2"
+                title="Admin moderation"
+                text="Ads are reviewed before publication so prohibited, misleading or unsafe content can be restricted under platform rules."
+              />
+              <NumberedStep
+                number="3"
+                title="Connect directly"
+                text="Interested people can contact the advertiser directly. Users should verify details independently before payment or commitment."
+              />
+            </div>
+          </section>
+
+          <section className="mt-6 rounded-3xl border border-[#CBD5E1] bg-[#0F3D5E] p-6 text-white shadow-sm md:p-8">
+            <p className="text-xs font-black uppercase tracking-wide text-orange-200">
+              Our positioning
+            </p>
+            <h2 className="mt-2 text-3xl font-black uppercase md:text-4xl">
+              My Classifieds brings local opportunities to your fingertips.
+            </h2>
+            <p className="mt-4 max-w-4xl text-sm leading-8 text-slate-100 md:text-base">
+              For a local resident, it can be a place to sell a used item. For a job seeker, it can be a place to find work. For a small business, it can be a low-cost visibility channel. For a service provider, it can become a local city directory. That is the purpose of My Classifieds: affordable, searchable, responsible local advertising for Baramati and Maharashtra.
+            </p>
+          </section>
 
           <section className="mt-6 rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm">
             <h2 className="text-xl font-black uppercase text-[#0F172A]">
@@ -127,6 +272,10 @@ export default function AboutPage() {
 
             <p className="mt-3 text-sm leading-7 text-[#475569]">
               My Classifieds is owned and operated by SAHIL KOTHARI ENTERPRISES PRIVATE LIMITED. CIN: U74999PN2014PTC150594. Registered Office: Vardhaman Capital, Plot No. 13, Gat No. 42/1, Mouje Rui, Taluka Baramati, District Pune, Maharashtra – 413133. Contact: connect@myclassifieds.in | +91 9673931166.
+            </p>
+
+            <p className="mt-3 rounded-2xl bg-[#F8FAFC] p-4 text-sm leading-7 text-[#475569]">
+              My Classifieds facilitates advertisement publication and contact between users. The platform does not independently verify ownership, title, employment offers, professional qualifications, service quality, documents, product condition or payments. Users must carry out their own due diligence before any transaction.
             </p>
 
             <div className="mt-5 flex flex-col gap-3 sm:flex-row">
