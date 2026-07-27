@@ -1,4 +1,5 @@
 import Link from "next/link";
+import BrandMark from "./BrandMark";
 import { getConditionLabel } from "../lib/itemConditions";
 import { t } from "../lib/i18n";
 
@@ -25,77 +26,116 @@ function shouldShowFeatured(ad) {
   return new Date(ad.featuredUntil) > new Date();
 }
 
+function getCategoryIcon(categorySlug) {
+  const slug = String(categorySlug || "");
+  if (slug.includes("real-estate")) return "⌂";
+  if (slug.includes("job")) return "▣";
+  if (slug.includes("vehicle")) return "▰";
+  if (slug.includes("electronic")) return "▯";
+  if (slug.includes("agriculture")) return "⚑";
+  if (slug.includes("service")) return "⚙";
+  return "▤";
+}
+
 export default function AdCard({ ad, language = "en" }) {
   const showFeatured = shouldShowFeatured(ad);
+  const verifiedSeller = Boolean(ad?.user?.isVerified);
+  const categoryName = language === "mr" ? ad.category?.nameMr || ad.category?.nameEn : ad.category?.nameEn;
 
   return (
     <article
-      className={`group flex h-full flex-col rounded-2xl border-2 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
-        showFeatured ? "border-orange-400" : "border-slate-200"
+      className={`group flex h-full flex-col overflow-hidden rounded-xl border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+        showFeatured ? "border-[#F59E0B]" : "border-[#CBD5E1]"
       }`}
     >
-      <div className="flex flex-wrap gap-2">
+      <Link
+        href={`/ads/${ad.slug}`}
+        className="relative block border-b border-[#CBD5E1] bg-[#F8FAFC]"
+        style={{ aspectRatio: "4 / 3" }}
+      >
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-[#F8FAFC] to-[#E2E8F0] p-4 text-center">
+          <BrandMark className="h-14 w-14 opacity-95" />
+          <div>
+            <p className="text-4xl font-black text-[#0F3D5E]">
+              {getCategoryIcon(ad.category?.slug)}
+            </p>
+            <p className="mt-1 text-xs font-black uppercase tracking-wide text-[#475569]">
+              {categoryName || "Classified"}
+            </p>
+          </div>
+        </div>
+
         {showFeatured && (
-          <span className="rounded bg-orange-500 px-2 py-1 text-[10px] font-black uppercase text-white">
+          <span className="absolute left-3 top-3 rounded bg-[#F59E0B] px-2.5 py-1 text-[10px] font-black uppercase text-[#0F172A] shadow-sm">
             {t(language, "featured")}
           </span>
         )}
-
-        {ad.category?.nameEn && (
-          <span className="rounded bg-slate-950 px-2 py-1 text-[10px] font-black uppercase text-white">
-            {language === "mr" ? ad.category.nameMr || ad.category.nameEn : ad.category.nameEn}
-          </span>
-        )}
-
-        {ad.city?.name && (
-          <span className="rounded bg-slate-100 px-2 py-1 text-[10px] font-black uppercase text-slate-700">
-            {ad.city.name}
-          </span>
-        )}
-      </div>
-
-      <Link href={`/ads/${ad.slug}`} className="mt-3 block">
-        <h3 className="line-clamp-2 text-lg font-black uppercase leading-tight text-slate-950 group-hover:text-blue-700">
-          {ad.title}
-        </h3>
       </Link>
 
-      <p className="mt-3 text-xl font-black text-red-700">
-        {formatPrice(ad.price, language)}
-      </p>
+      <div className="flex flex-1 flex-col p-4">
+        <div className="flex flex-wrap gap-2">
+          {verifiedSeller && (
+            <span className="rounded bg-[#0F766E] px-2 py-1 text-[10px] font-black uppercase text-white">
+              Verified Seller
+            </span>
+          )}
 
-      <p className="mt-3 line-clamp-4 flex-1 text-sm leading-6 text-slate-700">
-        {ad.description}
-      </p>
+          {categoryName && (
+            <span className="rounded bg-[#0F3D5E] px-2 py-1 text-[10px] font-black uppercase text-white">
+              {categoryName}
+            </span>
+          )}
 
-      <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-bold uppercase text-slate-500">
-        {ad.condition && ad.condition !== "NOT_APPLICABLE" && (
-          <span className="rounded bg-slate-100 px-2 py-1">
-            {getConditionLabel(ad.condition, language)}
-          </span>
-        )}
+          {ad.city?.name && (
+            <span className="rounded bg-slate-100 px-2 py-1 text-[10px] font-black uppercase text-[#475569]">
+              {ad.city.name}
+            </span>
+          )}
+        </div>
 
-        {ad.createdAt && (
-          <span className="rounded bg-slate-100 px-2 py-1">
-            {new Date(ad.createdAt).toLocaleDateString("en-IN")}
-          </span>
-        )}
-      </div>
-
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        <Link
-          href={`/ads/${ad.slug}`}
-          className="rounded-xl bg-blue-700 px-3 py-2 text-center text-xs font-black uppercase text-white hover:bg-blue-800"
-        >
-          {t(language, "view")}
+        <Link href={`/ads/${ad.slug}`} className="mt-3 block">
+          <h3 className="line-clamp-2 text-lg font-black uppercase leading-tight text-[#0F172A] group-hover:text-[#0F3D5E]">
+            {ad.title}
+          </h3>
         </Link>
 
-        <Link
-          href={`/report?adId=${ad.id}&adSlug=${ad.slug}`}
-          className="rounded-xl border px-3 py-2 text-center text-xs font-black uppercase text-slate-700 hover:bg-slate-50"
-        >
-          {t(language, "report")}
-        </Link>
+        <p className="mt-3 text-xl font-black text-[#C2410C]">
+          {formatPrice(ad.price, language)}
+        </p>
+
+        <p className="mt-3 line-clamp-3 flex-1 text-sm leading-6 text-[#475569]">
+          {ad.description}
+        </p>
+
+        <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-bold uppercase text-[#475569]">
+          {ad.condition && ad.condition !== "NOT_APPLICABLE" && (
+            <span className="rounded bg-slate-100 px-2 py-1">
+              {getConditionLabel(ad.condition, language)}
+            </span>
+          )}
+
+          {ad.createdAt && (
+            <span className="rounded bg-slate-100 px-2 py-1">
+              {new Date(ad.createdAt).toLocaleDateString("en-IN")}
+            </span>
+          )}
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <Link
+            href={`/ads/${ad.slug}`}
+            className="rounded-xl bg-[#0F3D5E] px-3 py-2 text-center text-xs font-black uppercase text-white hover:bg-[#0B2F49]"
+          >
+            {t(language, "view")}
+          </Link>
+
+          <Link
+            href={`/report?adId=${ad.id}&adSlug=${ad.slug}`}
+            className="rounded-xl border border-[#CBD5E1] px-3 py-2 text-center text-xs font-black uppercase text-[#B91C1C] hover:bg-red-50"
+          >
+            {t(language, "report")}
+          </Link>
+        </div>
       </div>
     </article>
   );
