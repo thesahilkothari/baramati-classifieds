@@ -1,4 +1,5 @@
 import { prisma } from "./lib/prisma";
+import { getAllowedAdCityWhere } from "./lib/locations";
 import { absoluteUrl } from "./lib/seo";
 import { landingPageSitemapRoutes } from "./lib/seoLandingPages";
 
@@ -51,8 +52,11 @@ export default async function sitemap() {
       }),
       prisma.ad.findMany({
         where: {
-          status: "ACTIVE",
-          OR: [{ expiresAt: null }, { expiresAt: { gt: now } }]
+          AND: [
+            { status: "ACTIVE" },
+            getAllowedAdCityWhere(),
+            { OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] }
+          ]
         },
         select: {
           slug: true,
