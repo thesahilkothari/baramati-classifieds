@@ -14,6 +14,7 @@ import {
   createManualPaymentReference,
   MANUAL_UPI_CONFIG
 } from "../../lib/manualPayment";
+import { isAllowedTier2LocationSlug } from "../../lib/locations";
 import { canPlanUseFeatured, getPlanCharacterLimits } from "../../lib/planFeatures";
 import {
   buildAdSubmissionEmail,
@@ -304,6 +305,16 @@ export async function POST(request) {
     if (!category || !city) {
       return NextResponse.json(
         { error: "Selected category or city is invalid." },
+        { status: 400 }
+      );
+    }
+
+    if (!isAllowedTier2LocationSlug(city.slug)) {
+      return NextResponse.json(
+        {
+          error:
+            "Selected city is currently outside the My Classifieds launch locations. Please select an approved tier-2 Maharashtra location."
+        },
         { status: 400 }
       );
     }
