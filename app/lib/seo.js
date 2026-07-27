@@ -14,19 +14,24 @@ export function absoluteUrl(path = "/") {
 
 export const defaultSeo = {
   siteName: "My Classifieds",
-  title: "My Classifieds | Online Classifieds Platform",
+  title: "My Classifieds | Online Classifieds Platform for Baramati",
   description:
-    "My Classifieds is an online classifieds platform for Baramati and Maharashtra. Post and browse ads for property, jobs, vehicles, electronics, services and local opportunities.",
+    "My Classifieds is an affordable online classifieds platform and local yellow-page style service for Baramati and tier-2 cities in Maharashtra. Post and browse ads for property, jobs, vehicles, services, electronics and local opportunities.",
   keywords: [
     "My Classifieds",
     "online classifieds platform",
     "Baramati classifieds",
     "classified ads Baramati",
     "Maharashtra classifieds",
+    "tier 2 city classifieds",
+    "local yellow pages Baramati",
+    "affordable classified ads",
     "property ads Baramati",
     "jobs Baramati",
     "local services Baramati",
-    "used vehicles Baramati"
+    "used vehicles Baramati",
+    "freelancers Baramati",
+    "services directory Baramati"
   ]
 };
 
