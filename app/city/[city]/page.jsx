@@ -1,30 +1,36 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/app/lib/prisma";
 import AdCard from "@/app/components/AdCard";
+import { buildPageMetadata } from "@/app/lib/seo";
 
 export async function generateMetadata({ params }) {
+  const resolvedParams = await params;
   const city = await prisma.city.findUnique({
     where: {
-      slug: params.city
+      slug: resolvedParams.city
     }
   });
 
   if (!city) {
-    return {
-      title: "City Not Found"
-    };
+    return buildPageMetadata({
+      title: "City Not Found | My Classifieds",
+      path: `/city/${resolvedParams.city}`,
+      noIndex: true
+    });
   }
 
-  return {
-    title: `Classified Ads in ${city.name} | Baramati Classifieds`,
-    description: `Find property, jobs, vehicles, electronics, agriculture equipment and services in ${city.name}, Maharashtra.`
-  };
+  return buildPageMetadata({
+    title: `Classified Ads in ${city.name} | My Classifieds`,
+    description: `Find property, jobs, vehicles, electronics, agriculture equipment and services in ${city.name}, Maharashtra.`,
+    path: `/city/${city.slug}`
+  });
 }
 
 export default async function CityPage({ params }) {
+  const resolvedParams = await params;
   const city = await prisma.city.findUnique({
     where: {
-      slug: params.city
+      slug: resolvedParams.city
     }
   });
 

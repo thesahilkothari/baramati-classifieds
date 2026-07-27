@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { buildPageMetadata } from "../lib/seo";
 
-export const metadata = {
+export const metadata = buildPageMetadata({
   title: "Contact | My Classifieds",
-  description: "Contact My Classifieds for classified advertisement support."
-};
+  description: "Contact My Classifieds for classified advertisement support.",
+  path: "/contact"
+});
 
 export default function ContactPage() {
   return (

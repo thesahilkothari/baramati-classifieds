@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import AdCard from "../../components/AdCard";
 import { prisma } from "../../lib/prisma";
+import { buildPageMetadata } from "../../lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -63,10 +64,11 @@ export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const slug = resolvedParams.slug;
 
-  return {
+  return buildPageMetadata({
     title: `${formatSlug(slug)} Ads | My Classifieds`,
-    description: `Browse ${formatSlug(slug)} classified ads in Baramati and Maharashtra.`
-  };
+    description: `Browse ${formatSlug(slug)} classified ads in Baramati and Maharashtra.`,
+    path: `/category/${slug}`
+  });
 }
 
 export default async function CategoryPage({ params }) {

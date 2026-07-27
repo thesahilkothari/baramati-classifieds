@@ -124,10 +124,11 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
       >
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           <div className="md:col-span-2">
-            <label className="text-xs font-black uppercase text-slate-500">
+            <label htmlFor="ad-search-keyword" className="text-xs font-black uppercase text-slate-500">
               {t(language, "keyword")}
             </label>
             <input
+              id="ad-search-keyword"
               name="q"
               value={form.q}
               onChange={updateField}
@@ -137,10 +138,11 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
           </div>
 
           <div>
-            <label className="text-xs font-black uppercase text-slate-500">
+            <label htmlFor="ad-search-category" className="text-xs font-black uppercase text-slate-500">
               {t(language, "category")}
             </label>
             <select
+              id="ad-search-category"
               name="category"
               value={form.category}
               onChange={updateField}
@@ -156,10 +158,11 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
           </div>
 
           <div>
-            <label className="text-xs font-black uppercase text-slate-500">
+            <label htmlFor="ad-search-city" className="text-xs font-black uppercase text-slate-500">
               {t(language, "location")}
             </label>
             <select
+              id="ad-search-city"
               name="city"
               value={form.city}
               onChange={updateField}
@@ -175,10 +178,11 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
           </div>
 
           <div>
-            <label className="text-xs font-black uppercase text-slate-500">
+            <label htmlFor="ad-search-min-price" className="text-xs font-black uppercase text-slate-500">
               {t(language, "minPrice")}
             </label>
             <input
+              id="ad-search-min-price"
               name="minPrice"
               value={form.minPrice}
               onChange={updateField}
@@ -189,10 +193,11 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
           </div>
 
           <div>
-            <label className="text-xs font-black uppercase text-slate-500">
+            <label htmlFor="ad-search-max-price" className="text-xs font-black uppercase text-slate-500">
               {t(language, "maxPrice")}
             </label>
             <input
+              id="ad-search-max-price"
               name="maxPrice"
               value={form.maxPrice}
               onChange={updateField}
@@ -203,10 +208,11 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
           </div>
 
           <div>
-            <label className="text-xs font-black uppercase text-slate-500">
+            <label htmlFor="ad-search-condition" className="text-xs font-black uppercase text-slate-500">
               {t(language, "condition")}
             </label>
             <select
+              id="ad-search-condition"
               name="condition"
               value={form.condition}
               onChange={updateField}
@@ -224,10 +230,11 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
           </div>
 
           <div>
-            <label className="text-xs font-black uppercase text-slate-500">
+            <label htmlFor="ad-search-posted" className="text-xs font-black uppercase text-slate-500">
               {t(language, "posted")}
             </label>
             <select
+              id="ad-search-posted"
               name="posted"
               value={form.posted}
               onChange={updateField}

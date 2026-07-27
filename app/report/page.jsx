@@ -1,9 +1,11 @@
 import ReportForm from "../components/ReportForm";
+import { buildPageMetadata } from "../lib/seo";
 
-export const metadata = {
+export const metadata = buildPageMetadata({
   title: "Report Listing / Grievance | My Classifieds",
-  description: "Report a classified listing, submit a grievance or raise a takedown request with My Classifieds."
-};
+  description: "Report a classified listing, submit a grievance or raise a takedown request with My Classifieds.",
+  path: "/report"
+});
 
 export default async function ReportPage({ searchParams }) {
   const resolvedSearchParams = await searchParams;

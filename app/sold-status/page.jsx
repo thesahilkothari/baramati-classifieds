@@ -1,10 +1,13 @@
 import SoldStatusForm from "../components/SoldStatusForm";
+import { buildPageMetadata } from "../lib/seo";
 
-export const metadata = {
+export const metadata = buildPageMetadata({
   title: "Confirm Sold Status | My Classifieds",
   description:
-    "Confirm whether your listed product or service is sold or still available."
-};
+    "Confirm whether your listed product or service is sold or still available.",
+  path: "/sold-status",
+  noIndex: true
+});
 
 export default async function SoldStatusPage({ searchParams }) {
   const resolvedSearchParams = await searchParams;

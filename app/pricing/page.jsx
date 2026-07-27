@@ -10,12 +10,14 @@ import {
   formatPlanAmount
 } from "../lib/planFeatures";
 import { getLanguageFromCookieStore, t } from "../lib/i18n";
+import { buildPageMetadata } from "../lib/seo";
 
-export const metadata = {
+export const metadata = buildPageMetadata({
   title: "Pricing | My Classifieds",
   description:
-    "Pricing plans for free, paid, premium and featured classified ads on My Classifieds."
-};
+    "Pricing plans for free, paid, premium and featured classified ads on My Classifieds.",
+  path: "/pricing"
+});
 
 function getPlanHref(planKey) {
   if (planKey === "FREE_7_DAYS") return "/post-ad?plan=free";
@@ -150,12 +152,11 @@ export default async function PricingPage() {
               ))}
             </ul>
 
-            <Link
-              href="/post-ad?plan=featured"
-              className="mt-6 flex w-full justify-center rounded-xl bg-orange-500 px-5 py-3 text-sm font-black uppercase text-white hover:bg-orange-600"
-            >
-              {t(language, "choosePlanButton")}
-            </Link>
+            <p className="mt-6 rounded-xl border border-orange-300 bg-white px-5 py-3 text-center text-sm font-black uppercase text-orange-800">
+              {language === "mr"
+                ? "Paid किंवा Premium plan निवडल्यानंतर उपलब्ध"
+                : "Available after selecting Paid or Premium"}
+            </p>
           </article>
         </div>
 

@@ -2,12 +2,14 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { SUPPORT_FAQS, getLocalizedFaqText, getSupportWhatsAppUrl } from "../lib/supportFaq";
 import { getLanguageFromCookieStore, t } from "../lib/i18n";
+import { buildPageMetadata } from "../lib/seo";
 
-export const metadata = {
+export const metadata = buildPageMetadata({
   title: "Help Centre | My Classifieds",
   description:
-    "Get quick answers about posting ads, pricing, approval time and manual UPI payment on My Classifieds."
-};
+    "Get quick answers about posting ads, pricing, approval time and manual UPI payment on My Classifieds.",
+  path: "/support"
+});
 
 export default async function SupportPage() {
   const cookieStore = await cookies();

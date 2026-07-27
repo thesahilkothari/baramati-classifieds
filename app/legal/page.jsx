@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { LEGAL_PAGES, POLICY_EFFECTIVE_DATE, POLICY_VERSION } from "../lib/legalContent";
+import { buildPageMetadata } from "../lib/seo";
 
-export const metadata = {
+export const metadata = buildPageMetadata({
   title: "Legal Hub | My Classifieds",
-  description: "Legal policies, privacy, refund, grievance and corporate information for My Classifieds."
-};
+  description: "Legal policies, privacy, refund, grievance and corporate information for My Classifieds.",
+  path: "/legal"
+});
 
 export default function LegalHubPage() {
   return (

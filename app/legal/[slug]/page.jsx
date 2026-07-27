@@ -10,6 +10,7 @@ import {
   POLICY_VERSION,
   readLegalMarkdown
 } from "../../lib/legalContent";
+import { buildPageMetadata } from "../../lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -23,18 +24,21 @@ export async function generateMetadata({ params, searchParams }) {
   const page = getLegalPage(resolvedParams.slug);
 
   if (!page) {
-    return {
-      title: "Legal Page Not Found | My Classifieds"
-    };
+    return buildPageMetadata({
+      title: "Legal Page Not Found | My Classifieds",
+      path: `/legal/${resolvedParams.slug}`,
+      noIndex: true
+    });
   }
 
   const lang = normalizeLegalLanguage(resolvedSearchParams?.lang);
   const title = getLegalTitle(page, lang);
 
-  return {
+  return buildPageMetadata({
     title: `${title} | My Classifieds`,
-    description: `${title} for My Classifieds. Version ${POLICY_VERSION}, effective ${POLICY_EFFECTIVE_DATE}.`
-  };
+    description: `${title} for My Classifieds. Version ${POLICY_VERSION}, effective ${POLICY_EFFECTIVE_DATE}.`,
+    path: `/legal/${page.slug}`
+  });
 }
 
 export default async function LegalDocumentPage({ params, searchParams }) {

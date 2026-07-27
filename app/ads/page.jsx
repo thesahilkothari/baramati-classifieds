@@ -4,8 +4,15 @@ import { prisma } from "../lib/prisma";
 import AdCard from "../components/AdCard";
 import AdSearchFilters from "../components/AdSearchFilters";
 import { getLanguageFromCookieStore, t } from "../lib/i18n";
+import { buildPageMetadata } from "../lib/seo";
 
 export const dynamic = "force-dynamic";
+export const metadata = buildPageMetadata({
+  title: "Browse Classified Ads in Baramati | My Classifieds",
+  description:
+    "Browse property, jobs, vehicles, electronics, agriculture equipment and local service ads in Baramati and Maharashtra.",
+  path: "/ads"
+});
 
 function getNumericValue(value) {
   const cleaned = String(value || "").replace(/[^\d.]/g, "");

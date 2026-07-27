@@ -2,16 +2,28 @@ import { cookies } from "next/headers";
 import { prisma } from "../lib/prisma";
 import PostAdForm from "../components/PostAdForm";
 import { getLanguageFromCookieStore, t } from "../lib/i18n";
+import { buildPageMetadata } from "../lib/seo";
 
-export const metadata = {
+export const metadata = buildPageMetadata({
   title: "Post Ad | My Classifieds",
   description:
-    "Post a classified ad in English or Marathi on My Classifieds."
+    "Post a classified ad in English or Marathi on My Classifieds.",
+  path: "/post-ad"
+});
+
+const PLAN_QUERY_MAP = {
+  free: "FREE_7_DAYS",
+  paid: "PAID_7_DAYS",
+  premium: "PREMIUM_30_DAYS"
 };
 
-export default async function PostAdPage() {
+export default async function PostAdPage({ searchParams }) {
   const cookieStore = await cookies();
   const language = getLanguageFromCookieStore(cookieStore);
+  const resolvedSearchParams = await searchParams;
+  const initialPlan =
+    PLAN_QUERY_MAP[String(resolvedSearchParams?.plan || "").toLowerCase()] ||
+    "FREE_7_DAYS";
 
   const [categories, cities] = await Promise.all([
     prisma.category.findMany({ orderBy: { nameEn: "asc" } }),
@@ -39,7 +51,12 @@ export default async function PostAdPage() {
           </div>
         </div>
 
-        <PostAdForm categories={categories} cities={cities} initialLanguage={language} />
+        <PostAdForm
+          categories={categories}
+          cities={cities}
+          initialLanguage={language}
+          initialPlan={initialPlan}
+        />
       </section>
     </main>
   );
