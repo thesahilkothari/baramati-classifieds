@@ -44,6 +44,7 @@ export async function POST(request) {
     const pageUrl = cleanText(body.pageUrl, 1000);
     const adId = Number(body.adId);
     const adSlug = cleanText(body.adSlug, 220);
+    const goodFaithAccepted = body.goodFaithAccepted === true;
 
     if (!getAllowedReportTypeValues().includes(reportType)) {
       return NextResponse.json({ error: "Please select a valid grievance/report type." }, { status: 400 });
@@ -65,6 +66,12 @@ export async function POST(request) {
     }
     if (reporterMobile && reporterMobile.length !== 10) {
       return NextResponse.json({ error: "Please enter a valid 10 digit mobile number." }, { status: 400 });
+    }
+    if (!goodFaithAccepted) {
+      return NextResponse.json(
+        { error: "Please confirm that this report is submitted in good faith." },
+        { status: 400 }
+      );
     }
 
     let ad = null;
@@ -106,7 +113,7 @@ export async function POST(request) {
           reportTicketId: createdTicket.id,
           action: "REPORT_SUBMITTED",
           toStatus: "NEW",
-          note: `Public report submitted. Type: ${reportTypeMeta?.label || reportType}`,
+          note: `Public report submitted in good faith. Type: ${reportTypeMeta?.label || reportType}`,
           actor: "PUBLIC_USER",
           ipAddress,
           userAgent
