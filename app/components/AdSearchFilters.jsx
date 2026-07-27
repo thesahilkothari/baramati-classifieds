@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ITEM_CONDITIONS } from "../lib/itemConditions";
+import { filterAllowedTier2Locations, isAllowedTier2LocationSlug } from "../lib/locations";
 import { LANGUAGE_COOKIE_NAME, normalizeLanguage, t } from "../lib/i18n";
 
 function getInitialValue(searchParams, key) {
@@ -38,24 +39,26 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
   const [language, setLanguage] = useState("en");
+  const approvedCities = useMemo(() => filterAllowedTier2Locations(cities), [cities]);
 
   useEffect(() => {
     setLanguage(readLanguageFromCookie());
   }, []);
 
-  const initialState = useMemo(
-    () => ({
+  const initialState = useMemo(() => {
+    const requestedCity = getInitialValue(searchParams, "city");
+
+    return {
       q: getInitialValue(searchParams, "q"),
       category: getInitialValue(searchParams, "category"),
-      city: getInitialValue(searchParams, "city"),
+      city: isAllowedTier2LocationSlug(requestedCity) ? requestedCity : "",
       minPrice: getInitialValue(searchParams, "minPrice"),
       maxPrice: getInitialValue(searchParams, "maxPrice"),
       condition: getInitialValue(searchParams, "condition"),
       posted: getInitialValue(searchParams, "posted"),
       sort: getInitialValue(searchParams, "sort") || "recommended"
-    }),
-    [searchParams]
-  );
+    };
+  }, [searchParams]);
 
   const [form, setForm] = useState(initialState);
 
@@ -172,8 +175,8 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
               className={inputClass}
             >
               <option value="">{t(language, "allLocations")}</option>
-              {cities.map((city) => (
-                <option key={city.id} value={city.slug}>
+              {approvedCities.map((city) => (
+                <option key={city.slug} value={city.slug}>
                   {city.name}
                 </option>
               ))}
