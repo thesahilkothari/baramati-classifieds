@@ -6,9 +6,25 @@ const legalLinks = [
   { href: "/legal", labelEn: "Legal Hub", labelMr: "कायदेशीर माहिती" },
   { href: "/legal/terms", labelEn: "Terms", labelMr: "वापराच्या अटी" },
   { href: "/legal/privacy", labelEn: "Privacy", labelMr: "गोपनीयता" },
+  { href: "/legal/listing-rules", labelEn: "Listing Rules", labelMr: "जाहिरात नियम" },
+  { href: "/legal/advertiser-policy", labelEn: "Advertiser Policy", labelMr: "जाहिरातदार धोरण" },
   { href: "/legal/refunds", labelEn: "Refunds", labelMr: "परतावा" },
+  { href: "/legal/safety", labelEn: "Safety", labelMr: "सुरक्षा" },
   { href: "/legal/grievance", labelEn: "Grievance", labelMr: "तक्रार निवारण" },
-  { href: "/legal/corporate", labelEn: "Corporate Info", labelMr: "कंपनी माहिती" }
+  { href: "/legal/ip", labelEn: "IP Complaints", labelMr: "IP तक्रार" },
+  { href: "/legal/ranking", labelEn: "Ranking Disclosure", labelMr: "Ranking Disclosure" },
+  { href: "/legal/ai-content", labelEn: "AI Content", labelMr: "AI Content" },
+  { href: "/legal/business-terms", labelEn: "Business Terms", labelMr: "Business Terms" },
+  { href: "/legal/corporate", labelEn: "Corporate Info", labelMr: "कंपनी माहिती" },
+  { href: "/legal/accessibility", labelEn: "Accessibility", labelMr: "Accessibility" }
+];
+
+const localLinks = [
+  { href: "/baramati/property", labelEn: "Baramati Property", labelMr: "बारामती मालमत्ता" },
+  { href: "/baramati/jobs", labelEn: "Baramati Jobs", labelMr: "बारामती नोकरी" },
+  { href: "/baramati/used-vehicles", labelEn: "Used Vehicles", labelMr: "वापरलेली वाहने" },
+  { href: "/baramati/local-services", labelEn: "Local Services", labelMr: "स्थानिक सेवा" },
+  { href: "/maharashtra/agriculture-equipment", labelEn: "Agriculture Equipment", labelMr: "शेती उपकरणे" }
 ];
 
 function label(language, en, mr) {
@@ -76,6 +92,10 @@ export default async function Footer() {
               {t(language, "pricing")}
             </Link>
 
+            <Link href="/about" className="block hover:text-white">
+              {label(language, "About", "आमच्याबद्दल")}
+            </Link>
+
             <Link href="/support" className="block hover:text-white">
               {t(language, "support")}
             </Link>
@@ -84,6 +104,18 @@ export default async function Footer() {
               {t(language, "report")}
             </Link>
           </nav>
+
+          <h2 className="mt-6 text-sm font-black uppercase tracking-wide text-slate-200">
+            Local Pages
+          </h2>
+
+          <nav className="mt-4 space-y-2 text-sm text-slate-300">
+            {localLinks.map((link) => (
+              <Link key={link.href} href={link.href} className="block hover:text-white">
+                {language === "mr" ? link.labelMr : link.labelEn}
+              </Link>
+            ))}
+          </nav>
         </div>
 
         <div>
@@ -91,7 +123,7 @@ export default async function Footer() {
             {t(language, "legal")}
           </h2>
 
-          <nav className="mt-4 space-y-2 text-sm text-slate-300">
+          <nav className="mt-4 grid grid-cols-1 gap-2 text-sm text-slate-300">
             {legalLinks.map((link) => (
               <Link key={link.href} href={link.href} className="block hover:text-white">
                 {language === "mr" ? link.labelMr : link.labelEn}
