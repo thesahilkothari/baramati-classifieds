@@ -14,18 +14,19 @@ export function absoluteUrl(path = "/") {
 
 export const defaultSeo = {
   siteName: "My Classifieds",
-  title: "My Classifieds | Baramati Classified Ads",
+  title: "My Classifieds | Online Classifieds Platform",
   description:
-    "Post and browse local classified ads for Baramati and Maharashtra. Find property, jobs, vehicles, services and local opportunities.",
+    "My Classifieds is an online classifieds platform for Baramati and Maharashtra. Post and browse ads for property, jobs, vehicles, electronics, services and local opportunities.",
   keywords: [
+    "My Classifieds",
+    "online classifieds platform",
     "Baramati classifieds",
     "classified ads Baramati",
     "Maharashtra classifieds",
     "property ads Baramati",
     "jobs Baramati",
     "local services Baramati",
-    "used vehicles Baramati",
-    "My Classifieds"
+    "used vehicles Baramati"
   ]
 };
 
@@ -33,7 +34,7 @@ export function buildPageMetadata({
   title = defaultSeo.title,
   description = defaultSeo.description,
   path = "/",
-  image = "/og-image.jpg",
+  image = "/opengraph-image",
   noIndex = false
 } = {}) {
   const url = absoluteUrl(path);
@@ -43,6 +44,14 @@ export function buildPageMetadata({
     title,
     description,
     keywords: defaultSeo.keywords,
+    applicationName: defaultSeo.siteName,
+    icons: {
+      icon: [
+        { url: "/icon", type: "image/png", sizes: "512x512" },
+        { url: "/brand/my-classifieds-icon.svg", type: "image/svg+xml" }
+      ],
+      apple: [{ url: "/apple-icon", type: "image/png", sizes: "512x512" }]
+    },
     alternates: {
       canonical: url
     },
@@ -57,7 +66,7 @@ export function buildPageMetadata({
           url: absoluteUrl(image),
           width: 1200,
           height: 630,
-          alt: defaultSeo.siteName
+          alt: "My Classifieds - Online Classifieds Platform"
         }
       ]
     },
