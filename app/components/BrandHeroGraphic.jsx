@@ -1,12 +1,17 @@
 import BrandLogo from "./BrandLogo";
+import { ALLOWED_TIER2_LOCATIONS } from "../lib/locations";
 
 const categoryChips = [
   { label: "Property", icon: "⌂", className: "bg-[#0F3D5E] text-white" },
   { label: "Jobs", icon: "▣", className: "bg-[#C2410C] text-white" },
   { label: "Vehicles", icon: "▰", className: "bg-[#0F766E] text-white" },
   { label: "Electronics", icon: "▯", className: "bg-[#0F3D5E] text-white" },
-  { label: "Local Services", icon: "⚙", className: "bg-[#0F766E] text-white" }
+  { label: "Local Services", icon: "⚙", className: "bg-[#0F766E] text-white" },
+  { label: "Agriculture", icon: "⚑", className: "bg-[#C2410C] text-white" }
 ];
+
+const launchCityPreview = ALLOWED_TIER2_LOCATIONS.slice(0, 6);
+const remainingCityCount = ALLOWED_TIER2_LOCATIONS.length - launchCityPreview.length;
 
 const listings = [
   {
@@ -14,21 +19,24 @@ const listings = [
     title: "2 BHK Duplex House",
     price: "₹45,00,000",
     accent: "bg-blue-50 text-[#0F3D5E]",
-    visual: "🏠"
+    visual: "🏠",
+    city: "Baramati"
   },
   {
     badge: "JOBS",
     title: "Field Sales Executive",
     price: "₹18,000 - ₹25,000 / month",
     accent: "bg-orange-50 text-[#C2410C]",
-    visual: "💼"
+    visual: "💼",
+    city: "Satara"
   },
   {
     badge: "VEHICLES",
     title: "Maruti Swift VXI",
     price: "₹6,25,000",
     accent: "bg-teal-50 text-[#0F766E]",
-    visual: "🚗"
+    visual: "🚗",
+    city: "Phaltan"
   }
 ];
 
@@ -49,18 +57,37 @@ export default function BrandHeroGraphic() {
           Buy, Sell, Rent & Find Jobs
         </h2>
         <p className="mt-2 text-base font-black text-[#0F766E]">
-          Baramati • Maharashtra • Local Classifieds
+          Tier-2 Maharashtra • Local Classifieds • Digital Yellow Page
         </p>
 
         <div className="mt-5 flex items-center gap-3 rounded-2xl border border-[#CBD5E1] bg-[#F8FAFC] p-3 shadow-sm">
           <span className="text-2xl text-[#64748B]">⌕</span>
           <span className="flex-1 text-sm font-semibold text-[#475569]">Search anything...</span>
           <span className="hidden rounded-xl border border-[#CBD5E1] bg-white px-3 py-2 text-sm font-bold text-[#0F3D5E] sm:block">
-            📍 Baramati
+            📍 13 launch cities
           </span>
           <span className="rounded-xl bg-[#0F3D5E] px-4 py-2 text-sm font-black text-white">
             Search
           </span>
+        </div>
+
+        <div className="mt-3 rounded-2xl border border-[#CBD5E1] bg-[#F8FAFC] p-3">
+          <p className="text-[10px] font-black uppercase tracking-wide text-[#0F766E]">
+            Current launch locations
+          </p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {launchCityPreview.map((city) => (
+              <span
+                key={city.slug}
+                className="rounded-full border border-[#CBD5E1] bg-white px-2.5 py-1 text-[10px] font-black uppercase text-[#475569]"
+              >
+                {city.name}
+              </span>
+            ))}
+            <span className="rounded-full border border-[#0F3D5E] bg-white px-2.5 py-1 text-[10px] font-black uppercase text-[#0F3D5E]">
+              +{remainingCityCount} more
+            </span>
+          </div>
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
@@ -93,7 +120,7 @@ export default function BrandHeroGraphic() {
                 <p className="mt-1 text-xs font-black text-[#C2410C]">
                   {listing.price}
                 </p>
-                <p className="mt-1 text-xs text-[#475569]">📍 Baramati, Maharashtra</p>
+                <p className="mt-1 text-xs text-[#475569]">📍 {listing.city}, Maharashtra</p>
               </div>
             </div>
           ))}
