@@ -55,7 +55,12 @@ async function fetchLandingAds(config) {
   const baseWhere = getBaseWhere(config, now);
   const include = {
     category: true,
-    city: true
+    city: true,
+    user: {
+      select: {
+        isVerified: true
+      }
+    }
   };
 
   const [featuredAds, premiumAds, paidAds, freeAds] = await Promise.all([
@@ -140,96 +145,96 @@ export default async function SeoLandingPage({ config }) {
     <>
       <JsonLd data={structuredData} />
 
-      <main className="min-h-screen bg-slate-100 px-3 pb-24 pt-5 md:px-4 md:pb-10">
+      <main className="min-h-screen bg-[#F8FAFC] px-3 pb-24 pt-5 md:px-4 md:pb-10">
         <section className="mx-auto max-w-7xl">
-          <nav className="mb-4 flex flex-wrap gap-2 text-xs font-bold uppercase text-slate-500">
+          <nav className="mb-4 flex flex-wrap gap-2 text-xs font-bold uppercase text-[#475569]">
             {config.breadcrumb.map((item, index) => (
               <span key={item.path} className="flex items-center gap-2">
                 {index > 0 && <span>/</span>}
-                <Link href={item.path} className="hover:text-blue-700">
+                <Link href={item.path} className="hover:text-[#0F3D5E]">
                   {item.name}
                 </Link>
               </span>
             ))}
           </nav>
 
-          <header className="rounded-3xl border-2 border-slate-900 bg-white p-6 shadow-sm md:p-8">
-            <p className="text-xs font-black uppercase tracking-wide text-red-600">
+          <header className="rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm md:p-8">
+            <p className="text-xs font-black uppercase tracking-wide text-[#C2410C]">
               {config.eyebrow}
             </p>
 
-            <h1 className="mt-3 max-w-4xl text-3xl font-black uppercase leading-tight text-slate-950 md:text-5xl">
+            <h1 className="mt-3 max-w-4xl text-3xl font-black uppercase leading-tight text-[#0F3D5E] md:text-5xl">
               {config.h1}
             </h1>
 
             <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <p className="rounded-2xl bg-slate-50 p-4 text-sm leading-7 text-slate-700">
+              <p className="rounded-2xl bg-[#F8FAFC] p-4 text-sm leading-7 text-[#475569]">
                 {config.introEn}
               </p>
 
-              <p className="rounded-2xl bg-slate-50 p-4 text-sm leading-7 text-slate-700">
+              <p className="rounded-2xl bg-[#F8FAFC] p-4 text-sm leading-7 text-[#475569]">
                 {config.introMr}
               </p>
             </div>
 
-            <div className="mt-5 rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm leading-7 text-yellow-900">
+            <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-7 text-amber-950">
               {config.note}
             </div>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Link
                 href={config.searchHref}
-                className="rounded-xl bg-blue-700 px-5 py-3 text-center text-sm font-black uppercase text-white hover:bg-blue-800"
+                className="rounded-xl bg-[#0F3D5E] px-5 py-3 text-center text-sm font-black uppercase text-white hover:bg-[#0B2F49]"
               >
                 Browse Matching Ads
               </Link>
 
               <Link
                 href="/post-ad"
-                className="rounded-xl bg-red-600 px-5 py-3 text-center text-sm font-black uppercase text-white hover:bg-red-700"
+                className="rounded-xl bg-[#C2410C] px-5 py-3 text-center text-sm font-black uppercase text-white hover:bg-orange-800"
               >
-                Post a Classified
+                Post Free Ad
               </Link>
             </div>
           </header>
 
           <section className="mt-8">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-2xl font-black uppercase text-slate-950">
+              <h2 className="text-2xl font-black uppercase text-[#0F172A]">
                 Approved matching classifieds
               </h2>
 
               <Link
                 href={config.searchHref}
-                className="text-sm font-black uppercase text-blue-700"
+                className="text-sm font-black uppercase text-[#0F3D5E]"
               >
                 View all filters
               </Link>
             </div>
 
             {ads.length === 0 ? (
-              <div className="mt-5 rounded-3xl border bg-white p-8 text-center shadow-sm">
-                <h3 className="text-2xl font-black text-slate-950">
+              <div className="mt-5 rounded-3xl border border-[#CBD5E1] bg-white p-8 text-center shadow-sm">
+                <h3 className="text-2xl font-black text-[#0F172A]">
                   No matching ads are live right now
                 </h3>
 
-                <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+                <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-[#475569]">
                   This page shows only approved and active classifieds. You can browse all ads or post a new classified for this category.
                 </p>
 
                 <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
                   <Link
                     href={config.searchHref}
-                    className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-black uppercase text-white"
+                    className="rounded-xl bg-[#0F3D5E] px-5 py-3 text-sm font-black uppercase text-white"
                   >
                     Browse Ads
                   </Link>
 
                   <Link
                     href="/post-ad"
-                    className="rounded-xl border px-5 py-3 text-sm font-black uppercase text-slate-700"
+                    className="rounded-xl border border-[#CBD5E1] px-5 py-3 text-sm font-black uppercase text-[#0F3D5E]"
                   >
-                    Post Ad
+                    Post Free Ad
                   </Link>
                 </div>
               </div>
