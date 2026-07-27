@@ -1,5 +1,19 @@
 @import "tailwindcss";
 
+:root {
+  --mc-navy: #0F3D5E;
+  --mc-orange: #C2410C;
+  --mc-teal: #0F766E;
+  --mc-bg: #F8FAFC;
+  --mc-card: #FFFFFF;
+  --mc-text: #0F172A;
+  --mc-muted: #475569;
+  --mc-border: #CBD5E1;
+  --mc-input-border: #64748B;
+  --mc-featured: #F59E0B;
+  --mc-danger: #B91C1C;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -10,13 +24,27 @@ html {
 
 body {
   min-height: 100vh;
-  background: #f8fafc;
-  color: #0f172a;
+  background: var(--mc-bg);
+  color: var(--mc-text);
+  font-family: Inter, "Noto Sans Devanagari", ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+::selection {
+  background: rgba(194, 65, 12, 0.18);
+  color: var(--mc-text);
 }
 
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
