@@ -142,7 +142,12 @@ function buildBaseWhere({ searchParams, now }) {
 async function fetchRankedAds(baseWhere, now) {
   const include = {
     category: true,
-    city: true
+    city: true,
+    user: {
+      select: {
+        isVerified: true
+      }
+    }
   };
 
   const [featuredAds, premiumAds, paidAds, freeAds] = await Promise.all([
@@ -248,29 +253,29 @@ export default async function AdsPage({ searchParams }) {
         ]}
       />
 
-      <main className="min-h-screen bg-slate-100 px-3 pb-24 pt-5 md:px-4 md:pb-8">
+      <main className="min-h-screen bg-[#F8FAFC] px-3 pb-24 pt-5 md:px-4 md:pb-8">
         <section className="mx-auto max-w-7xl">
-          <div className="rounded-3xl border-2 border-slate-900 bg-white p-5 shadow-sm">
+          <div className="rounded-3xl border border-[#CBD5E1] bg-white p-5 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-xs font-black uppercase tracking-wide text-red-600">
-                  {t(language, "brand")}
+                <p className="text-xs font-black uppercase tracking-wide text-[#C2410C]">
+                  Online Classifieds Platform
                 </p>
 
-                <h1 className="mt-2 text-3xl font-black uppercase text-slate-950 md:text-5xl">
+                <h1 className="mt-2 text-3xl font-black uppercase text-[#0F3D5E] md:text-5xl">
                   {t(language, "browseAds")}
                 </h1>
 
-                <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
+                <p className="mt-3 max-w-3xl text-sm leading-6 text-[#475569]">
                   {t(language, "findFaster")}. {t(language, "rankingNote")}.
                 </p>
               </div>
 
               <Link
                 href="/post-ad"
-                className="hidden rounded-xl bg-red-600 px-5 py-3 text-sm font-black uppercase text-white hover:bg-red-700 md:inline-flex"
+                className="hidden rounded-xl bg-[#C2410C] px-5 py-3 text-sm font-black uppercase text-white hover:bg-orange-800 md:inline-flex"
               >
-                {t(language, "postAd")}
+                Post Free Ad
               </Link>
             </div>
           </div>
@@ -280,27 +285,27 @@ export default async function AdsPage({ searchParams }) {
           </div>
 
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm font-bold text-slate-600">
+            <p className="text-sm font-bold text-[#475569]">
               {t(language, "showingAds")} {allAds.length}{" "}
               {t(language, "activeClassifieds")}
             </p>
 
-            <p className="text-xs font-bold uppercase text-slate-500">
+            <p className="text-xs font-bold uppercase text-[#475569]">
               {t(language, "rankingNote")}
             </p>
           </div>
 
           {allAds.length === 0 ? (
-            <div className="mt-6 rounded-3xl border bg-white p-8 text-center shadow-sm">
-              <h2 className="text-2xl font-black text-slate-950">
+            <div className="mt-6 rounded-3xl border border-[#CBD5E1] bg-white p-8 text-center shadow-sm">
+              <h2 className="text-2xl font-black text-[#0F172A]">
                 {t(language, "noMatchingAds")}
               </h2>
-              <p className="mt-2 text-slate-600">
+              <p className="mt-2 text-[#475569]">
                 {t(language, "tryChangingFilters")}
               </p>
               <Link
                 href="/ads"
-                className="mt-5 inline-flex rounded-xl bg-blue-700 px-5 py-3 text-sm font-black uppercase text-white"
+                className="mt-5 inline-flex rounded-xl bg-[#0F3D5E] px-5 py-3 text-sm font-black uppercase text-white"
               >
                 {t(language, "clearFilters")}
               </Link>
