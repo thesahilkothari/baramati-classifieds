@@ -5,14 +5,20 @@ import AdCard from "../components/AdCard";
 import AdSearchFilters from "../components/AdSearchFilters";
 import JsonLd from "../components/JsonLd";
 import { getLanguageFromCookieStore, t } from "../lib/i18n";
+import {
+  ALLOWED_TIER2_LOCATION_SLUGS,
+  getAllowedAdCityWhere,
+  getAllowedTier2Cities,
+  isAllowedTier2LocationSlug
+} from "../lib/locations";
 import { buildPageMetadata } from "../lib/seo";
 import { buildBreadcrumbSchema, buildCollectionPageSchema, buildItemListSchema } from "../lib/jsonLd";
 
 export const dynamic = "force-dynamic";
 export const metadata = buildPageMetadata({
-  title: "Browse Classified Ads in Baramati | My Classifieds",
+  title: "Browse Classified Ads in Tier-2 Maharashtra | My Classifieds",
   description:
-    "Browse property, jobs, vehicles, electronics, agriculture equipment and local service ads in Baramati and Maharashtra.",
+    "Browse property, jobs, vehicles, electronics, agriculture equipment and local service ads for approved tier-2 Maharashtra locations.",
   path: "/ads"
 });
 
@@ -66,7 +72,8 @@ function uniqueAds(ads) {
 function buildBaseWhere({ searchParams, now }) {
   const q = String(searchParams.q || "").trim();
   const category = String(searchParams.category || "").trim();
-  const city = String(searchParams.city || "").trim();
+  const requestedCity = String(searchParams.city || "").trim();
+  const city = isAllowedTier2LocationSlug(requestedCity) ? requestedCity : "";
   const condition = String(searchParams.condition || "").trim();
   const posted = String(searchParams.posted || "").trim();
   const minPrice = getNumericValue(searchParams.minPrice);
@@ -75,6 +82,7 @@ function buildBaseWhere({ searchParams, now }) {
 
   const andConditions = [
     { status: "ACTIVE" },
+    getAllowedAdCityWhere(),
     {
       OR: [{ expiresAt: null }, { expiresAt: { gt: now } }]
     }
@@ -225,7 +233,7 @@ export default async function AdsPage({ searchParams }) {
 
   const [categories, cities] = await Promise.all([
     prisma.category.findMany({ orderBy: { nameEn: "asc" } }),
-    prisma.city.findMany({ orderBy: { name: "asc" } })
+    getAllowedTier2Cities(prisma)
   ]);
 
   const baseWhere = buildBaseWhere({
@@ -244,9 +252,9 @@ export default async function AdsPage({ searchParams }) {
             { name: "Browse Ads", path: "/ads" }
           ]),
           buildCollectionPageSchema({
-            title: "Browse Classified Ads in Baramati | My Classifieds",
+            title: "Browse Classified Ads in Tier-2 Maharashtra | My Classifieds",
             description:
-              "Browse property, jobs, vehicles, electronics, agriculture equipment and local service ads in Baramati and Maharashtra.",
+              "Browse property, jobs, vehicles, electronics, agriculture equipment and local service ads for approved tier-2 Maharashtra locations.",
             path: "/ads"
           }),
           buildItemListSchema(allAds)
@@ -267,7 +275,11 @@ export default async function AdsPage({ searchParams }) {
                 </h1>
 
                 <p className="mt-3 max-w-3xl text-sm leading-6 text-[#475569]">
-                  {t(language, "findFaster")}. {t(language, "rankingNote")}.
+                  Browse active classifieds only from approved tier-2 Maharashtra launch locations. {t(language, "findFaster")}. {t(language, "rankingNote")}.
+                </p>
+
+                <p className="mt-2 max-w-3xl text-xs font-bold uppercase leading-5 text-[#475569]">
+                  Current launch cities: {ALLOWED_TIER2_LOCATION_SLUGS.length} approved local locations. Pune and Mumbai are intentionally excluded.
                 </p>
               </div>
 
