@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "../../lib/prisma";
 import { buildPageMetadata } from "../../lib/seo";
+import { getAllowedAdCityWhere } from "../../lib/locations";
 import JsonLd from "../../components/JsonLd";
 import {
   buildBreadcrumbSchema,
@@ -41,6 +42,7 @@ function getAdWhere(slug, now) {
     AND: [
       { slug },
       { status: "ACTIVE" },
+      getAllowedAdCityWhere(),
       { OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] }
     ]
   };
@@ -118,7 +120,7 @@ export default async function AdDetailPage({ params }) {
                   {ad.category?.nameEn || "Classified"}
                 </span>
                 {ad.city?.name && (
-                  <span className="rounded bg-[#F8FAFC] px-3 py-1 text-xs font-black uppercase text-[#475569]">
+                  <span className="rounded border border-[#CBD5E1] bg-[#F8FAFC] px-3 py-1 text-xs font-black uppercase text-[#475569]">
                     {ad.city.name}
                   </span>
                 )}
@@ -164,7 +166,7 @@ export default async function AdDetailPage({ params }) {
               <h2 className="text-xl font-black uppercase text-[#0F172A]">
                 Contact Advertiser
               </h2>
-              <p className="mt-3 text-sm leading-6 text-[#475569]">
+              <p className="mt-3 text-sm text-[#475569]">
                 Contact directly through call or WhatsApp. Verify all details before payment.
               </p>
 
