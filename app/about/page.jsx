@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { buildPageMetadata } from "../lib/seo";
 import JsonLd from "../components/JsonLd";
@@ -63,18 +64,34 @@ export default function AboutPage() {
             / About
           </nav>
 
-          <header className="rounded-3xl border-2 border-slate-900 bg-white p-6 shadow-sm md:p-8">
-            <p className="text-xs font-black uppercase tracking-wide text-red-600">
-              About My Classifieds
-            </p>
+          <header className="overflow-hidden rounded-3xl border-2 border-slate-900 bg-white shadow-sm">
+            <div className="grid gap-0 md:grid-cols-[1.1fr_0.9fr]">
+              <div className="p-6 md:p-8">
+                <p className="text-xs font-black uppercase tracking-wide text-red-600">
+                  About My Classifieds
+                </p>
 
-            <h1 className="mt-3 text-3xl font-black uppercase leading-tight text-slate-950 md:text-5xl">
-              A lightweight local classified platform for Baramati and Maharashtra
-            </h1>
+                <h1 className="mt-3 text-3xl font-black uppercase leading-tight text-slate-950 md:text-5xl">
+                  A lightweight local classified platform for Baramati and Maharashtra
+                </h1>
 
-            <p className="mt-5 text-base leading-8 text-slate-700">
-              My Classifieds keeps local advertising simple: users can post and browse classified advertisements, contact advertisers directly, and use clear paid visibility options without automatic renewal.
-            </p>
+                <p className="mt-5 text-base leading-8 text-slate-700">
+                  My Classifieds keeps local advertising simple: users can post and browse classified advertisements, contact advertisers directly, and use clear paid visibility options without automatic renewal.
+                </p>
+              </div>
+
+              <div className="border-t bg-slate-950 p-4 md:border-l md:border-t-0">
+                <Image
+                  src="/og-image.jpg"
+                  alt="My Classifieds brand preview for local classified ads in Baramati and Maharashtra"
+                  width={1200}
+                  height={630}
+                  loading="lazy"
+                  sizes="(min-width: 768px) 420px, 100vw"
+                  className="h-auto w-full rounded-2xl border border-white/10"
+                />
+              </div>
+            </div>
           </header>
 
           <div className="mt-6 grid gap-4">
