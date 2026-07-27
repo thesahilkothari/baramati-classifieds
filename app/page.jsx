@@ -3,9 +3,13 @@ import { cookies } from "next/headers";
 import { prisma } from "./lib/prisma";
 import AdCard from "./components/AdCard";
 import BrandHeroGraphic from "./components/BrandHeroGraphic";
+import BrandLogo from "./components/BrandLogo";
 import JsonLd from "./components/JsonLd";
 import { getLanguageFromCookieStore, t } from "./lib/i18n";
-import { getAllowedAdCityWhere, getAllowedTier2Cities } from "./lib/locations";
+import {
+  getAllowedAdCityWhere,
+  getAllowedTier2CitySearchOptions
+} from "./lib/locations";
 import { buildOrganizationSchema, buildWebSiteSchema } from "./lib/jsonLd";
 
 export const dynamic = "force-dynamic";
@@ -156,7 +160,7 @@ async function getHomeAds() {
 async function getHomeFilters() {
   return Promise.all([
     prisma.category.findMany({ orderBy: { nameEn: "asc" } }),
-    getAllowedTier2Cities(prisma)
+    getAllowedTier2CitySearchOptions()
   ]);
 }
 
@@ -175,8 +179,16 @@ export default async function HomePage() {
       <main className="bg-[#F8FAFC] px-3 pb-24 pt-5 md:px-4 md:pb-10">
         <section className="mx-auto max-w-7xl">
           <div className="overflow-hidden rounded-3xl border border-[#CBD5E1] bg-white shadow-sm">
-            <div className="grid items-start gap-6 p-5 md:grid-cols-[1fr_0.92fr] md:p-8 lg:p-10">
+            <div className="grid items-start gap-6 p-4 md:grid-cols-[1fr_0.92fr] md:p-6 lg:p-8">
               <div className="flex flex-col justify-start">
+                <Link
+                  href="/"
+                  className="mb-4 inline-flex w-fit rounded-2xl border border-[#CBD5E1] bg-white px-3 py-2 shadow-sm"
+                  aria-label="My Classifieds home"
+                >
+                  <BrandLogo />
+                </Link>
+
                 <p className="text-sm font-black uppercase tracking-wide text-[#C2410C]">
                   My Classifieds • Online Classifieds Platform
                 </p>
@@ -231,7 +243,7 @@ export default async function HomePage() {
                     >
                       <option value="">All Approved Locations</option>
                       {cities.map((city) => (
-                        <option key={city.id} value={city.slug}>
+                        <option key={city.slug} value={city.slug}>
                           {city.name}
                         </option>
                       ))}
@@ -253,7 +265,7 @@ export default async function HomePage() {
                   <div className="mt-3 flex flex-wrap gap-2">
                     {cities.map((city) => (
                       <Link
-                        key={city.id}
+                        key={city.slug}
                         href={`/ads?city=${city.slug}`}
                         className="rounded-full border border-[#CBD5E1] bg-[#F8FAFC] px-3 py-1.5 text-[11px] font-black uppercase text-[#475569] hover:border-[#0F3D5E] hover:text-[#0F3D5E]"
                       >
@@ -262,7 +274,7 @@ export default async function HomePage() {
                     ))}
                   </div>
                   <p className="mt-3 text-[11px] font-semibold leading-5 text-[#475569]">
-                    Pune, Mumbai and similar tier-1 locations are intentionally not part of the current launch list.
+                    Pune, Mumbai, Nagpur and similar tier-1 locations are intentionally not part of the current launch list.
                   </p>
                 </div>
 
