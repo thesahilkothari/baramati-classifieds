@@ -36,11 +36,30 @@ function getCategoryIcon(categorySlug) {
   return "▤";
 }
 
+function getReportCopy(language) {
+  if (language === "mr") {
+    return {
+      summary: "Report issue",
+      warning:
+        "फक्त spam, fraud, prohibited/illegal content, duplicate ad किंवा safety concern असल्यासच report करा.",
+      action: "Continue to report"
+    };
+  }
+
+  return {
+    summary: "Report issue",
+    warning:
+      "Use only for spam, fraud, prohibited/illegal content, duplicate ads or safety concerns.",
+    action: "Continue to report"
+  };
+}
+
 export default function AdCard({ ad, language = "en" }) {
   const showFeatured = shouldShowFeatured(ad);
   const verifiedSeller = Boolean(ad?.user?.isVerified);
   const categoryName = language === "mr" ? ad.category?.nameMr || ad.category?.nameEn : ad.category?.nameEn;
   const categoryIcon = getCategoryIcon(ad.category?.slug);
+  const reportCopy = getReportCopy(language);
 
   return (
     <article
@@ -108,20 +127,30 @@ export default function AdCard({ ad, language = "en" }) {
         {ad.description}
       </p>
 
-      <div className="mt-4 grid grid-cols-2 gap-2">
+      <div className="mt-4">
         <Link
           href={`/ads/${ad.slug}`}
-          className="rounded-xl bg-[#0F3D5E] px-3 py-2 text-center text-xs font-black uppercase text-white hover:bg-[#0B2F49]"
+          className="block rounded-xl bg-[#0F3D5E] px-3 py-2.5 text-center text-xs font-black uppercase text-white hover:bg-[#0B2F49]"
         >
           {t(language, "view")}
         </Link>
 
-        <Link
-          href={`/report?adId=${ad.id}&adSlug=${ad.slug}`}
-          className="rounded-xl border border-[#CBD5E1] px-3 py-2 text-center text-xs font-black uppercase text-[#B91C1C] hover:bg-red-50"
-        >
-          {t(language, "report")}
-        </Link>
+        <details className="mt-2 rounded-xl border border-transparent text-xs text-[#475569] open:border-[#CBD5E1] open:bg-[#F8FAFC] open:p-3">
+          <summary className="cursor-pointer list-none text-center text-[11px] font-bold uppercase text-[#B91C1C] underline-offset-4 hover:underline">
+            {reportCopy.summary}
+          </summary>
+
+          <p className="mt-2 text-center text-[11px] leading-5 text-[#475569]">
+            {reportCopy.warning}
+          </p>
+
+          <Link
+            href={`/report?adId=${ad.id}&adSlug=${ad.slug}&source=card`}
+            className="mt-3 block rounded-lg border border-[#B91C1C] bg-white px-3 py-2 text-center text-[11px] font-black uppercase text-[#B91C1C] hover:bg-red-50"
+          >
+            {reportCopy.action}
+          </Link>
+        </details>
       </div>
     </article>
   );
