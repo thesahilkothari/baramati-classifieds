@@ -3,8 +3,10 @@ import { cookies } from "next/headers";
 import { prisma } from "../lib/prisma";
 import AdCard from "../components/AdCard";
 import AdSearchFilters from "../components/AdSearchFilters";
+import JsonLd from "../components/JsonLd";
 import { getLanguageFromCookieStore, t } from "../lib/i18n";
 import { buildPageMetadata } from "../lib/seo";
+import { buildBreadcrumbSchema, buildCollectionPageSchema, buildItemListSchema } from "../lib/jsonLd";
 
 export const dynamic = "force-dynamic";
 export const metadata = buildPageMetadata({
@@ -38,6 +40,13 @@ function getPostedDate(posted) {
   }
 
   return null;
+}
+
+function getConditionKeywords(condition) {
+  if (condition === "NEW") return ["new", "brand new", "unused"];
+  if (condition === "USED") return ["used", "second hand", "pre owned", "pre-owned"];
+  if (condition === "LIKE_NEW") return ["like new", "excellent", "mint condition"];
+  return [];
 }
 
 function uniqueAds(ads) {
@@ -100,9 +109,13 @@ function buildBaseWhere({ searchParams, now }) {
     });
   }
 
-  if (condition) {
+  const conditionKeywords = getConditionKeywords(condition);
+  if (conditionKeywords.length > 0) {
     andConditions.push({
-      condition
+      OR: conditionKeywords.flatMap((keyword) => [
+        { title: { contains: keyword } },
+        { description: { contains: keyword } }
+      ])
     });
   }
 
@@ -218,71 +231,89 @@ export default async function AdsPage({ searchParams }) {
   const { allAds } = await fetchRankedAds(baseWhere, now);
 
   return (
-    <main className="min-h-screen bg-slate-100 px-3 pb-24 pt-5 md:px-4 md:pb-8">
-      <section className="mx-auto max-w-7xl">
-        <div className="rounded-3xl border-2 border-slate-900 bg-white p-5 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-black uppercase tracking-wide text-red-600">
-                {t(language, "brand")}
-              </p>
+    <>
+      <JsonLd
+        data={[
+          buildBreadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Browse Ads", path: "/ads" }
+          ]),
+          buildCollectionPageSchema({
+            title: "Browse Classified Ads in Baramati | My Classifieds",
+            description:
+              "Browse property, jobs, vehicles, electronics, agriculture equipment and local service ads in Baramati and Maharashtra.",
+            path: "/ads"
+          }),
+          buildItemListSchema(allAds)
+        ]}
+      />
 
-              <h1 className="mt-2 text-3xl font-black uppercase text-slate-950 md:text-5xl">
-                {t(language, "browseAds")}
-              </h1>
+      <main className="min-h-screen bg-slate-100 px-3 pb-24 pt-5 md:px-4 md:pb-8">
+        <section className="mx-auto max-w-7xl">
+          <div className="rounded-3xl border-2 border-slate-900 bg-white p-5 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-wide text-red-600">
+                  {t(language, "brand")}
+                </p>
 
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
-                {t(language, "findFaster")}. {t(language, "rankingNote")}.
-              </p>
+                <h1 className="mt-2 text-3xl font-black uppercase text-slate-950 md:text-5xl">
+                  {t(language, "browseAds")}
+                </h1>
+
+                <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
+                  {t(language, "findFaster")}. {t(language, "rankingNote")}.
+                </p>
+              </div>
+
+              <Link
+                href="/post-ad"
+                className="hidden rounded-xl bg-red-600 px-5 py-3 text-sm font-black uppercase text-white hover:bg-red-700 md:inline-flex"
+              >
+                {t(language, "postAd")}
+              </Link>
             </div>
-
-            <Link
-              href="/post-ad"
-              className="hidden rounded-xl bg-red-600 px-5 py-3 text-sm font-black uppercase text-white hover:bg-red-700 md:inline-flex"
-            >
-              {t(language, "postAd")}
-            </Link>
           </div>
-        </div>
 
-        <div className="mt-5">
-          <AdSearchFilters categories={categories} cities={cities} />
-        </div>
+          <div className="mt-5">
+            <AdSearchFilters categories={categories} cities={cities} />
+          </div>
 
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm font-bold text-slate-600">
-            {t(language, "showingAds")} {allAds.length}{" "}
-            {t(language, "activeClassifieds")}
-          </p>
-
-          <p className="text-xs font-bold uppercase text-slate-500">
-            {t(language, "rankingNote")}
-          </p>
-        </div>
-
-        {allAds.length === 0 ? (
-          <div className="mt-6 rounded-3xl border bg-white p-8 text-center shadow-sm">
-            <h2 className="text-2xl font-black text-slate-950">
-              {t(language, "noMatchingAds")}
-            </h2>
-            <p className="mt-2 text-slate-600">
-              {t(language, "tryChangingFilters")}
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-bold text-slate-600">
+              {t(language, "showingAds")} {allAds.length}{" "}
+              {t(language, "activeClassifieds")}
             </p>
-            <Link
-              href="/ads"
-              className="mt-5 inline-flex rounded-xl bg-blue-700 px-5 py-3 text-sm font-black uppercase text-white"
-            >
-              {t(language, "clearFilters")}
-            </Link>
+
+            <p className="text-xs font-bold uppercase text-slate-500">
+              {t(language, "rankingNote")}
+            </p>
           </div>
-        ) : (
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {allAds.map((ad) => (
-              <AdCard key={ad.id} ad={ad} language={language} />
-            ))}
-          </div>
-        )}
-      </section>
-    </main>
+
+          {allAds.length === 0 ? (
+            <div className="mt-6 rounded-3xl border bg-white p-8 text-center shadow-sm">
+              <h2 className="text-2xl font-black text-slate-950">
+                {t(language, "noMatchingAds")}
+              </h2>
+              <p className="mt-2 text-slate-600">
+                {t(language, "tryChangingFilters")}
+              </p>
+              <Link
+                href="/ads"
+                className="mt-5 inline-flex rounded-xl bg-blue-700 px-5 py-3 text-sm font-black uppercase text-white"
+              >
+                {t(language, "clearFilters")}
+              </Link>
+            </div>
+          ) : (
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {allAds.map((ad) => (
+                <AdCard key={ad.id} ad={ad} language={language} />
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
+    </>
   );
 }
