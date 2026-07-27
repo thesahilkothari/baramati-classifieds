@@ -5,6 +5,7 @@ import AdCard from "./components/AdCard";
 import BrandHeroGraphic from "./components/BrandHeroGraphic";
 import JsonLd from "./components/JsonLd";
 import { getLanguageFromCookieStore, t } from "./lib/i18n";
+import { getAllowedAdCityWhere, getAllowedTier2Cities } from "./lib/locations";
 import { buildOrganizationSchema, buildWebSiteSchema } from "./lib/jsonLd";
 
 export const dynamic = "force-dynamic";
@@ -78,6 +79,7 @@ function getAdInclude() {
 async function getHomeAds() {
   const now = new Date();
   const include = getAdInclude();
+  const allowedCityWhere = getAllowedAdCityWhere();
 
   const activeExpiryFilter = {
     OR: [{ expiresAt: null }, { expiresAt: { gt: now } }]
@@ -92,6 +94,7 @@ async function getHomeAds() {
       where: {
         AND: [
           { status: "ACTIVE" },
+          allowedCityWhere,
           { isFeatured: true },
           activeExpiryFilter,
           activeFeaturedFilter
@@ -103,9 +106,12 @@ async function getHomeAds() {
     }),
     prisma.ad.findMany({
       where: {
-        status: "ACTIVE",
-        adType: "PREMIUM",
-        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }]
+        AND: [
+          { status: "ACTIVE" },
+          allowedCityWhere,
+          { adType: "PREMIUM" },
+          activeExpiryFilter
+        ]
       },
       include,
       orderBy: { createdAt: "desc" },
@@ -113,9 +119,12 @@ async function getHomeAds() {
     }),
     prisma.ad.findMany({
       where: {
-        status: "ACTIVE",
-        adType: "PAID",
-        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }]
+        AND: [
+          { status: "ACTIVE" },
+          allowedCityWhere,
+          { adType: "PAID" },
+          activeExpiryFilter
+        ]
       },
       include,
       orderBy: { createdAt: "desc" },
@@ -123,9 +132,12 @@ async function getHomeAds() {
     }),
     prisma.ad.findMany({
       where: {
-        status: "ACTIVE",
-        adType: "FREE",
-        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }]
+        AND: [
+          { status: "ACTIVE" },
+          allowedCityWhere,
+          { adType: "FREE" },
+          activeExpiryFilter
+        ]
       },
       include,
       orderBy: { createdAt: "desc" },
@@ -144,7 +156,7 @@ async function getHomeAds() {
 async function getHomeFilters() {
   return Promise.all([
     prisma.category.findMany({ orderBy: { nameEn: "asc" } }),
-    prisma.city.findMany({ orderBy: { name: "asc" } })
+    getAllowedTier2Cities(prisma)
   ]);
 }
 
@@ -170,11 +182,11 @@ export default async function HomePage() {
                 </p>
 
                 <h1 className="mt-3 text-4xl font-black leading-tight text-[#0F3D5E] md:text-6xl">
-                  Affordable local classifieds for Baramati and Maharashtra
+                  Affordable local classifieds for tier-2 Maharashtra
                 </h1>
 
                 <p className="mt-5 max-w-3xl text-base leading-8 text-[#475569]">
-                  A city-focused digital yellow page for tier-2 Maharashtra: post free classified ads, find property, jobs, vehicles, goods, local services and professionals, and connect with nearby people without depending only on costly newspaper classifieds.
+                  A city-focused digital yellow page for approved tier-2 Maharashtra locations: post free classified ads, find property, jobs, vehicles, goods, local services and professionals, and connect with nearby people without depending only on costly newspaper classifieds.
                 </p>
 
                 <form
@@ -217,7 +229,7 @@ export default async function HomePage() {
                       defaultValue="baramati"
                       className="rounded-xl border border-[#64748B] bg-white px-4 py-3 text-sm font-semibold text-[#0F172A] outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20"
                     >
-                      <option value="">All Locations</option>
+                      <option value="">All Approved Locations</option>
                       {cities.map((city) => (
                         <option key={city.id} value={city.slug}>
                           {city.name}
