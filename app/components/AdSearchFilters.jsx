@@ -97,14 +97,17 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
     router.push("/ads");
   }
 
+  const inputClass =
+    "mt-2 w-full rounded-xl border border-[#64748B] bg-white px-4 py-3 text-sm text-[#0F172A] outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20";
+
   return (
-    <section className="rounded-3xl border-2 border-slate-900 bg-white p-4 shadow-sm">
+    <section className="rounded-3xl border border-[#CBD5E1] bg-white p-4 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-black uppercase tracking-wide text-blue-700">
+          <p className="text-xs font-black uppercase tracking-wide text-[#C2410C]">
             {t(language, "searchClassifieds")}
           </p>
-          <h2 className="mt-1 text-xl font-black uppercase text-slate-950">
+          <h2 className="mt-1 text-xl font-black uppercase text-[#0F3D5E]">
             {t(language, "findFaster")}
           </h2>
         </div>
@@ -112,7 +115,7 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
         <button
           type="button"
           onClick={() => setIsOpen((value) => !value)}
-          className="rounded-xl border px-4 py-2 text-xs font-black uppercase text-slate-700 md:hidden"
+          className="rounded-xl border border-[#CBD5E1] px-4 py-2 text-xs font-black uppercase text-[#0F3D5E] md:hidden"
         >
           {isOpen ? t(language, "hideFilters") : t(language, "showFilters")}
         </button>
@@ -124,7 +127,7 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
       >
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           <div className="md:col-span-2">
-            <label htmlFor="ad-search-keyword" className="text-xs font-black uppercase text-slate-500">
+            <label htmlFor="ad-search-keyword" className="text-xs font-black uppercase text-[#475569]">
               {t(language, "keyword")}
             </label>
             <input
@@ -132,13 +135,13 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
               name="q"
               value={form.q}
               onChange={updateField}
-              className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none focus:border-blue-700"
+              className={inputClass}
               placeholder={t(language, "keywordPlaceholder")}
             />
           </div>
 
           <div>
-            <label htmlFor="ad-search-category" className="text-xs font-black uppercase text-slate-500">
+            <label htmlFor="ad-search-category" className="text-xs font-black uppercase text-[#475569]">
               {t(language, "category")}
             </label>
             <select
@@ -146,7 +149,7 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
               name="category"
               value={form.category}
               onChange={updateField}
-              className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none focus:border-blue-700"
+              className={inputClass}
             >
               <option value="">{t(language, "allCategories")}</option>
               {categories.map((category) => (
@@ -158,7 +161,7 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
           </div>
 
           <div>
-            <label htmlFor="ad-search-city" className="text-xs font-black uppercase text-slate-500">
+            <label htmlFor="ad-search-city" className="text-xs font-black uppercase text-[#475569]">
               {t(language, "location")}
             </label>
             <select
@@ -166,7 +169,7 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
               name="city"
               value={form.city}
               onChange={updateField}
-              className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none focus:border-blue-700"
+              className={inputClass}
             >
               <option value="">{t(language, "allLocations")}</option>
               {cities.map((city) => (
@@ -178,7 +181,7 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
           </div>
 
           <div>
-            <label htmlFor="ad-search-min-price" className="text-xs font-black uppercase text-slate-500">
+            <label htmlFor="ad-search-min-price" className="text-xs font-black uppercase text-[#475569]">
               {t(language, "minPrice")}
             </label>
             <input
@@ -186,14 +189,14 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
               name="minPrice"
               value={form.minPrice}
               onChange={updateField}
-              className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none focus:border-blue-700"
+              className={inputClass}
               placeholder="1000"
               inputMode="numeric"
             />
           </div>
 
           <div>
-            <label htmlFor="ad-search-max-price" className="text-xs font-black uppercase text-slate-500">
+            <label htmlFor="ad-search-max-price" className="text-xs font-black uppercase text-[#475569]">
               {t(language, "maxPrice")}
             </label>
             <input
@@ -201,14 +204,14 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
               name="maxPrice"
               value={form.maxPrice}
               onChange={updateField}
-              className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none focus:border-blue-700"
+              className={inputClass}
               placeholder="50000"
               inputMode="numeric"
             />
           </div>
 
           <div>
-            <label htmlFor="ad-search-condition" className="text-xs font-black uppercase text-slate-500">
+            <label htmlFor="ad-search-condition" className="text-xs font-black uppercase text-[#475569]">
               {t(language, "condition")}
             </label>
             <select
@@ -216,7 +219,7 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
               name="condition"
               value={form.condition}
               onChange={updateField}
-              className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none focus:border-blue-700"
+              className={inputClass}
             >
               <option value="">{t(language, "anyCondition")}</option>
               {ITEM_CONDITIONS.filter(
@@ -230,7 +233,7 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
           </div>
 
           <div>
-            <label htmlFor="ad-search-posted" className="text-xs font-black uppercase text-slate-500">
+            <label htmlFor="ad-search-posted" className="text-xs font-black uppercase text-[#475569]">
               {t(language, "posted")}
             </label>
             <select
@@ -238,7 +241,7 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
               name="posted"
               value={form.posted}
               onChange={updateField}
-              className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none focus:border-blue-700"
+              className={inputClass}
             >
               <option value="">{t(language, "anyTime")}</option>
               <option value="today">{t(language, "postedToday")}</option>
@@ -251,7 +254,7 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
         <div className="mt-4 flex flex-col gap-3 sm:flex-row">
           <button
             type="submit"
-            className="rounded-xl bg-blue-700 px-6 py-3 text-sm font-black uppercase text-white hover:bg-blue-800"
+            className="rounded-xl bg-[#0F3D5E] px-6 py-3 text-sm font-black uppercase text-white hover:bg-[#0B2F49]"
           >
             {t(language, "applyFilters")}
           </button>
@@ -259,7 +262,7 @@ export default function AdSearchFilters({ categories = [], cities = [] }) {
           <button
             type="button"
             onClick={clearFilters}
-            className="rounded-xl border px-6 py-3 text-sm font-black uppercase text-slate-700 hover:bg-slate-50"
+            className="rounded-xl border border-[#CBD5E1] px-6 py-3 text-sm font-black uppercase text-[#0F3D5E] hover:bg-slate-50"
           >
             {t(language, "clear")}
           </button>
