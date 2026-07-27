@@ -4,6 +4,7 @@ import { prisma } from "../lib/prisma";
 import AdCard from "./AdCard";
 import JsonLd from "./JsonLd";
 import { getLanguageFromCookieStore } from "../lib/i18n";
+import { getAllowedAdCityWhere } from "../lib/locations";
 import {
   buildBreadcrumbSchema,
   buildCollectionPageSchema,
@@ -27,6 +28,7 @@ function uniqueAds(ads) {
 function getBaseWhere(config, now) {
   const andConditions = [
     { status: "ACTIVE" },
+    getAllowedAdCityWhere(),
     {
       OR: [{ expiresAt: null }, { expiresAt: { gt: now } }]
     },
@@ -219,7 +221,7 @@ export default async function SeoLandingPage({ config }) {
                 </h3>
 
                 <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-[#475569]">
-                  This page shows only approved and active classifieds. You can browse all ads or post a new classified for this category.
+                  This page shows only approved and active classifieds from approved tier-2 Maharashtra launch locations. You can browse all ads or post a new classified for this category.
                 </p>
 
                 <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
