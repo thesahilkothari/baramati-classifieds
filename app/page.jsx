@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { prisma } from "./lib/prisma";
 import AdCard from "./components/AdCard";
+import BrandHeroGraphic from "./components/BrandHeroGraphic";
 import JsonLd from "./components/JsonLd";
 import { getLanguageFromCookieStore, t } from "./lib/i18n";
 import { buildOrganizationSchema, buildWebSiteSchema } from "./lib/jsonLd";
@@ -23,12 +23,21 @@ function uniqueAds(ads) {
   return result;
 }
 
+function getAdInclude() {
+  return {
+    category: true,
+    city: true,
+    user: {
+      select: {
+        isVerified: true
+      }
+    }
+  };
+}
+
 async function getHomeAds() {
   const now = new Date();
-  const include = {
-    category: true,
-    city: true
-  };
+  const include = getAdInclude();
 
   const activeExpiryFilter = {
     OR: [{ expiresAt: null }, { expiresAt: { gt: now } }]
@@ -92,101 +101,128 @@ async function getHomeAds() {
   };
 }
 
+async function getHomeFilters() {
+  return Promise.all([
+    prisma.category.findMany({ orderBy: { nameEn: "asc" } }),
+    prisma.city.findMany({ orderBy: { name: "asc" } })
+  ]);
+}
+
 export default async function HomePage() {
   const cookieStore = await cookies();
   const language = getLanguageFromCookieStore(cookieStore);
-  const { featuredAds, latestAds } = await getHomeAds();
+  const [{ featuredAds, latestAds }, [categories, cities]] = await Promise.all([
+    getHomeAds(),
+    getHomeFilters()
+  ]);
 
   return (
     <>
       <JsonLd data={[buildOrganizationSchema(), buildWebSiteSchema()]} />
 
-      <main className="bg-slate-100 px-3 pb-24 pt-5 md:px-4 md:pb-10">
+      <main className="bg-[#F8FAFC] px-3 pb-24 pt-5 md:px-4 md:pb-10">
         <section className="mx-auto max-w-7xl">
-          <div className="overflow-hidden rounded-3xl border-2 border-slate-900 bg-white shadow-sm">
-            <div className="grid gap-6 p-6 md:grid-cols-[1.2fr_0.8fr] md:p-10">
-              <div>
-                <p className="text-sm font-black uppercase tracking-wide text-red-600">
-                  {t(language, "homeHeroEyebrow")}
+          <div className="overflow-hidden rounded-3xl border border-[#CBD5E1] bg-white shadow-sm">
+            <div className="grid gap-6 p-5 md:grid-cols-[1fr_0.92fr] md:p-8 lg:p-10">
+              <div className="flex flex-col justify-center">
+                <p className="text-sm font-black uppercase tracking-wide text-[#C2410C]">
+                  Online Classifieds Platform
                 </p>
 
-                <h1 className="mt-3 text-4xl font-black uppercase leading-tight text-slate-950 md:text-6xl">
-                  {t(language, "homeHeroTitle")}
+                <h1 className="mt-3 text-4xl font-black leading-tight text-[#0F3D5E] md:text-6xl">
+                  Buy, Sell, Rent & Find Jobs Across Baramati
                 </h1>
 
-                <p className="mt-5 max-w-3xl text-base leading-8 text-slate-700">
-                  {t(language, "homeHeroText")}
+                <p className="mt-5 max-w-3xl text-base leading-8 text-[#475569]">
+                  Post and browse local classified ads for property, jobs, vehicles, electronics, agriculture equipment and local services across Baramati and Maharashtra.
                 </p>
 
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <form
+                  action="/ads"
+                  className="mt-6 rounded-2xl border border-[#CBD5E1] bg-[#F8FAFC] p-3 shadow-sm"
+                >
+                  <div className="grid gap-3 lg:grid-cols-[1.2fr_0.9fr_0.9fr_auto]">
+                    <label className="sr-only" htmlFor="home-search-keyword">
+                      Search keyword
+                    </label>
+                    <input
+                      id="home-search-keyword"
+                      name="q"
+                      placeholder="Search anything..."
+                      className="rounded-xl border border-[#64748B] bg-white px-4 py-3 text-sm font-semibold text-[#0F172A] outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20"
+                    />
+
+                    <label className="sr-only" htmlFor="home-search-category">
+                      Category
+                    </label>
+                    <select
+                      id="home-search-category"
+                      name="category"
+                      className="rounded-xl border border-[#64748B] bg-white px-4 py-3 text-sm font-semibold text-[#0F172A] outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20"
+                    >
+                      <option value="">All Categories</option>
+                      {categories.map((category) => (
+                        <option key={category.id} value={category.slug}>
+                          {language === "mr" ? category.nameMr || category.nameEn : category.nameEn}
+                        </option>
+                      ))}
+                    </select>
+
+                    <label className="sr-only" htmlFor="home-search-city">
+                      Location
+                    </label>
+                    <select
+                      id="home-search-city"
+                      name="city"
+                      defaultValue="baramati"
+                      className="rounded-xl border border-[#64748B] bg-white px-4 py-3 text-sm font-semibold text-[#0F172A] outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20"
+                    >
+                      <option value="">All Locations</option>
+                      {cities.map((city) => (
+                        <option key={city.id} value={city.slug}>
+                          {city.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <button
+                      type="submit"
+                      className="rounded-xl bg-[#0F3D5E] px-6 py-3 text-sm font-black uppercase text-white hover:bg-[#0B2F49]"
+                    >
+                      Search
+                    </button>
+                  </div>
+                </form>
+
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                  <Link
+                    href="/post-ad"
+                    className="rounded-xl bg-[#C2410C] px-6 py-4 text-center text-sm font-black uppercase text-white hover:bg-orange-800"
+                  >
+                    Post Free Ad
+                  </Link>
+
                   <Link
                     href="/ads"
-                    className="rounded-xl bg-blue-700 px-6 py-4 text-center text-sm font-black uppercase text-white hover:bg-blue-800"
+                    className="rounded-xl border border-[#CBD5E1] bg-white px-6 py-4 text-center text-sm font-black uppercase text-[#0F3D5E] hover:bg-slate-50"
                   >
                     {t(language, "startBrowsing")}
                   </Link>
-
-                  <Link
-                    href="/post-ad"
-                    className="rounded-xl bg-red-600 px-6 py-4 text-center text-sm font-black uppercase text-white hover:bg-red-700"
-                  >
-                    {t(language, "placeClassified")}
-                  </Link>
                 </div>
               </div>
 
-              <div className="rounded-3xl bg-slate-950 p-6 text-white">
-                <h2 className="text-2xl font-black uppercase">
-                  {t(language, "whyChooseUs")}
-                </h2>
-
-                <div className="mt-6 space-y-5">
-                  {[
-                    {
-                      title: t(language, "mobileFirst"),
-                      text: t(language, "mobileFirstText")
-                    },
-                    {
-                      title: t(language, "simplePricing"),
-                      text: t(language, "simplePricingText")
-                    },
-                    {
-                      title: t(language, "localReach"),
-                      text: t(language, "localReachText")
-                    }
-                  ].map((item) => (
-                    <div key={item.title} className="rounded-2xl bg-white/10 p-4">
-                      <p className="font-black uppercase">{item.title}</p>
-                      <p className="mt-2 text-sm leading-6 text-slate-200">
-                        {item.text}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-                  <Image
-                    src="/og-image.jpg"
-                    alt="My Classifieds local classified ads preview for Baramati and Maharashtra"
-                    width={1200}
-                    height={630}
-                    priority
-                    sizes="(min-width: 1024px) 360px, 100vw"
-                    className="h-auto w-full"
-                  />
-                </div>
-              </div>
+              <BrandHeroGraphic />
             </div>
           </div>
 
           {featuredAds.length > 0 && (
             <section className="mt-8">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-3xl font-black uppercase text-slate-950">
+                <h2 className="text-3xl font-black uppercase text-[#0F172A]">
                   {t(language, "featuredClassifieds")}
                 </h2>
 
-                <Link href="/ads" className="text-sm font-black uppercase text-blue-700">
+                <Link href="/ads" className="text-sm font-black uppercase text-[#0F3D5E]">
                   {t(language, "viewAllAds")}
                 </Link>
               </div>
@@ -201,23 +237,23 @@ export default async function HomePage() {
 
           <section className="mt-8">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-3xl font-black uppercase text-slate-950">
+              <h2 className="text-3xl font-black uppercase text-[#0F172A]">
                 {t(language, "latestClassifieds")}
               </h2>
 
-              <Link href="/ads" className="text-sm font-black uppercase text-blue-700">
+              <Link href="/ads" className="text-sm font-black uppercase text-[#0F3D5E]">
                 {t(language, "viewAllAds")}
               </Link>
             </div>
 
             {latestAds.length === 0 ? (
-              <div className="mt-5 rounded-3xl border bg-white p-8 text-center shadow-sm">
-                <p className="text-lg font-bold text-slate-600">
+              <div className="mt-5 rounded-3xl border border-[#CBD5E1] bg-white p-8 text-center shadow-sm">
+                <p className="text-lg font-bold text-[#475569]">
                   {t(language, "noAdsYet")}
                 </p>
                 <Link
                   href="/post-ad"
-                  className="mt-5 inline-flex rounded-xl bg-red-600 px-6 py-3 text-sm font-black uppercase text-white"
+                  className="mt-5 inline-flex rounded-xl bg-[#C2410C] px-6 py-3 text-sm font-black uppercase text-white"
                 >
                   {t(language, "placeClassified")}
                 </Link>
