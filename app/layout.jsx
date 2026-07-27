@@ -12,7 +12,7 @@ export const metadata = buildPageMetadata();
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#dc2626"
+  themeColor: "#0F3D5E"
 };
 
 export default async function RootLayout({ children }) {
@@ -21,7 +21,7 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang={getHtmlLang(language)} data-language={language}>
-      <body className="bg-slate-100 pb-16 md:pb-0">
+      <body className="bg-[#F8FAFC] pb-16 text-[#0F172A] md:pb-0">
         <Header />
         {children}
         <Footer />
