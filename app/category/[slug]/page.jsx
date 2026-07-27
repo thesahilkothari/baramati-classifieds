@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import AdCard from "../../components/AdCard";
 import { prisma } from "../../lib/prisma";
+import { getAllowedAdCityWhere } from "../../lib/locations";
 import { buildPageMetadata } from "../../lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +18,7 @@ function buildCategoryConditions({ categoryId, now }) {
   return [
     { status: "ACTIVE" },
     { categoryId },
+    getAllowedAdCityWhere(),
     {
       OR: [
         { expiresAt: null },
@@ -24,6 +26,18 @@ function buildCategoryConditions({ categoryId, now }) {
       ]
     }
   ];
+}
+
+function getAdInclude() {
+  return {
+    category: true,
+    city: true,
+    user: {
+      select: {
+        isVerified: true
+      }
+    }
+  };
 }
 
 function CategoryAdSection({ title, label, borderClass, ads }) {
@@ -66,7 +80,7 @@ export async function generateMetadata({ params }) {
 
   return buildPageMetadata({
     title: `${formatSlug(slug)} Ads | My Classifieds`,
-    description: `Browse ${formatSlug(slug)} classified ads in Baramati and Maharashtra.`,
+    description: `Browse ${formatSlug(slug)} classified ads in approved tier-2 Maharashtra locations.`,
     path: `/category/${slug}`
   });
 }
@@ -96,6 +110,8 @@ export default async function CategoryPage({ params }) {
       now
     });
 
+    const include = getAdInclude();
+
     premiumAds = await prisma.ad.findMany({
       where: {
         AND: [
@@ -103,10 +119,7 @@ export default async function CategoryPage({ params }) {
           { adType: "PREMIUM" }
         ]
       },
-      include: {
-        category: true,
-        city: true
-      },
+      include,
       orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
       take: 100
     });
@@ -120,10 +133,7 @@ export default async function CategoryPage({ params }) {
           { adType: { not: "PREMIUM" } }
         ]
       },
-      include: {
-        category: true,
-        city: true
-      },
+      include,
       orderBy: { createdAt: "desc" },
       take: 100
     });
@@ -141,10 +151,7 @@ export default async function CategoryPage({ params }) {
           }
         ]
       },
-      include: {
-        category: true,
-        city: true
-      },
+      include,
       orderBy: { createdAt: "desc" },
       take: 100
     });
@@ -156,10 +163,7 @@ export default async function CategoryPage({ params }) {
           { adType: "FREE" }
         ]
       },
-      include: {
-        category: true,
-        city: true
-      },
+      include,
       orderBy: { createdAt: "desc" },
       take: 200
     });
@@ -192,7 +196,7 @@ export default async function CategoryPage({ params }) {
           )}
 
           <p className="mt-3 max-w-2xl text-slate-300">
-            Active non-expired classified ads in this category.
+            Active non-expired classified ads in this category from approved tier-2 Maharashtra launch locations.
           </p>
         </div>
       </section>
@@ -218,7 +222,7 @@ export default async function CategoryPage({ params }) {
             </h2>
 
             <p className="mt-3 text-slate-600">
-              There are no active non-expired ads in this category yet.
+              There are no active non-expired ads in this category for the approved launch locations yet.
             </p>
           </div>
         ) : (
