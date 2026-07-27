@@ -2,12 +2,13 @@ import { cookies } from "next/headers";
 import { prisma } from "../lib/prisma";
 import PostAdForm from "../components/PostAdForm";
 import { getLanguageFromCookieStore, t } from "../lib/i18n";
+import { getAllowedTier2Cities } from "../lib/locations";
 import { buildPageMetadata } from "../lib/seo";
 
 export const metadata = buildPageMetadata({
   title: "Post Ad | My Classifieds",
   description:
-    "Post a classified ad in English or Marathi on My Classifieds.",
+    "Post a classified ad in English or Marathi on My Classifieds for approved tier-2 Maharashtra locations.",
   path: "/post-ad"
 });
 
@@ -27,7 +28,7 @@ export default async function PostAdPage({ searchParams }) {
 
   const [categories, cities] = await Promise.all([
     prisma.category.findMany({ orderBy: { nameEn: "asc" } }),
-    prisma.city.findMany({ orderBy: { name: "asc" } })
+    getAllowedTier2Cities(prisma)
   ]);
 
   return (
@@ -47,6 +48,10 @@ export default async function PostAdPage({ searchParams }) {
           </p>
 
           <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-bold text-blue-900">
+            Ads can currently be posted only for approved tier-2 Maharashtra locations such as Baramati, Phaltan, Akluj, Solapur, Karad, Satara, Sangli, Indapur, Daund, Shirur, Nashik, Chhatrapati Sambhajinagar and Ahilyanagar. Pune, Mumbai and similar tier-1 cities are intentionally not included.
+          </div>
+
+          <div className="mt-3 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-bold text-blue-900">
             {t(language, "englishMarathiAllowed")}
           </div>
         </div>
