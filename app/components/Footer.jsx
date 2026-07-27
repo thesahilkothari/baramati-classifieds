@@ -32,6 +32,14 @@ function label(language, en, mr) {
   return language === "mr" ? mr : en;
 }
 
+function footerMission(language) {
+  if (language === "mr") {
+    return "बारामतीसारख्या tier-2 शहरांसाठी affordable online classifieds आणि local yellow-page style सेवा — मालमत्ता, नोकरी, वाहन, वस्तू, सेवा, freelancers आणि professionals शोधण्यासाठी व जाहिरात देण्यासाठी.";
+  }
+
+  return "Affordable online classifieds and local yellow-page style service for Baramati and tier-2 Maharashtra — built for property, jobs, vehicles, goods, services, freelancers and local professionals.";
+}
+
 export default async function Footer() {
   const cookieStore = await cookies();
   const language = getLanguageFromCookieStore(cookieStore);
@@ -44,9 +52,13 @@ export default async function Footer() {
             <BrandLogo compact />
           </Link>
 
-          <p className="mt-3 max-w-xl text-sm leading-6 text-slate-200">
-            {t(language, "footerAbout")}
+          <p className="mt-3 max-w-xl text-sm leading-7 text-slate-200">
+            {footerMission(language)}
           </p>
+
+          <Link href="/about" className="mt-3 inline-flex text-sm font-black uppercase text-orange-200 hover:text-white">
+            {label(language, "Read the platform story", "Platform बद्दल वाचा")}
+          </Link>
 
           <div className="mt-5 space-y-1 text-sm text-slate-200">
             <p>
