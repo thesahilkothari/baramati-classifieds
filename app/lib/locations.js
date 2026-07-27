@@ -83,6 +83,9 @@ export const ALLOWED_TIER2_LOCATION_SLUGS = ALLOWED_TIER2_LOCATIONS.map(
   (location) => location.slug
 );
 
+export const ALLOWED_TIER2_LOCATION_LABEL =
+  "Baramati, Phaltan, Akluj, Solapur, Karad, Satara, Sangli, Indapur, Daund, Shirur, Nashik, Chhatrapati Sambhajinagar and Ahilyanagar";
+
 export function isAllowedTier2LocationSlug(slug) {
   return ALLOWED_TIER2_LOCATION_SLUGS.includes(String(slug || ""));
 }
@@ -128,8 +131,12 @@ export async function ensureAllowedTier2Locations(prisma) {
 export async function getAllowedTier2Cities(prisma) {
   await ensureAllowedTier2Locations(prisma);
 
-  return prisma.city.findMany({
-    where: getAllowedTier2LocationWhere(),
-    orderBy: { name: "asc" }
+  const cities = await prisma.city.findMany({
+    where: getAllowedTier2LocationWhere()
   });
+
+  const cityBySlug = new Map(cities.map((city) => [city.slug, city]));
+
+  return ALLOWED_TIER2_LOCATIONS.map((location) => cityBySlug.get(location.slug))
+    .filter(Boolean);
 }
