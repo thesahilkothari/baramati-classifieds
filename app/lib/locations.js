@@ -90,6 +90,22 @@ export function isAllowedTier2LocationSlug(slug) {
   return ALLOWED_TIER2_LOCATION_SLUGS.includes(String(slug || ""));
 }
 
+export function filterAllowedTier2Locations(cities = []) {
+  const cityBySlug = new Map(
+    cities
+      .filter((city) => isAllowedTier2LocationSlug(city?.slug))
+      .map((city) => [city.slug, city])
+  );
+
+  return ALLOWED_TIER2_LOCATIONS.map((location) => {
+    const databaseCity = cityBySlug.get(location.slug);
+
+    return databaseCity
+      ? { ...databaseCity, name: location.name, slug: location.slug }
+      : location;
+  });
+}
+
 export function getAllowedTier2LocationWhere() {
   return {
     slug: {
@@ -100,7 +116,9 @@ export function getAllowedTier2LocationWhere() {
 
 export function getAllowedAdCityWhere() {
   return {
-    city: getAllowedTier2LocationWhere()
+    city: {
+      is: getAllowedTier2LocationWhere()
+    }
   };
 }
 
@@ -135,8 +153,9 @@ export async function getAllowedTier2Cities(prisma) {
     where: getAllowedTier2LocationWhere()
   });
 
-  const cityBySlug = new Map(cities.map((city) => [city.slug, city]));
+  return filterAllowedTier2Locations(cities).filter((city) => city.id);
+}
 
-  return ALLOWED_TIER2_LOCATIONS.map((location) => cityBySlug.get(location.slug))
-    .filter(Boolean);
+export function getAllowedTier2CitySearchOptions() {
+  return ALLOWED_TIER2_LOCATIONS;
 }
