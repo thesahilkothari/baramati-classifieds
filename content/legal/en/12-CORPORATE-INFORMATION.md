@@ -9,8 +9,8 @@
 ## Owner and operator
 
 **Legal name:** SAHIL KOTHARI ENTERPRISES PRIVATE LIMITED  
-**CIN:** U74999PN2014PTC150594  
-**Registered office:** Vardhaman Capital, Plot No. 13, Gat No. 42/1, Mouje Rui, Taluka Baramati, District Pune, Maharashtra – 413133  
+**CIN:** U85101PN2014PTC150594  
+**Registered office:** G. NO. 42/1, Plot No 13, RUI, NEAR MOTA NAGAR, Pune, BARAMATI, Maharashtra, India, 413102  
 **Telephone:** +91 9673931166  
 **Email:** `connect@myclassifieds.in`  
 **GSTIN:** 27AAUCS3079C1ZZ  
@@ -20,7 +20,7 @@
 
 **Name:** Shekhar V. K.  
 **Designation:** Grievance Officer  
-**Address:** Vardhaman Capital, Plot No. 13, Gat No. 42/1, Mouje Rui, Taluka Baramati, District Pune, Maharashtra – 413133  
+**Address:** G. NO. 42/1, Plot No 13, RUI, NEAR MOTA NAGAR, Pune, BARAMATI, Maharashtra, India, 413102  
 **Email:** `connect@myclassifieds.in`  
 **Telephone:** +91 9673931166  
 **Online mechanism:** /contact
@@ -29,12 +29,22 @@
 
 **Name:** Shekhar V. K.  
 **Designation:** Resident Nodal/Designated Functionary  
-**Contact:** `connect@myclassifieds.in`; Vardhaman Capital, Plot No. 13, Gat No. 42/1, Mouje Rui, Taluka Baramati, District Pune, Maharashtra – 413133; +91 9673931166
+**Contact:** `connect@myclassifieds.in`; G. NO. 42/1, Plot No 13, RUI, NEAR MOTA NAGAR, Pune, BARAMATI, Maharashtra, India, 413102; +91 9673931166
+
+## MCA master-data snapshot
+
+As per the official Ministry of Corporate Affairs master-data record downloaded on 29 July 2026 at 5:44:44 pm: ROC Pune; registration number 150594; incorporated on 12 February 2014; private, non-government company limited by shares; unlisted; ACTIVE Compliant; company status Active; authorised capital ₹1,00,000; paid-up capital ₹1,00,000; last AGM 30 September 2025; balance-sheet date 31 March 2025; and Small Company status Yes.
+
+The MCA-record email is `sahilkothariepl@gmail.com`. This is stated only as the MCA master-data email field and does not replace the public website support channel `connect@myclassifieds.in`.
+
+The supplied master-data record does not contain director/signatory or charge particulars. Those particulars must be independently verified from the relevant MCA/company filings before reliance.
+
+The GSTIN above is retained as the user-provided website billing identifier. GST legal-name/address and principal/additional place of business should be separately checked against the GST registration certificate before issuing or changing GST invoices/receipts.
 
 ## Privacy and intellectual-property contacts
 
 **Privacy grievances:** Shekhar V. K., Grievance Officer — `connect@myclassifieds.in`  
-**IP notices:** Shekhar V. K., Contact Person, connect@myclassifieds.in  
+**IP notices:** Shekhar V. K., Contact Person — `connect@myclassifieds.in`  
 **Security:** `connect@myclassifieds.in`
 
 ## Consumer support
