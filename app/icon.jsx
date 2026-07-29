@@ -20,17 +20,20 @@ export default function Icon() {
           justifyContent: "center"
         }}
       >
-        <svg width="410" height="410" viewBox="0 0 512 512" fill="none">
-          <path d="M256 48C160.5 48 83 125.5 83 221c0 129.6 173 242.5 173 242.5S429 350.6 429 221C429 125.5 351.5 48 256 48Z" fill="#0F3D5E" />
-          <ellipse cx="256" cy="456" rx="88" ry="18" fill="#0F3D5E" opacity="0.18" />
-          <rect x="156" y="166" width="196" height="136" rx="24" fill="white" />
-          <rect x="185" y="198" width="54" height="54" rx="13" fill="#C2410C" />
-          <rect x="260" y="204" width="72" height="18" rx="9" fill="#0F3D5E" />
-          <rect x="260" y="244" width="78" height="18" rx="9" fill="#0F3D5E" />
-          <rect x="185" y="278" width="124" height="18" rx="9" fill="#0F3D5E" />
-          <circle cx="331" cy="317" r="69" fill="white" stroke="#0F3D5E" strokeWidth="30" />
-          <circle cx="331" cy="317" r="23" fill="#C2410C" />
-          <path d="M382 368L435 421" stroke="#0F3D5E" strokeWidth="30" strokeLinecap="round" />
+        <svg width="430" height="430" viewBox="0 0 512 512" fill="none">
+          <path d="M128 104L342 82L390 278L171 300L128 104Z" fill="#F8FAFC" stroke="#0F3D5E" strokeWidth="18" strokeLinejoin="round" />
+          <path d="M108 132H390C408 132 422 146 422 164V306C422 324 408 338 390 338H140C122 338 108 324 108 306V132Z" fill="#FFFFFF" stroke="#0F3D5E" strokeWidth="22" strokeLinejoin="round" />
+          <path d="M422 164C448 190 448 274 422 316" stroke="#0F3D5E" strokeWidth="22" strokeLinecap="round" />
+          <rect x="150" y="174" width="74" height="68" rx="10" fill="#0F766E" />
+          <rect x="254" y="180" width="108" height="21" rx="10.5" fill="#0F3D5E" />
+          <rect x="254" y="227" width="104" height="21" rx="10.5" fill="#0F3D5E" />
+          <rect x="150" y="270" width="76" height="21" rx="10.5" fill="#0F3D5E" />
+          <rect x="254" y="274" width="86" height="21" rx="10.5" fill="#0F3D5E" />
+          <path d="M145 422L184 338H242L221 422H145Z" fill="#0F766E" />
+          <path d="M236 422L252 338H310L326 422H236Z" fill="#0F766E" opacity="0.92" />
+          <path d="M342 422L321 338H379L418 422H342Z" fill="#0F766E" />
+          <path d="M256 196C207 196 167 236 167 285C167 351 256 432 256 432S345 351 345 285C345 236 305 196 256 196Z" fill="#C2410C" stroke="#FFFFFF" strokeWidth="24" strokeLinejoin="round" />
+          <circle cx="256" cy="285" r="37" fill="#FFFFFF" />
         </svg>
       </div>
     ),
