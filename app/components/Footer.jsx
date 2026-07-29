@@ -38,10 +38,10 @@ function label(language, en, mr) {
 
 function footerMission(language) {
   if (language === "mr") {
-    return "बारामतीसारख्या tier-2 शहरांसाठी affordable online classifieds आणि local yellow-page style सेवा — मालमत्ता, नोकरी, वाहन, वस्तू, सेवा, freelancers आणि professionals शोधण्यासाठी व जाहिरात देण्यासाठी.";
+    return "महाराष्ट्रातील tier-II आणि tier-III शहरांसाठी affordable online classifieds आणि local yellow-page style सेवा — मालमत्ता, नोकरी, वाहन, वस्तू, सेवा, freelancers आणि professionals शोधण्यासाठी व जाहिरात देण्यासाठी.";
   }
 
-  return "Affordable online classifieds and local yellow-page style service for Baramati and tier-2 Maharashtra — built for property, jobs, vehicles, goods, services, freelancers and local professionals.";
+  return "Affordable online classifieds and local yellow-page style service for tier-II and tier-III Maharashtra — built for property, jobs, vehicles, goods, services, freelancers and local professionals.";
 }
 
 export default async function Footer() {
