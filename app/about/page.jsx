@@ -10,23 +10,24 @@ import {
   COMPANY_PUBLIC_PHONE,
   COMPANY_REGISTERED_OFFICE
 } from "../lib/companyDetails";
+import { ALLOWED_TIER2_LOCATIONS, APPROVED_LOCATION_COUNT } from "../lib/locations";
 
 export const metadata = buildPageMetadata({
-  title: "About My Classifieds | Affordable Online Classifieds for Tier-2 Maharashtra",
+  title: "About My Classifieds | Affordable Classifieds for Tier-II and Tier-III Maharashtra",
   description:
-    "My Classifieds is an affordable online classifieds platform designed for Baramati and tier-2 cities in Maharashtra, helping people post property, jobs, services and local ads easily.",
+    "My Classifieds is an affordable online classifieds platform designed for tier-II and tier-III cities and towns of Maharashtra, helping people post property, jobs, services and local ads easily.",
   path: "/about"
 });
 
 const publicMissionPoints = [
-  "Built for tier-2 cities such as Baramati, where traditional newspaper classifieds can be costly for ordinary citizens and small businesses.",
+  "Built for tier-II and tier-III Maharashtra cities and towns where traditional newspaper classifieds can be costly for ordinary citizens and small businesses.",
   "Designed as an affordable local yellow-page style service for people who want to buy, sell, rent, hire, work, offer services or find nearby opportunities.",
   "Focused on simple text-first classifieds so the platform remains fast, searchable, mobile-friendly and accessible on ordinary internet connections.",
   "Open to legally permissible classifieds only, subject to moderation, listing rules, safety checks and user reporting mechanisms."
 ];
 
 const publicMissionPointsMr = [
-  "बारामतीसारख्या tier-2 शहरांसाठी तयार केलेले, जिथे वृत्तपत्रातील classified जाहिराती सामान्य नागरिक व छोट्या व्यवसायांसाठी खर्चिक ठरू शकतात.",
+  "महाराष्ट्रातील tier-II आणि tier-III शहरांसाठी तयार केलेले, जिथे वृत्तपत्रातील classified जाहिराती सामान्य नागरिक व छोट्या व्यवसायांसाठी खर्चिक ठरू शकतात.",
   "खरेदी, विक्री, भाडे, नोकरी, सेवा, freelancers आणि स्थानिक संधींसाठी affordable local yellow-page style सेवा म्हणून विकसित केलेले.",
   "जलद, शोधण्यास सोपे आणि mobile-first अनुभवासाठी text-first classifieds वर भर.",
   "केवळ कायदेशीरदृष्ट्या अनुमत जाहिराती, moderation, listing rules, safety checks आणि user reporting mechanisms अंतर्गत."
@@ -71,7 +72,7 @@ const platformPrinciples = [
   {
     title: "Affordable reach",
     text:
-      "Local visibility should not be limited only to those who can afford repeated print advertisements. My Classifieds gives a simpler digital route for public notices, local needs and everyday opportunities."
+      "Local visibility should not be limited only to those who can afford repeated print advertisements. My Classifieds gives a simpler digital route for local needs and everyday opportunities."
   },
   {
     title: "Search-first utility",
@@ -79,9 +80,9 @@ const platformPrinciples = [
       "The platform is designed around search, category and location rather than clutter. A user should be able to quickly find what is useful nearby."
   },
   {
-    title: "Local city focus",
+    title: "Smaller-city focus",
     text:
-      "The purpose is not to imitate a luxury marketplace. It is to become a practical city-level classifieds and yellow-page style layer for Baramati and similar Maharashtra cities."
+      "The purpose is not to imitate a luxury marketplace. It is to become a practical city-level classifieds and yellow-page style layer for Maharashtra's tier-II and tier-III places."
   },
   {
     title: "Responsible publishing",
@@ -132,11 +133,11 @@ export default function AboutPage() {
                 </p>
 
                 <h1 className="mt-3 text-3xl font-black leading-tight text-[#0F3D5E] md:text-5xl">
-                  Local classifieds made affordable for Baramati and tier-2 Maharashtra
+                  Local classifieds made affordable for tier-II and tier-III Maharashtra
                 </h1>
 
                 <p className="mt-5 text-base leading-8 text-[#475569]">
-                  My Classifieds was created for cities where a simple classified advertisement in a newspaper, local weekly or fortnightly can still be costly and inconvenient for the common public. We bring everyday local needs to your fingertips: buy, sell, rent, hire, find jobs, offer services and connect with nearby people through a simple online classifieds platform.
+                  My Classifieds was created for cities and towns where a simple classified advertisement in a newspaper, local weekly or fortnightly can still be costly and inconvenient for the common public. We bring everyday local needs to your fingertips: buy, sell, rent, hire, find jobs, offer services and connect with nearby people through a simple online classifieds platform.
                 </p>
 
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row">
@@ -167,10 +168,10 @@ export default function AboutPage() {
               The idea behind the platform
             </p>
             <h2 className="mt-2 text-2xl font-black uppercase text-[#0F172A] md:text-3xl">
-              A digital yellow page for the local city
+              A digital yellow page for smaller Maharashtra cities
             </h2>
             <p className="mt-4 text-sm leading-8 text-[#475569] md:text-base">
-              My Classifieds is built as an affordable local utility. It is not meant to be a crowded luxury marketplace. It is meant to be useful: a clean, searchable, city-focused classifieds service where people in Baramati and similar Maharashtra cities can publish everyday requirements and discover nearby opportunities without depending only on costly print ads.
+              My Classifieds is built as an affordable local utility. It is not meant to be a crowded luxury marketplace. It is meant to be useful: a clean, searchable, city-focused classifieds service where people in selected Maharashtra cities and towns can publish everyday requirements and discover nearby opportunities without depending only on costly print ads.
             </p>
 
             <div className="mt-6 grid gap-3 md:grid-cols-2">
@@ -187,6 +188,40 @@ export default function AboutPage() {
                   {point}
                 </div>
               ))}
+            </div>
+          </section>
+
+          <section className="mt-6 rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm md:p-8">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-xs font-black uppercase tracking-wide text-[#C2410C]">
+                  Current location coverage
+                </p>
+                <h2 className="mt-2 text-2xl font-black uppercase text-[#0F172A] md:text-3xl">
+                  {APPROVED_LOCATION_COUNT} selected Maharashtra cities and towns
+                </h2>
+              </div>
+              <Link href="/ads" className="text-sm font-black uppercase text-[#0F3D5E]">
+                Browse by location
+              </Link>
+            </div>
+
+            <p className="mt-4 text-sm leading-7 text-[#475569]">
+              The launch focus is on non-metro local markets across Western Maharashtra, North Maharashtra, Marathwada, Vidarbha and Konkan. Mumbai, Pune, Nagpur and similar metro-first locations are intentionally outside the current launch focus.
+            </p>
+
+            <div className="mt-5 max-h-72 overflow-y-auto rounded-2xl border border-[#CBD5E1] bg-[#F8FAFC] p-4">
+              <div className="flex flex-wrap gap-2">
+                {ALLOWED_TIER2_LOCATIONS.map((city) => (
+                  <Link
+                    key={city.slug}
+                    href={`/ads?city=${city.slug}`}
+                    className="rounded-full border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-black uppercase text-[#475569] hover:border-[#0F3D5E] hover:text-[#0F3D5E]"
+                  >
+                    {city.name}
+                  </Link>
+                ))}
+              </div>
             </div>
           </section>
 
@@ -268,7 +303,7 @@ export default function AboutPage() {
               My Classifieds brings local opportunities to your fingertips.
             </h2>
             <p className="mt-4 max-w-4xl text-sm leading-8 text-slate-100 md:text-base">
-              For a local resident, it can be a place to sell a used item. For a job seeker, it can be a place to find work. For a small business, it can be a low-cost visibility channel. For a service provider, it can become a local city directory. That is the purpose of My Classifieds: affordable, searchable, responsible local advertising for Baramati and Maharashtra.
+              For a local resident, it can be a place to sell a used item. For a job seeker, it can be a place to find work. For a small business, it can be a low-cost visibility channel. For a service provider, it can become a local city directory. That is the purpose of My Classifieds: affordable, searchable, responsible local advertising for tier-II and tier-III Maharashtra.
             </p>
           </section>
 
