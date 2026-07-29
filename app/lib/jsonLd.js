@@ -1,9 +1,12 @@
 import { absoluteUrl, defaultSeo } from "./seo";
+import {
+  COMPANY_LEGAL_NAME,
+  COMPANY_POSTAL_ADDRESS_SCHEMA,
+  COMPANY_PUBLIC_EMAIL,
+  COMPANY_PUBLIC_PHONE
+} from "./companyDetails";
 
-const COMPANY_NAME = "SAHIL KOTHARI ENTERPRISES PRIVATE LIMITED";
 const BRAND_NAME = "My Classifieds";
-const CONTACT_EMAIL = "connect@myclassifieds.in";
-const CONTACT_PHONE = "+91 9673931166";
 
 function cleanText(value, maxLength = 500) {
   return String(value || "")
@@ -23,18 +26,14 @@ export function buildOrganizationSchema() {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: COMPANY_NAME,
+    name: COMPANY_LEGAL_NAME,
     alternateName: BRAND_NAME,
     url: absoluteUrl("/"),
-    email: CONTACT_EMAIL,
-    telephone: CONTACT_PHONE,
+    email: COMPANY_PUBLIC_EMAIL,
+    telephone: COMPANY_PUBLIC_PHONE,
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Vardhaman Capital, Plot No. 13, Gat No. 42/1, Mouje Rui",
-      addressLocality: "Baramati",
-      addressRegion: "Maharashtra",
-      postalCode: "413133",
-      addressCountry: "IN"
+      ...COMPANY_POSTAL_ADDRESS_SCHEMA
     }
   };
 }
