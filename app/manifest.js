@@ -5,7 +5,7 @@ export default function manifest() {
     name: "My Classifieds - Online Classifieds Platform",
     short_name: "My Classifieds",
     description:
-      "Affordable local online classifieds and yellow-page style service for Baramati and tier-2 Maharashtra.",
+      "Affordable local online classifieds and yellow-page style service for tier-II and tier-III cities and towns of Maharashtra.",
     start_url: "/",
     scope: "/",
     display: "standalone",
