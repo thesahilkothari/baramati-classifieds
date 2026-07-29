@@ -8,13 +8,12 @@ export const COMPANY_PUBLIC_PHONE_COMPACT = "9673931166";
 export const COMPANY_GSTIN = "27AAUCS3079C1ZZ";
 export const COMPANY_RULE_26_CONTACT = "Shekhar V. K.";
 export const COMPANY_GRIEVANCE_OFFICER = "Shekhar V. K.";
-export const COMPANY_MCA_RECORD_EMAIL = "sahilkothariepl@gmail.com";
 
 export const COMPANY_RULE26_DISCLOSURE_EN =
-  "My Classifieds is owned and operated by SAHIL KOTHARI ENTERPRISES PRIVATE LIMITED | CIN: U85101PN2014PTC150594 | Registered Office: G. NO. 42/1, Plot No 13, RUI, NEAR MOTA NAGAR, Pune, BARAMATI, Maharashtra, India, 413102 | Tel: +91 9673931166 | Email: connect@myclassifieds.in | Contact person for queries/grievances: Shekhar V. K., Contact Person under Rule 26.";
+  "My Classifieds is owned and operated by SAHIL KOTHARI ENTERPRISES PRIVATE LIMITED | CIN: U85101PN2014PTC150594 | Registered Office: G. NO. 42/1, Plot No 13, RUI, NEAR MOTA NAGAR, Pune, BARAMATI, Maharashtra, India, 413102 | Support: connect@myclassifieds.in | +91 9673931166 | Grievance contact: Shekhar V. K.";
 
 export const COMPANY_RULE26_DISCLOSURE_MR =
-  "My Classifieds हे SAHIL KOTHARI ENTERPRISES PRIVATE LIMITED या कंपनीद्वारे मालकी व संचालन केले जाते | CIN: U85101PN2014PTC150594 | नोंदणीकृत कार्यालय: G. NO. 42/1, Plot No 13, RUI, NEAR MOTA NAGAR, Pune, BARAMATI, Maharashtra, India, 413102 | Tel: +91 9673931166 | Email: connect@myclassifieds.in | प्रश्न/तक्रारींसाठी संपर्क व्यक्ती: Shekhar V. K., Contact Person under Rule 26.";
+  "My Classifieds हे SAHIL KOTHARI ENTERPRISES PRIVATE LIMITED या कंपनीद्वारे मालकी व संचालन केले जाते | CIN: U85101PN2014PTC150594 | नोंदणीकृत कार्यालय: G. NO. 42/1, Plot No 13, RUI, NEAR MOTA NAGAR, Pune, BARAMATI, Maharashtra, India, 413102 | Support: connect@myclassifieds.in | +91 9673931166 | तक्रार संपर्क: Shekhar V. K.";
 
 const CORPORATE_REPLACEMENTS = [
   ["U74999PN2014PTC150594", COMPANY_CIN],
