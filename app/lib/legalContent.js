@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { normalizeCorporateText } from "./companyDetails";
 
 export const POLICY_VERSION = "1.0";
 export const POLICY_EFFECTIVE_DATE = "23 July 2026";
@@ -114,7 +115,8 @@ export async function readLegalMarkdown({ slug, lang = "en" }) {
   );
 
   try {
-    return await fs.readFile(filePath, "utf8");
+    const markdown = await fs.readFile(filePath, "utf8");
+    return normalizeCorporateText(markdown);
   } catch (error) {
     console.error("Legal content read failed:", error);
     return null;
