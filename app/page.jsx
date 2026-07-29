@@ -7,6 +7,7 @@ import BrandLogo from "./components/BrandLogo";
 import JsonLd from "./components/JsonLd";
 import { getLanguageFromCookieStore, t } from "./lib/i18n";
 import {
+  APPROVED_LOCATION_COUNT,
   getAllowedAdCityWhere,
   getAllowedTier2CitySearchOptions
 } from "./lib/locations";
@@ -18,19 +19,19 @@ const cityUtilityHighlights = [
   {
     title: "Affordable local advertising",
     text:
-      "A practical alternative where newspaper, weekly or fortnightly classified ads may be costly for ordinary users.",
+      "A practical alternative for smaller Maharashtra cities where newspaper, weekly or fortnightly classifieds may be costly for ordinary users and small businesses.",
     href: "/about"
   },
   {
-    title: "City-level yellow page",
+    title: "Local yellow-page utility",
     text:
-      "Discover local services, professionals, freelancers, jobs, property, vehicles and everyday opportunities in one searchable place.",
+      "Find and post local needs across property, jobs, vehicles, services, freelancers, professionals, goods and everyday city opportunities.",
     href: "/ads"
   },
   {
-    title: "Text-first and mobile-first",
+    title: "Built for tier-II and tier-III users",
     text:
-      "Designed for fast loading, simple posting and easy browsing without requiring photos for launch-stage classifieds.",
+      "Fast, plain-text, mobile-first classifieds for Maharashtra cities and towns outside the Mumbai-Pune-Nagpur metro-first focus.",
     href: "/post-ad"
   }
 ];
@@ -51,7 +52,11 @@ const useCases = [
   "Doctors",
   "Lawyers",
   "CAs",
-  "Architects"
+  "Architects",
+  "Caregivers",
+  "Transporters",
+  "Packers & Movers",
+  "Agriculture Equipment"
 ];
 
 function uniqueAds(ads) {
@@ -194,11 +199,11 @@ export default async function HomePage() {
                 </p>
 
                 <h1 className="mt-3 text-4xl font-black leading-tight text-[#0F3D5E] md:text-6xl">
-                  Affordable local classifieds for tier-2 Maharashtra
+                  Affordable classifieds for tier-II & tier-III Maharashtra
                 </h1>
 
                 <p className="mt-5 max-w-3xl text-base leading-8 text-[#475569]">
-                  A city-focused digital yellow page for approved tier-2 Maharashtra locations: post free classified ads, find property, jobs, vehicles, goods, local services and professionals, and connect with nearby people without depending only on costly newspaper classifieds.
+                  A city-focused digital yellow page for {APPROVED_LOCATION_COUNT} selected Maharashtra cities and towns: post free classified ads, find property, jobs, vehicles, goods, local services and professionals, and connect with nearby people without depending only on costly newspaper classifieds.
                 </p>
 
                 <form
@@ -259,22 +264,31 @@ export default async function HomePage() {
                 </form>
 
                 <div className="mt-3 rounded-2xl border border-[#CBD5E1] bg-white p-4">
-                  <p className="text-xs font-black uppercase tracking-wide text-[#0F766E]">
-                    Available launch locations only
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {cities.map((city) => (
-                      <Link
-                        key={city.slug}
-                        href={`/ads?city=${city.slug}`}
-                        className="rounded-full border border-[#CBD5E1] bg-[#F8FAFC] px-3 py-1.5 text-[11px] font-black uppercase text-[#475569] hover:border-[#0F3D5E] hover:text-[#0F3D5E]"
-                      >
-                        {city.name}
-                      </Link>
-                    ))}
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-xs font-black uppercase tracking-wide text-[#0F766E]">
+                      Available in selected Maharashtra cities & towns
+                    </p>
+                    <p className="rounded-full bg-[#F8FAFC] px-3 py-1 text-[11px] font-black uppercase text-[#0F3D5E]">
+                      {APPROVED_LOCATION_COUNT} locations
+                    </p>
                   </div>
+
+                  <div className="mt-3 max-h-48 overflow-y-auto pr-1">
+                    <div className="flex flex-wrap gap-2">
+                      {cities.map((city) => (
+                        <Link
+                          key={city.slug}
+                          href={`/ads?city=${city.slug}`}
+                          className="rounded-full border border-[#CBD5E1] bg-[#F8FAFC] px-3 py-1.5 text-[11px] font-black uppercase text-[#475569] hover:border-[#0F3D5E] hover:text-[#0F3D5E]"
+                        >
+                          {city.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+
                   <p className="mt-3 text-[11px] font-semibold leading-5 text-[#475569]">
-                    Pune, Mumbai, Nagpur and similar tier-1 locations are intentionally not part of the current launch list.
+                    Mumbai, Pune, Nagpur and similar metro-first locations are intentionally outside the current launch focus.
                   </p>
                 </div>
 
