@@ -2,7 +2,10 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import BrandLogo from "./BrandLogo";
 import { getLanguageFromCookieStore, t } from "../lib/i18n";
-import { normalizeCorporateText } from "../lib/companyDetails";
+import {
+  COMPANY_RULE26_DISCLOSURE_EN,
+  COMPANY_RULE26_DISCLOSURE_MR
+} from "../lib/companyDetails";
 
 const legalLinks = [
   { href: "/legal", labelEn: "Legal Hub", labelMr: "कायदेशीर माहिती" },
@@ -44,7 +47,8 @@ function footerMission(language) {
 export default async function Footer() {
   const cookieStore = await cookies();
   const language = getLanguageFromCookieStore(cookieStore);
-  const companyDisclosure = normalizeCorporateText(t(language, "companyDisclosure"));
+  const companyDisclosure =
+    language === "mr" ? COMPANY_RULE26_DISCLOSURE_MR : COMPANY_RULE26_DISCLOSURE_EN;
 
   return (
     <footer className="border-t border-[#0B2F49] bg-[#0F3D5E] px-4 py-10 text-white">
