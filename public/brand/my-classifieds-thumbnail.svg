@@ -1,70 +1,75 @@
 <svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">My Classifieds website thumbnail</title>
-  <desc id="desc">My Classifieds thumbnail with separate Online Classifieds Platform tagline.</desc>
+  <desc id="desc">Online Classifieds Platform thumbnail for tier-II and tier-III cities and towns of Maharashtra.</desc>
   <rect width="1200" height="630" fill="#F8FAFC"/>
-  <circle cx="1032" cy="282" r="250" fill="#0F766E" opacity="0.1"/>
-  <circle cx="1110" cy="114" r="76" fill="#0F3D5E" opacity="0.06"/>
-  <path d="M772 185C857 125 958 127 1030 190C1102 253 1117 367 1067 447" stroke="#0F766E" stroke-width="4" stroke-dasharray="11 14" opacity="0.5"/>
-  <g opacity="0.22" fill="#0F766E">
-    <circle cx="45" cy="540" r="3"/><circle cx="68" cy="540" r="3"/><circle cx="91" cy="540" r="3"/><circle cx="114" cy="540" r="3"/><circle cx="137" cy="540" r="3"/>
-    <circle cx="45" cy="565" r="3"/><circle cx="68" cy="565" r="3"/><circle cx="91" cy="565" r="3"/><circle cx="114" cy="565" r="3"/><circle cx="137" cy="565" r="3"/>
-    <circle cx="45" cy="590" r="3"/><circle cx="68" cy="590" r="3"/><circle cx="91" cy="590" r="3"/><circle cx="114" cy="590" r="3"/><circle cx="137" cy="590" r="3"/>
+  <circle cx="1050" cy="315" r="190" fill="#0F766E" opacity="0.16"/>
+  <circle cx="1030" cy="315" r="122" fill="#0F3D5E" opacity="0.08"/>
+  <g opacity="0.22" fill="#0F3D5E">
+    <circle cx="42" cy="516" r="2.5"/><circle cx="62" cy="516" r="2.5"/><circle cx="82" cy="516" r="2.5"/><circle cx="102" cy="516" r="2.5"/>
+    <circle cx="42" cy="536" r="2.5"/><circle cx="62" cy="536" r="2.5"/><circle cx="82" cy="536" r="2.5"/><circle cx="102" cy="536" r="2.5"/>
+    <circle cx="42" cy="556" r="2.5"/><circle cx="62" cy="556" r="2.5"/><circle cx="82" cy="556" r="2.5"/><circle cx="102" cy="556" r="2.5"/>
   </g>
-
-  <g transform="translate(70 72) scale(1.55)">
-    <path d="M24 19L64 15L73 52L32 56L24 19Z" fill="#F8FAFC" stroke="#0F3D5E" stroke-width="3" stroke-linejoin="round"/>
-    <path d="M20 24L73 24C76.3 24 79 26.7 79 30V57C79 60.3 76.3 63 73 63H26C22.7 63 20 60.3 20 57V24Z" fill="#FFFFFF" stroke="#0F3D5E" stroke-width="4" stroke-linejoin="round"/>
-    <path d="M79 30C84 34.8 84 51 79 60" stroke="#0F3D5E" stroke-width="4" stroke-linecap="round"/>
-    <rect x="28" y="32" width="14" height="13" rx="2" fill="#0F766E"/>
-    <rect x="48" y="33" width="20" height="4" rx="2" fill="#0F3D5E"/>
-    <rect x="48" y="42" width="20" height="4" rx="2" fill="#0F3D5E"/>
-    <rect x="28" y="50" width="14" height="4" rx="2" fill="#0F3D5E"/>
-    <rect x="48" y="51" width="16" height="4" rx="2" fill="#0F3D5E"/>
-    <path d="M27 76L34 62H45L41 76H27Z" fill="#0F766E"/>
-    <path d="M44 76L47 62H58L61 76H44Z" fill="#0F766E" opacity="0.9"/>
-    <path d="M64 76L60 62H71L78 76H64Z" fill="#0F766E"/>
-    <path d="M48 36C38.7 36 31.2 43.5 31.2 52.8C31.2 65.3 48 80.5 48 80.5S64.8 65.3 64.8 52.8C64.8 43.5 57.3 36 48 36Z" fill="#C2410C" stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round"/>
-    <circle cx="48" cy="52.8" r="6.8" fill="#FFFFFF"/>
+  <g transform="translate(70 78)">
+    <path d="M60 0C26.9 0 0 26.9 0 60c0 44.9 60 87 60 87s60-42.1 60-87C120 26.9 93.1 0 60 0Z" fill="#0F3D5E"/>
+    <rect x="25" y="35" width="70" height="48" rx="9" fill="#fff"/>
+    <rect x="35" y="46" width="20" height="20" rx="5" fill="#C2410C"/>
+    <rect x="62" y="48" width="26" height="7" rx="3.5" fill="#0F3D5E"/>
+    <rect x="62" y="63" width="28" height="7" rx="3.5" fill="#0F3D5E"/>
+    <rect x="35" y="76" width="43" height="7" rx="3.5" fill="#0F3D5E"/>
+    <circle cx="86" cy="88" r="26" fill="#fff" stroke="#0F3D5E" stroke-width="11"/>
+    <circle cx="86" cy="88" r="8" fill="#C2410C"/>
+    <path d="M106 108L126 128" stroke="#0F3D5E" stroke-width="11" stroke-linecap="round"/>
+    <path d="M36 90h58l-10 13H46L36 90Z" fill="#0F766E"/>
   </g>
-  <text x="225" y="139" font-family="Inter, Arial, sans-serif" font-weight="900" font-size="70" letter-spacing="-1.8">
-    <tspan fill="#C2410C">My</tspan><tspan fill="#0F3D5E"> Classifieds</tspan>
-  </text>
-  <text x="229" y="184" fill="#0F766E" font-family="Inter, Arial, sans-serif" font-size="26" font-weight="900" letter-spacing="5">Online Classifieds Platform</text>
-
-  <text x="70" y="296" fill="#0F3D5E" font-family="Inter, Arial, sans-serif" font-weight="900" font-size="58">Buy, Sell, Rent &amp; Find Jobs</text>
-  <text x="70" y="346" fill="#475569" font-family="Inter, Arial, sans-serif" font-weight="800" font-size="30">Tier-2 Maharashtra Local Classifieds</text>
-  <rect x="70" y="386" width="640" height="64" rx="18" fill="white" stroke="#CBD5E1"/>
-  <circle cx="105" cy="418" r="12" stroke="#64748B" stroke-width="4"/><path d="M115 428L126 439" stroke="#64748B" stroke-width="4" stroke-linecap="round"/>
-  <text x="150" y="426" fill="#64748B" font-family="Inter, Arial, sans-serif" font-weight="700" font-size="21">What are you looking for?</text>
-  <line x1="430" y1="399" x2="430" y2="438" stroke="#CBD5E1"/>
-  <text x="462" y="426" fill="#0F3D5E" font-family="Inter, Arial, sans-serif" font-weight="800" font-size="20">13 launch cities</text>
-  <rect x="585" y="397" width="106" height="42" rx="12" fill="#C2410C"/>
-  <text x="611" y="425" fill="white" font-family="Inter, Arial, sans-serif" font-weight="900" font-size="20">Search</text>
-
+  <text x="220" y="140" font-family="Inter, Arial, sans-serif" font-weight="900" font-size="62" letter-spacing="-1.5"><tspan fill="#C2410C">My</tspan><tspan fill="#0F3D5E"> Classifieds</tspan></text>
+  <rect x="220" y="169" width="45" height="5" rx="2.5" fill="#0F766E"/>
+  <text x="285" y="179" fill="#0F3D5E" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800" letter-spacing="6">ONLINE CLASSIFIEDS PLATFORM</text>
+  <rect x="760" y="169" width="45" height="5" rx="2.5" fill="#0F766E"/>
+  <text x="70" y="290" fill="#0F3D5E" font-family="Inter, Arial, sans-serif" font-weight="900" font-size="58">Buy, Sell, Rent &amp; Find Jobs</text>
+  <text x="70" y="340" fill="#0F766E" font-family="Inter, Arial, sans-serif" font-weight="800" font-size="30">Tier-II &amp; Tier-III Maharashtra • 85 Cities &amp; Towns</text>
+  <rect x="70" y="380" width="585" height="58" rx="16" fill="white" stroke="#CBD5E1"/>
+  <circle cx="102" cy="409" r="12" stroke="#64748B" stroke-width="4"/><path d="M112 419L122 429" stroke="#64748B" stroke-width="4" stroke-linecap="round"/>
+  <text x="140" y="418" fill="#64748B" font-family="Inter, Arial, sans-serif" font-weight="600" font-size="20">Search anything...</text>
+  <line x1="420" y1="392" x2="420" y2="426" stroke="#CBD5E1"/>
+  <text x="448" y="418" fill="#0F3D5E" font-family="Inter, Arial, sans-serif" font-weight="700" font-size="18">85 locations</text>
+  <rect x="535" y="390" width="104" height="38" rx="10" fill="#0F3D5E"/>
+  <text x="561" y="416" fill="white" font-family="Inter, Arial, sans-serif" font-weight="900" font-size="18">Search</text>
   <g font-family="Inter, Arial, sans-serif" font-weight="900" font-size="15">
-    <rect x="70" y="486" width="114" height="40" rx="10" fill="#0F3D5E"/><text x="97" y="512" fill="white">Property</text>
-    <rect x="196" y="486" width="86" height="40" rx="10" fill="#C2410C"/><text x="225" y="512" fill="white">Jobs</text>
-    <rect x="294" y="486" width="110" height="40" rx="10" fill="#0F766E"/><text x="326" y="512" fill="white">Vehicles</text>
-    <rect x="416" y="486" width="128" height="40" rx="10" fill="#0F3D5E"/><text x="444" y="512" fill="white">Electronics</text>
-    <rect x="556" y="486" width="136" height="40" rx="10" fill="#0F766E"/><text x="581" y="512" fill="white">Local Services</text>
+    <rect x="70" y="466" width="114" height="40" rx="10" fill="#0F3D5E"/><text x="97" y="492" fill="white">Property</text>
+    <rect x="196" y="466" width="86" height="40" rx="10" fill="#C2410C"/><text x="225" y="492" fill="white">Jobs</text>
+    <rect x="294" y="466" width="110" height="40" rx="10" fill="#0F766E"/><text x="326" y="492" fill="white">Vehicles</text>
+    <rect x="416" y="466" width="128" height="40" rx="10" fill="#0F3D5E"/><text x="444" y="492" fill="white">Electronics</text>
+    <rect x="556" y="466" width="136" height="40" rx="10" fill="#0F766E"/><text x="581" y="492" fill="white">Local Services</text>
   </g>
-
-  <g transform="translate(795 130)">
-    <rect x="0" y="0" width="148" height="118" rx="18" fill="white" stroke="#CBD5E1"/>
-    <text x="48" y="69" font-size="45">🏠</text>
-    <rect x="190" y="82" width="148" height="118" rx="18" fill="white" stroke="#CBD5E1"/>
-    <text x="238" y="151" font-size="45">💼</text>
-    <rect x="102" y="234" width="148" height="118" rx="18" fill="white" stroke="#CBD5E1"/>
-    <text x="151" y="304" font-size="45">🚗</text>
-    <circle cx="320" cy="4" r="38" fill="#0F766E"/>
-    <circle cx="320" cy="4" r="12" fill="white"/>
+  <g transform="translate(735 78)">
+    <rect x="70" y="0" width="245" height="420" rx="34" fill="#0F172A"/>
+    <rect x="84" y="15" width="217" height="390" rx="26" fill="white"/>
+    <rect x="107" y="96" width="170" height="44" rx="12" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="124" y="124" fill="#64748B" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600">Search anything...</text>
+    <text x="108" y="169" fill="#0F3D5E" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="800">Selected city</text>
+    <text x="205" y="169" fill="#0F3D5E" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="800">Change</text>
+    <g transform="translate(-20 198)">
+      <rect width="345" height="92" rx="16" fill="white" stroke="#CBD5E1"/>
+      <rect x="14" y="14" width="92" height="64" rx="10" fill="#E0F2FE"/>
+      <text x="43" y="55" font-size="30">🏠</text>
+      <rect x="122" y="13" width="70" height="20" rx="7" fill="#DBEAFE"/><text x="135" y="28" fill="#0F3D5E" font-family="Inter" font-weight="900" font-size="11">PROPERTY</text>
+      <text x="122" y="55" fill="#0F172A" font-family="Inter" font-size="19" font-weight="900">2 BHK Duplex House</text>
+      <text x="122" y="80" fill="#C2410C" font-family="Inter" font-size="18" font-weight="900">₹45,00,000</text>
+    </g>
+    <g transform="translate(-20 304)">
+      <rect width="345" height="92" rx="16" fill="white" stroke="#CBD5E1"/>
+      <rect x="14" y="14" width="92" height="64" rx="10" fill="#FFEDD5"/>
+      <text x="43" y="56" font-size="30">💼</text>
+      <rect x="122" y="13" width="50" height="20" rx="7" fill="#FFEDD5"/><text x="134" y="28" fill="#C2410C" font-family="Inter" font-weight="900" font-size="11">JOBS</text>
+      <text x="122" y="55" fill="#0F172A" font-family="Inter" font-size="19" font-weight="900">Field Sales Executive</text>
+      <text x="122" y="80" fill="#C2410C" font-family="Inter" font-size="18" font-weight="900">₹18,000 - ₹25,000</text>
+    </g>
   </g>
-
   <rect y="558" width="1200" height="72" fill="#0F3D5E"/>
   <g fill="white" font-family="Inter, Arial, sans-serif">
-    <text x="80" y="593" font-size="18" font-weight="900">Trusted &amp; Secure</text><text x="80" y="616" font-size="14">Moderated listings</text>
-    <text x="340" y="593" font-size="18" font-weight="900">Local &amp; Relevant</text><text x="340" y="616" font-size="14">For tier-2 Maharashtra</text>
-    <text x="620" y="593" font-size="18" font-weight="900">Quick &amp; Easy</text><text x="620" y="616" font-size="14">Post in minutes</text>
-    <text x="870" y="593" font-size="18" font-weight="900">Mobile Friendly</text><text x="870" y="616" font-size="14">Anytime, anywhere</text>
+    <text x="80" y="593" font-size="18" font-weight="900">Trusted &amp; Safe</text><text x="80" y="616" font-size="14">Moderated listings</text>
+    <text x="330" y="593" font-size="18" font-weight="900">Local &amp; Relevant</text><text x="330" y="616" font-size="14">Nearby deals first</text>
+    <text x="590" y="593" font-size="18" font-weight="900">Mobile First</text><text x="590" y="616" font-size="14">Fast &amp; easy to use</text>
+    <text x="835" y="593" font-size="18" font-weight="900">Connect Directly</text><text x="835" y="616" font-size="14">Buyers &amp; sellers connect</text>
   </g>
 </svg>
