@@ -3,6 +3,13 @@ import { buildPageMetadata } from "../lib/seo";
 import BrandHeroGraphic from "../components/BrandHeroGraphic";
 import JsonLd from "../components/JsonLd";
 import { buildBreadcrumbSchema, buildOrganizationSchema } from "../lib/jsonLd";
+import {
+  COMPANY_CIN,
+  COMPANY_LEGAL_NAME,
+  COMPANY_PUBLIC_EMAIL,
+  COMPANY_PUBLIC_PHONE,
+  COMPANY_REGISTERED_OFFICE
+} from "../lib/companyDetails";
 
 export const metadata = buildPageMetadata({
   title: "About My Classifieds | Affordable Online Classifieds for Tier-2 Maharashtra",
@@ -271,7 +278,7 @@ export default function AboutPage() {
             </h2>
 
             <p className="mt-3 text-sm leading-7 text-[#475569]">
-              My Classifieds is owned and operated by SAHIL KOTHARI ENTERPRISES PRIVATE LIMITED. CIN: U74999PN2014PTC150594. Registered Office: Vardhaman Capital, Plot No. 13, Gat No. 42/1, Mouje Rui, Taluka Baramati, District Pune, Maharashtra – 413133. Contact: connect@myclassifieds.in | +91 9673931166.
+              My Classifieds is owned and operated by {COMPANY_LEGAL_NAME}. CIN: {COMPANY_CIN}. Registered Office: {COMPANY_REGISTERED_OFFICE}. Contact: {COMPANY_PUBLIC_EMAIL} | {COMPANY_PUBLIC_PHONE}.
             </p>
 
             <p className="mt-3 rounded-2xl bg-[#F8FAFC] p-4 text-sm leading-7 text-[#475569]">
