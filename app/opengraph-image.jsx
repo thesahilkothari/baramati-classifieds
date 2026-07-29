@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { APPROVED_LOCATION_COUNT } from "./lib/locations";
 
 export const runtime = "edge";
 export const alt = "My Classifieds - Online Classifieds Platform";
@@ -12,36 +13,33 @@ function Mark() {
   return (
     <div
       style={{
-        width: 136,
-        height: 136,
+        width: 126,
+        height: 126,
         borderRadius: 34,
-        background: "#FFFFFF",
+        background: "#F8FAFC",
         border: "3px solid #CBD5E1",
         display: "flex",
         alignItems: "center",
         justifyContent: "center"
       }}
     >
-      <svg width="110" height="110" viewBox="0 0 96 96" fill="none">
-        <path d="M24 19L64 15L73 52L32 56L24 19Z" fill="#F8FAFC" stroke="#0F3D5E" strokeWidth="3" strokeLinejoin="round" />
-        <path d="M20 24L73 24C76.3 24 79 26.7 79 30V57C79 60.3 76.3 63 73 63H26C22.7 63 20 60.3 20 57V24Z" fill="#FFFFFF" stroke="#0F3D5E" strokeWidth="4" strokeLinejoin="round" />
-        <path d="M79 30C84 34.8 84 51 79 60" stroke="#0F3D5E" strokeWidth="4" strokeLinecap="round" />
-        <rect x="28" y="32" width="14" height="13" rx="2" fill="#0F766E" />
-        <rect x="48" y="33" width="20" height="4" rx="2" fill="#0F3D5E" />
-        <rect x="48" y="42" width="20" height="4" rx="2" fill="#0F3D5E" />
-        <rect x="28" y="50" width="14" height="4" rx="2" fill="#0F3D5E" />
-        <rect x="48" y="51" width="16" height="4" rx="2" fill="#0F3D5E" />
-        <path d="M27 76L34 62H45L41 76H27Z" fill="#0F766E" />
-        <path d="M44 76L47 62H58L61 76H44Z" fill="#0F766E" opacity="0.9" />
-        <path d="M64 76L60 62H71L78 76H64Z" fill="#0F766E" />
-        <path d="M48 36C38.7 36 31.2 43.5 31.2 52.8C31.2 65.3 48 80.5 48 80.5S64.8 65.3 64.8 52.8C64.8 43.5 57.3 36 48 36Z" fill="#C2410C" stroke="#FFFFFF" strokeWidth="4" strokeLinejoin="round" />
-        <circle cx="48" cy="52.8" r="6.8" fill="#FFFFFF" />
+      <svg width="96" height="96" viewBox="0 0 96 96" fill="none">
+        <path d="M47 6C32 6 20 18 20 33c0 22 27 49 27 49s27-27 27-49C74 18 62 6 47 6Z" fill="#0F3D5E" />
+        <path d="M31 20h31v31H31z" fill="#FFFFFF" />
+        <rect x="35" y="25" width="9" height="9" rx="2" fill="#C2410C" />
+        <rect x="48" y="26" width="12" height="3" rx="1.5" fill="#0F3D5E" />
+        <rect x="48" y="34" width="14" height="3" rx="1.5" fill="#0F3D5E" />
+        <rect x="35" y="42" width="20" height="3" rx="1.5" fill="#0F3D5E" />
+        <path d="M61 78c7.732 0 14-6.268 14-14s-6.268-14-14-14-14 6.268-14 14 6.268 14 14 14Z" fill="#FFFFFF" stroke="#0F3D5E" strokeWidth="7" />
+        <path d="M72 74l12 12" stroke="#0F3D5E" strokeWidth="7" strokeLinecap="round" />
+        <circle cx="61" cy="64" r="4" fill="#C2410C" />
+        <path d="M34 53h34l-6 7H40l-6-7Z" fill="#0F766E" />
       </svg>
     </div>
   );
 }
 
-function ListingCard({ top, badge, title, price, accent, city, icon }) {
+function ListingCard({ top, badge, title, price, accent, city }) {
   return (
     <div
       style={{
@@ -73,7 +71,7 @@ function ListingCard({ top, badge, title, price, accent, city, icon }) {
           fontWeight: 900
         }}
       >
-        {icon}
+        ●
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
         <div
@@ -148,22 +146,26 @@ export default function Image() {
               </div>
               <div
                 style={{
-                  color: "#0F766E",
-                  fontSize: 25,
-                  fontWeight: 900,
-                  letterSpacing: 5,
-                  marginTop: 6
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 18,
+                  color: "#0F3D5E",
+                  fontSize: 24,
+                  fontWeight: 800,
+                  letterSpacing: 6
                 }}
               >
-                Online Classifieds Platform
+                <span style={{ width: 54, height: 5, borderRadius: 3, background: "#0F766E" }} />
+                ONLINE CLASSIFIEDS PLATFORM
+                <span style={{ width: 54, height: 5, borderRadius: 3, background: "#0F766E" }} />
               </div>
             </div>
           </div>
           <div style={{ marginTop: 42, color: "#0F3D5E", fontSize: 58, fontWeight: 900 }}>
             Buy, Sell, Rent & Find Jobs
           </div>
-          <div style={{ marginTop: 14, color: "#0F766E", fontSize: 31, fontWeight: 900 }}>
-            Tier-2 Maharashtra • 13 Launch Cities • Local Classifieds
+          <div style={{ marginTop: 14, color: "#0F766E", fontSize: 30, fontWeight: 900 }}>
+            Tier-II & Tier-III Maharashtra • {APPROVED_LOCATION_COUNT} Cities & Towns
           </div>
           <div
             style={{
@@ -184,10 +186,10 @@ export default function Image() {
           >
             <span>⌕</span>
             <span>Search anything...</span>
-            <span style={{ marginLeft: "auto", color: "#0F3D5E" }}>13 cities</span>
+            <span style={{ marginLeft: "auto", color: "#0F3D5E" }}>{APPROVED_LOCATION_COUNT} locations</span>
             <span
               style={{
-                background: "#C2410C",
+                background: "#0F3D5E",
                 color: "#FFFFFF",
                 borderRadius: 12,
                 padding: "12px 24px",
@@ -207,12 +209,12 @@ export default function Image() {
               lineHeight: 1.35
             }}
           >
-            Baramati • Phaltan • Akluj • Solapur • Karad • Satara • Sangli • Indapur • Daund • Shirur • Nashik • Sambhajinagar • Ahilyanagar
+            Baramati • Satara • Sangli • Kolhapur • Nashik • Solapur • Ahilyanagar • Marathwada • Vidarbha • Konkan
           </div>
         </div>
-        <ListingCard top={142} badge="PROPERTY" title="2 BHK Duplex House" price="₹45,00,000" city="Baramati" accent="#E0F2FE" icon="⌂" />
-        <ListingCard top={282} badge="JOBS" title="Field Sales Executive" price="₹18,000 - ₹25,000" city="Satara" accent="#FFEDD5" icon="▣" />
-        <ListingCard top={422} badge="VEHICLES" title="Maruti Swift VXI" price="₹6,25,000" city="Phaltan" accent="#CCFBF1" icon="▰" />
+        <ListingCard top={142} badge="PROPERTY" title="2 BHK Duplex House" price="₹45,00,000" city="Baramati" accent="#E0F2FE" />
+        <ListingCard top={282} badge="JOBS" title="Field Sales Executive" price="₹18,000 - ₹25,000" city="Satara" accent="#FFEDD5" />
+        <ListingCard top={422} badge="SERVICES" title="Local Electrician" price="Direct contact" city="Kolhapur" accent="#CCFBF1" />
         <div
           style={{
             position: "absolute",
@@ -225,7 +227,7 @@ export default function Image() {
             fontWeight: 800
           }}
         >
-          <span>Trusted & Secure</span>
+          <span>Trusted & Safe</span>
           <span>Local & Relevant</span>
           <span>Mobile First</span>
           <span>Connect Directly</span>
