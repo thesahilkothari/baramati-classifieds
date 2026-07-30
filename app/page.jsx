@@ -184,16 +184,18 @@ export default async function HomePage() {
       <main className="bg-[#F8FAFC] px-3 pb-24 pt-5 md:px-4 md:pb-10">
         <section className="mx-auto max-w-7xl">
           <div className="overflow-visible rounded-[2rem] border border-[#CBD5E1] bg-white shadow-sm">
-            <div className="grid items-start gap-6 p-4 md:p-6 lg:grid-cols-[minmax(0,1.04fr)_minmax(350px,0.96fr)] lg:p-8">
-              <div className="flex min-w-0 flex-col justify-start">
-                <Link
-                  href="/"
-                  className="mb-5 flex w-full max-w-[430px] items-center justify-center overflow-visible rounded-[1.75rem] border border-[#CBD5E1] bg-white p-3 shadow-sm"
-                  aria-label="My Classifieds home"
-                >
-                  <BrandLogo />
-                </Link>
+            <div className="border-b border-[#CBD5E1] bg-white px-4 py-5 sm:px-6 md:py-6">
+              <Link
+                href="/"
+                className="mx-auto flex w-full max-w-[620px] items-center justify-center overflow-visible rounded-[1.75rem] bg-white px-3 py-3"
+                aria-label="My Classifieds home"
+              >
+                <BrandLogo />
+              </Link>
+            </div>
 
+            <div className="grid items-start gap-6 p-4 md:p-6 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.88fr)] lg:p-8">
+              <div className="min-w-0">
                 <p className="text-sm font-black uppercase tracking-wide text-[#C2410C]">
                   For tier-II and tier-III cities and towns of Maharashtra
                 </p>
@@ -210,7 +212,7 @@ export default async function HomePage() {
                   action="/ads"
                   className="mt-6 rounded-2xl border border-[#CBD5E1] bg-[#F8FAFC] p-3 shadow-sm"
                 >
-                  <div className="grid gap-3 lg:grid-cols-[1.2fr_0.9fr_0.9fr_auto]">
+                  <div className="grid gap-3 xl:grid-cols-[1.2fr_0.9fr_0.9fr_auto]">
                     <label className="sr-only" htmlFor="home-search-keyword">
                       Search keyword
                     </label>
@@ -263,35 +265,6 @@ export default async function HomePage() {
                   </div>
                 </form>
 
-                <div className="mt-3 rounded-2xl border border-[#CBD5E1] bg-white p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-xs font-black uppercase tracking-wide text-[#0F766E]">
-                      Available in selected Maharashtra cities & towns
-                    </p>
-                    <p className="rounded-full bg-[#F8FAFC] px-3 py-1 text-[11px] font-black uppercase text-[#0F3D5E]">
-                      {APPROVED_LOCATION_COUNT} locations
-                    </p>
-                  </div>
-
-                  <div className="mt-3 max-h-36 overflow-y-auto pr-1 md:max-h-44">
-                    <div className="flex flex-wrap gap-2">
-                      {cities.map((city) => (
-                        <Link
-                          key={city.slug}
-                          href={`/ads?city=${city.slug}`}
-                          className="rounded-full border border-[#CBD5E1] bg-[#F8FAFC] px-3 py-1.5 text-[11px] font-black uppercase text-[#475569] hover:border-[#0F3D5E] hover:text-[#0F3D5E]"
-                        >
-                          {city.name}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-
-                  <p className="mt-3 text-[11px] font-semibold leading-5 text-[#475569]">
-                    Mumbai, Pune, Nagpur and similar metro-first locations are intentionally outside the current launch focus.
-                  </p>
-                </div>
-
                 <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                   <Link
                     href="/post-ad"
@@ -309,8 +282,37 @@ export default async function HomePage() {
                 </div>
               </div>
 
-              <div className="min-w-0">
+              <div className="min-w-0 space-y-4">
                 <BrandHeroGraphic />
+
+                <div className="rounded-2xl border border-[#CBD5E1] bg-white p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-xs font-black uppercase tracking-wide text-[#0F766E]">
+                      Available in selected Maharashtra cities & towns
+                    </p>
+                    <p className="rounded-full bg-[#F8FAFC] px-3 py-1 text-[11px] font-black uppercase text-[#0F3D5E]">
+                      {APPROVED_LOCATION_COUNT} locations
+                    </p>
+                  </div>
+
+                  <div className="mt-3 max-h-40 overflow-y-auto pr-1 md:max-h-52">
+                    <div className="flex flex-wrap gap-2">
+                      {cities.map((city) => (
+                        <Link
+                          key={city.slug}
+                          href={`/ads?city=${city.slug}`}
+                          className="rounded-full border border-[#CBD5E1] bg-[#F8FAFC] px-3 py-1.5 text-[11px] font-black uppercase text-[#475569] hover:border-[#0F3D5E] hover:text-[#0F3D5E]"
+                        >
+                          {city.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+
+                  <p className="mt-3 text-[11px] font-semibold leading-5 text-[#475569]">
+                    Mumbai, Pune, Nagpur and similar metro-first locations are intentionally outside the current launch focus.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
