@@ -46,6 +46,11 @@ export function createManualPaymentReference(adId, planKey) {
   return `MC-${safeAdId}-${safePlan}-${timestamp}`;
 }
 
+export function formatUpiAmount(amount) {
+  const value = Number(amount || 0);
+  return Number.isFinite(value) ? value.toFixed(2) : "0.00";
+}
+
 export function buildUpiPaymentUrl({ amount, adId, planKey, referenceNumber }) {
   const checkoutReference =
     referenceNumber || buildCheckoutReference({ adId, planKey });
@@ -57,14 +62,16 @@ export function buildUpiPaymentUrl({ amount, adId, planKey, referenceNumber }) {
     planKey || ""
   ]
     .filter(Boolean)
-    .join(" ");
+    .join(" ")
+    .slice(0, 80);
 
   const params = new URLSearchParams({
     pa: MANUAL_UPI_CONFIG.vpa,
     pn: MANUAL_UPI_CONFIG.payeeName,
-    am: String(amount),
+    am: formatUpiAmount(amount),
     cu: "INR",
-    tn: note.slice(0, 80)
+    tr: checkoutReference,
+    tn: note
   });
 
   return `upi://pay?${params.toString()}`;
