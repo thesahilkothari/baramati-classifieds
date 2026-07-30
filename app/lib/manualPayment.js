@@ -6,6 +6,7 @@ import {
   getPlanFeatureList,
   getPlanFeatures
 } from "./planFeatures";
+import { buildCheckoutReference } from "./paymentReference";
 
 export const MANUAL_UPI_CONFIG = {
   provider: "MANUAL_UPI",
@@ -46,11 +47,14 @@ export function createManualPaymentReference(adId, planKey) {
 }
 
 export function buildUpiPaymentUrl({ amount, adId, planKey, referenceNumber }) {
+  const checkoutReference =
+    referenceNumber || buildCheckoutReference({ adId, planKey });
+
   const note = [
     "My Classifieds",
+    checkoutReference,
     adId ? `Ad ${adId}` : "",
-    planKey || "",
-    referenceNumber || ""
+    planKey || ""
   ]
     .filter(Boolean)
     .join(" ");
@@ -66,4 +70,4 @@ export function buildUpiPaymentUrl({ amount, adId, planKey, referenceNumber }) {
   return `upi://pay?${params.toString()}`;
 }
 
-export { canPlanUseFeatured };
+export { buildCheckoutReference, canPlanUseFeatured };
