@@ -1,12 +1,19 @@
-export default function BrandLogo({ compact = false, inverse = false, showTagline = true }) {
+export default function BrandLogo({ compact = false, inverse = false, showTagline = true, className = "" }) {
+  const source = compact
+    ? "/brand/my-classifieds-header-logo.svg?v=uploaded-style-20260730-v6"
+    : "/brand/my-classifieds-logo.svg?v=uploaded-style-20260730-v6";
+
   const sizeClass = compact
-    ? "h-[52px] w-auto max-w-[220px] sm:h-[58px] sm:max-w-[280px]"
-    : "h-auto w-[260px] max-w-full sm:w-[360px] md:w-[460px]";
+    ? "h-[54px] w-auto max-w-[230px] sm:h-[62px] sm:max-w-[310px]"
+    : "h-auto w-full max-w-[420px] sm:max-w-[500px]";
 
   return (
-    <span className="inline-flex shrink-0 items-center overflow-visible" aria-label="My Classifieds">
+    <span
+      className={`inline-flex shrink-0 items-center justify-center overflow-visible ${className}`}
+      aria-label="My Classifieds"
+    >
       <img
-        src="/brand/my-classifieds-logo.svg?v=official-20260730-v2"
+        src={source}
         alt="My Classifieds - Online Classifieds Platform"
         className={`block shrink-0 object-contain ${sizeClass}`}
         decoding="async"
