@@ -51,7 +51,9 @@ export default function BrandHeroGraphic() {
       </div>
 
       <div className="relative z-10">
-        <BrandLogo />
+        <div className="inline-flex rounded-2xl bg-white p-2 shadow-sm ring-1 ring-[#CBD5E1]">
+          <BrandLogo compact />
+        </div>
 
         <h2 className="mt-5 text-3xl font-black leading-tight text-[#0F3D5E] md:text-4xl">
           Buy, Sell, Rent & Find Jobs
