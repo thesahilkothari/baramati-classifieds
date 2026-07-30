@@ -3,25 +3,25 @@ import BrandMark from "./BrandMark";
 export default function BrandLogo({ compact = false, inverse = false, showTagline = true }) {
   const classifiedColor = inverse ? "text-white" : "text-[#0F3D5E]";
   const taglineColor = inverse ? "text-slate-200" : "text-[#0F766E]";
-  const markSize = compact ? "h-10 w-10 sm:h-11 sm:w-11" : "h-16 w-16";
+  const markSize = compact ? "h-10 w-10" : "h-16 w-16";
   const brandTextSize = compact ? "text-lg sm:text-xl" : "text-3xl sm:text-4xl";
-  const taglineTextSize = compact ? "text-[8px] sm:text-[9px]" : "text-[10px] sm:text-xs";
+  const shouldShowTagline = !compact && showTagline;
 
   return (
-    <div className="flex items-center gap-3 overflow-visible py-1">
+    <div className="flex items-center gap-3 overflow-visible">
       <BrandMark className={`${markSize} shrink-0 overflow-visible`} />
-      <div className="min-w-0 overflow-visible py-1">
+      <div className="min-w-0 overflow-visible">
         <div
-          className={`block overflow-visible whitespace-nowrap pb-1 font-black leading-[1.45] tracking-tight ${brandTextSize}`}
+          className={`block overflow-visible whitespace-nowrap font-black leading-[1.8] tracking-tight ${brandTextSize}`}
         >
-          <span className="inline-block overflow-visible align-baseline text-[#C2410C]">My</span>{" "}
-          <span className={`inline-block overflow-visible align-baseline ${classifiedColor}`}>
+          <span className="inline-block overflow-visible align-middle text-[#C2410C]">My</span>{" "}
+          <span className={`inline-block overflow-visible align-middle ${classifiedColor}`}>
             Classifieds
           </span>
         </div>
-        {showTagline && (
+        {shouldShowTagline && (
           <div
-            className={`block overflow-visible whitespace-nowrap pt-0.5 font-black uppercase leading-[1.6] tracking-[0.16em] ${taglineTextSize} ${taglineColor}`}
+            className={`mt-1 block overflow-visible whitespace-nowrap text-xs font-black uppercase leading-[1.9] tracking-[0.18em] ${taglineColor}`}
           >
             Online Classifieds Platform
           </div>
