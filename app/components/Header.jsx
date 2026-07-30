@@ -17,10 +17,10 @@ export default async function Header() {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 overflow-visible">
         <Link
           href="/"
-          className="inline-flex min-h-[58px] items-center overflow-visible rounded-2xl bg-white px-3 py-2 shadow-sm ring-1 ring-white/20"
+          className="inline-flex min-h-[70px] shrink-0 items-center justify-center overflow-visible rounded-2xl bg-white px-2.5 py-1.5 shadow-sm ring-1 ring-white/20"
           aria-label="My Classifieds home"
         >
-          <BrandLogo compact showTagline={false} />
+          <BrandLogo compact />
         </Link>
 
         <nav className="hidden items-center gap-5 text-sm font-bold text-white lg:flex">
