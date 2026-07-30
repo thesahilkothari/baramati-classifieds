@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   buildCheckoutReference,
   buildUpiPaymentUrl,
@@ -24,6 +24,8 @@ export default function AdPromotionPayment({ adId }) {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedText, setCopiedText] = useState("");
+  const [qrDataUrl, setQrDataUrl] = useState("");
+  const [qrError, setQrError] = useState("");
 
   const plan = useMemo(
     () =>
@@ -52,6 +54,43 @@ export default function AdPromotionPayment({ adId }) {
     () => getPaymentReferenceValidation(transactionReference),
     [transactionReference]
   );
+
+  useEffect(() => {
+    let isActive = true;
+
+    async function generateDynamicQr() {
+      setQrError("");
+      setQrDataUrl("");
+
+      try {
+        const QRCode = await import("qrcode");
+        const dataUrl = await QRCode.toDataURL(upiUrl, {
+          errorCorrectionLevel: "M",
+          margin: 1,
+          width: 320,
+          color: {
+            dark: "#0F3D5EFF",
+            light: "#FFFFFFFF"
+          }
+        });
+
+        if (isActive) {
+          setQrDataUrl(dataUrl);
+        }
+      } catch (qrGenerationError) {
+        console.error("Dynamic UPI QR generation failed:", qrGenerationError);
+        if (isActive) {
+          setQrError("Dynamic QR could not be generated. Use Open UPI App or scan the fallback QR.");
+        }
+      }
+    }
+
+    generateDynamicQr();
+
+    return () => {
+      isActive = false;
+    };
+  }, [upiUrl]);
 
   async function copyToClipboard(value, label) {
     try {
@@ -122,17 +161,15 @@ export default function AdPromotionPayment({ adId }) {
   return (
     <section className="mt-8 rounded-3xl border border-[#CBD5E1] bg-white p-5 shadow-sm md:p-6">
       <p className="text-sm font-black uppercase tracking-wide text-[#0F766E]">
-        Easy UPI Checkout
+        Dynamic UPI Checkout
       </p>
 
       <h2 className="mt-2 text-2xl font-black text-[#0F172A]">
-        Pay by UPI and validate through UTR
+        Pay by exact UPI QR and validate through UTR
       </h2>
 
       <p className="mt-3 text-sm leading-6 text-[#475569]">
-        Choose a paid plan, open your UPI app with the amount and note pre-filled,
-        complete the payment, then paste the UPI transaction ID / UTR. Duplicate
-        and invalid references are blocked automatically.
+        Choose a paid plan. The checkout creates a unique reference and dynamic UPI QR with the exact amount. Complete payment in your UPI app, then paste the UPI transaction ID / UTR. Duplicate and invalid references are blocked automatically.
       </p>
 
       <div className="mt-5 grid gap-3 md:grid-cols-3">
@@ -142,7 +179,7 @@ export default function AdPromotionPayment({ adId }) {
         </div>
         <div className="rounded-2xl border border-[#CBD5E1] bg-[#F8FAFC] p-4">
           <p className="text-xs font-black uppercase text-[#0F3D5E]">Step 2</p>
-          <p className="mt-1 text-sm font-bold text-[#0F172A]">Pay in UPI App</p>
+          <p className="mt-1 text-sm font-bold text-[#0F172A]">Scan Dynamic QR</p>
         </div>
         <div className="rounded-2xl border border-[#CBD5E1] bg-[#F8FAFC] p-4">
           <p className="text-xs font-black uppercase text-[#0F3D5E]">Step 3</p>
@@ -151,9 +188,7 @@ export default function AdPromotionPayment({ adId }) {
       </div>
 
       <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
-        Prices are GST inclusive. Where bank webhook access is configured, matching
-        UTR payments can be verified automatically. Until then, the same UTR flow
-        creates a faster admin-verification queue from the bank statement.
+        Prices are GST inclusive. Where bank webhook access is configured, matching UTR payments can be verified automatically. Until then, this flow creates a faster admin-verification queue from the bank statement.
       </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -194,23 +229,36 @@ export default function AdPromotionPayment({ adId }) {
         ))}
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[340px_1fr]">
+      <div className="mt-6 grid gap-6 lg:grid-cols-[360px_1fr]">
         <div className="rounded-3xl border-2 border-[#0F3D5E] bg-[#F8FAFC] p-4 text-center">
           <p className="text-xs font-black uppercase text-[#475569]">
-            Scan or Open UPI
+            Dynamic QR for selected plan
           </p>
 
-          <img
-            src={MANUAL_UPI_CONFIG.qrImagePath}
-            alt="My Classifieds UPI QR code"
-            className="mx-auto mt-3 w-full max-w-[280px] rounded-2xl border bg-white p-2"
-          />
+          <div className="mx-auto mt-3 flex min-h-[300px] w-full max-w-[300px] items-center justify-center rounded-2xl border border-[#CBD5E1] bg-white p-3">
+            {qrDataUrl ? (
+              <img
+                src={qrDataUrl}
+                alt={`Dynamic UPI QR for ${plan.name}`}
+                className="h-auto w-full rounded-xl"
+              />
+            ) : (
+              <img
+                src={MANUAL_UPI_CONFIG.qrImagePath}
+                alt="My Classifieds fallback UPI QR code"
+                className="h-auto w-full rounded-xl"
+              />
+            )}
+          </div>
+
+          {qrError && (
+            <p className="mt-2 rounded-xl bg-amber-100 p-2 text-xs font-bold leading-5 text-amber-900">
+              {qrError}
+            </p>
+          )}
 
           <p className="mt-3 text-sm font-bold text-[#475569]">
-            UPI ID:{" "}
-            <span className="font-black text-[#0F172A]">
-              {MANUAL_UPI_CONFIG.vpa}
-            </span>
+            UPI ID: <span className="font-black text-[#0F172A]">{MANUAL_UPI_CONFIG.vpa}</span>
           </p>
 
           <p className="mt-1 text-xs leading-5 text-[#475569]">
@@ -218,9 +266,12 @@ export default function AdPromotionPayment({ adId }) {
           </p>
 
           <div className="mt-3 rounded-2xl bg-white p-3 text-left text-xs leading-5 text-[#475569]">
-            <p className="font-black uppercase text-[#0F3D5E]">Checkout note</p>
+            <p className="font-black uppercase text-[#0F3D5E]">Unique checkout reference</p>
             <p className="mt-1 break-all font-mono text-[#0F172A]">
               {checkoutReference}
+            </p>
+            <p className="mt-1 text-[11px] font-semibold text-[#475569]">
+              This reference is embedded in the UPI `tr` field and note.
             </p>
             <button
               type="button"
@@ -231,9 +282,17 @@ export default function AdPromotionPayment({ adId }) {
             </button>
           </div>
 
+          <button
+            type="button"
+            onClick={() => copyToClipboard(upiUrl, "upiUrl")}
+            className="mt-3 w-full rounded-xl border border-[#0F766E] bg-white px-5 py-3 text-sm font-black uppercase text-[#0F766E] hover:bg-teal-50"
+          >
+            {copiedText === "upiUrl" ? "UPI Link Copied" : "Copy UPI Link"}
+          </button>
+
           <a
             href={upiUrl}
-            className="mt-4 flex justify-center rounded-xl bg-[#0F766E] px-5 py-3 text-sm font-black uppercase text-white hover:bg-teal-800"
+            className="mt-3 flex justify-center rounded-xl bg-[#0F766E] px-5 py-3 text-sm font-black uppercase text-white hover:bg-teal-800"
           >
             Open UPI App
           </a>
@@ -248,10 +307,7 @@ export default function AdPromotionPayment({ adId }) {
           </h3>
 
           <div className="mt-4 rounded-2xl bg-blue-50 p-4 text-sm leading-6 text-blue-900">
-            Pay exactly{" "}
-            <span className="font-black">{formatManualAmount(plan.price)}</span>{" "}
-            for <span className="font-black">{plan.name}</span>. Keep the UPI
-            app receipt open and paste the transaction ID / UTR below.
+            Pay exactly <span className="font-black">{formatManualAmount(plan.price)}</span> for <span className="font-black">{plan.name}</span>. Keep the UPI app receipt open and paste the transaction ID / UTR below.
           </div>
 
           <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -346,8 +402,7 @@ export default function AdPromotionPayment({ adId }) {
       </div>
 
       <p className="mt-4 text-center text-xs leading-5 text-[#475569]">
-        Payment does not guarantee approval of prohibited, misleading, fraudulent
-        or illegal advertisements.
+        Payment does not guarantee approval of prohibited, misleading, fraudulent or illegal advertisements.
       </p>
     </section>
   );
