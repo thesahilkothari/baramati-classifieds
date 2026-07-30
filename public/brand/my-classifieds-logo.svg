@@ -1,8 +1,8 @@
-<svg width="720" height="150" viewBox="0 0 720 150" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+<svg width="720" height="190" viewBox="0 0 720 190" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">My Classifieds logo</title>
   <desc id="desc">My Classifieds logo with newspaper classified icon and location pin. The tagline is intentionally not part of this logo artwork.</desc>
-  <rect width="720" height="150" fill="transparent"/>
-  <g transform="translate(24 18) scale(1.14)">
+  <rect width="720" height="190" fill="transparent"/>
+  <g transform="translate(30 28) scale(1.18)">
     <path d="M24 19L64 15L73 52L32 56L24 19Z" fill="#F8FAFC" stroke="#0F3D5E" stroke-width="3" stroke-linejoin="round"/>
     <path d="M20 24L73 24C76.3 24 79 26.7 79 30V57C79 60.3 76.3 63 73 63H26C22.7 63 20 60.3 20 57V24Z" fill="#FFFFFF" stroke="#0F3D5E" stroke-width="4" stroke-linejoin="round"/>
     <path d="M79 30C84 34.8 84 51 79 60" stroke="#0F3D5E" stroke-width="4" stroke-linecap="round"/>
@@ -17,7 +17,7 @@
     <path d="M48 36C38.7 36 31.2 43.5 31.2 52.8C31.2 65.3 48 80.5 48 80.5S64.8 65.3 64.8 52.8C64.8 43.5 57.3 36 48 36Z" fill="#C2410C" stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round"/>
     <circle cx="48" cy="52.8" r="6.8" fill="#FFFFFF"/>
   </g>
-  <text x="150" y="76" font-family="Inter, Arial, sans-serif" font-weight="900" font-size="62" letter-spacing="-1.6">
+  <text x="154" y="96" font-family="Inter, Arial, sans-serif" font-weight="900" font-size="62" letter-spacing="-1.6" dominant-baseline="alphabetic">
     <tspan fill="#C2410C">My</tspan><tspan fill="#0F3D5E"> Classifieds</tspan>
   </text>
 </svg>
