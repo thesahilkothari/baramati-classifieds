@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "../../lib/prisma";
 import { getAdminSession } from "../../lib/adminAuth";
 import AdminManualPaymentActions from "../../components/AdminManualPaymentActions";
+import { parsePaymentDetailsJson } from "../../lib/paymentReference";
 
 export const dynamic = "force-dynamic";
 
@@ -36,14 +37,18 @@ function getStatusClass(status) {
   return "bg-slate-800 text-white";
 }
 
-function parsePaymentDetails(value) {
-  try {
-    return JSON.parse(value || "{}");
-  } catch {
-    return {
-      note: value || ""
-    };
+function getAutomationBadge(details, payment) {
+  const verifiedBy = payment.manualVerifiedBy;
+
+  if (verifiedBy === "BANK_UPI") {
+    return "Auto verified by bank webhook";
   }
+
+  if (details.automationMode === "BANK_WEBHOOK_READY_WITH_UTR_RECONCILIATION") {
+    return "Webhook-ready UTR flow";
+  }
+
+  return "UTR validation flow";
 }
 
 export default async function AdminPaymentsPage() {
@@ -101,12 +106,13 @@ export default async function AdminPaymentsPage() {
             </p>
 
             <h1 className="mt-2 text-3xl font-black uppercase text-slate-950 md:text-4xl">
-              Manual UPI Payments
+              UPI Payments & UTR Validation
             </h1>
 
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              Review UPI transaction references submitted by users, verify them
-              against your bank/UPI statement, and apply the selected plan.
+              Review UPI transaction references, see UTR validation details, verify
+              unmatched payments from the bank statement, and use bank-webhook
+              reconciliation when your bank API credentials are configured.
             </p>
           </div>
 
@@ -130,7 +136,7 @@ export default async function AdminPaymentsPage() {
           </div>
 
           <div className="mt-5 overflow-x-auto">
-            <table className="w-full min-w-[1200px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[1250px] border-collapse text-left text-sm">
               <thead>
                 <tr className="bg-slate-950 text-white">
                   <th className="border border-slate-300 p-3">Date</th>
@@ -140,7 +146,7 @@ export default async function AdminPaymentsPage() {
                   <th className="border border-slate-300 p-3">Ad</th>
                   <th className="border border-slate-300 p-3">Reference</th>
                   <th className="border border-slate-300 p-3">UPI UTR</th>
-                  <th className="border border-slate-300 p-3">Payer / Note</th>
+                  <th className="border border-slate-300 p-3">Payer / Validation</th>
                   <th className="border border-slate-300 p-3">Verified</th>
                   <th className="border border-slate-300 p-3">Action</th>
                 </tr>
@@ -158,10 +164,13 @@ export default async function AdminPaymentsPage() {
                   </tr>
                 ) : (
                   payments.map((payment) => {
-                    const details = parsePaymentDetails(payment.failureReason);
+                    const details = parsePaymentDetailsJson(payment.failureReason);
                     const isManual =
+                      payment.provider === "MANUAL_UPI" ||
                       payment.status === "PENDING_MANUAL_VERIFICATION" ||
                       String(payment.razorpayOrderId || "").startsWith("MC-");
+                    const utr =
+                      payment.manualTransactionRef || payment.razorpayPaymentId || "-";
 
                     return (
                       <tr key={payment.id} className="odd:bg-white even:bg-slate-50">
@@ -205,26 +214,39 @@ export default async function AdminPaymentsPage() {
 
                         <td className="border border-slate-300 p-3 align-top">
                           <span className="break-all font-mono text-xs">
-                            {payment.razorpayOrderId}
+                            {payment.manualReferenceNumber || payment.razorpayOrderId}
                           </span>
+                          {details.checkoutReference && (
+                            <p className="mt-2 break-all text-xs font-bold text-slate-500">
+                              Checkout: {details.checkoutReference}
+                            </p>
+                          )}
                         </td>
 
                         <td className="border border-slate-300 p-3 align-top">
-                          <span className="break-all font-mono text-xs">
-                            {payment.razorpayPaymentId || "-"}
+                          <span className="break-all font-mono text-xs font-black text-slate-950">
+                            {utr}
                           </span>
+                          {details.utrConfidence && (
+                            <p className="mt-2 rounded bg-blue-50 px-2 py-1 text-xs font-black uppercase text-blue-700">
+                              UTR Confidence: {details.utrConfidence}
+                            </p>
+                          )}
                         </td>
 
                         <td className="border border-slate-300 p-3 align-top">
                           {isManual ? (
                             <>
-                              <p>{details.payerName || "-"}</p>
+                              <p>{payment.manualPayerName || details.payerName || "-"}</p>
                               <p className="text-xs text-slate-500">
-                                {details.payerMobile || "-"}
+                                {payment.manualPayerMobile || details.payerMobile || "-"}
                               </p>
-                              {details.note && (
-                                <p className="mt-2 text-xs text-slate-600">
-                                  {details.note}
+                              <p className="mt-2 rounded bg-slate-100 px-2 py-1 text-xs font-black uppercase text-slate-700">
+                                {getAutomationBadge(details, payment)}
+                              </p>
+                              {(details.note || payment.manualPaymentNote) && (
+                                <p className="mt-2 whitespace-pre-line text-xs text-slate-600">
+                                  {details.note || payment.manualPaymentNote}
                                 </p>
                               )}
                               {details.adminNote && (
@@ -242,6 +264,11 @@ export default async function AdminPaymentsPage() {
 
                         <td className="border border-slate-300 p-3 align-top">
                           {formatDate(payment.verifiedAt)}
+                          {payment.manualVerifiedBy && (
+                            <p className="mt-1 text-xs font-black uppercase text-slate-500">
+                              By {payment.manualVerifiedBy}
+                            </p>
+                          )}
                         </td>
 
                         <td className="border border-slate-300 p-3 align-top">
