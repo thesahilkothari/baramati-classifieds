@@ -13,6 +13,15 @@ import {
   cleanMobile,
   verifyAdOwnerByMobileAndEmail
 } from "../../../lib/userVerification";
+import {
+  buildPaymentDetailsJson,
+  getPaymentReferenceValidation,
+  normalizePaymentReference
+} from "../../../lib/paymentReference";
+import {
+  getPaymentAutomationMode,
+  tryAutoReconcilePaymentFromStoredBankEvents
+} from "../../../lib/bankPaymentAutomation";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -46,7 +55,11 @@ export async function POST(request) {
     const planKey = cleanText(body.plan, 80);
     const includeFeatured =
       body.includeFeatured === true && canPlanUseFeatured(planKey);
-    const manualTransactionRef = cleanText(body.transactionReference, 120);
+    const referenceValidation = getPaymentReferenceValidation(
+      body.transactionReference
+    );
+    const manualTransactionRef = referenceValidation.reference;
+    const checkoutReference = cleanText(body.checkoutReference, 80);
     const manualPayerName = cleanText(body.payerName, 120);
     const manualPayerMobile = cleanMobile(body.payerMobile);
     const manualPaymentNote = cleanLongText(body.note, 500);
@@ -110,11 +123,10 @@ export async function POST(request) {
       );
     }
 
-    if (!manualTransactionRef || manualTransactionRef.length < 6) {
+    if (!referenceValidation.ok) {
       return NextResponse.json(
         {
-          error:
-            "Please enter a valid UPI transaction ID / UTR / bank reference number."
+          error: referenceValidation.message
         },
         { status: 400 }
       );
@@ -137,7 +149,10 @@ export async function POST(request) {
     const duplicateReference = await prisma.payment.findFirst({
       where: {
         provider: MANUAL_UPI_CONFIG.provider,
-        manualTransactionRef
+        OR: [
+          { manualTransactionRef },
+          { razorpayPaymentId: manualTransactionRef }
+        ]
       }
     });
 
@@ -152,12 +167,14 @@ export async function POST(request) {
     }
 
     const manualReferenceNumber = createManualPaymentReference(ad.id, planKey);
+    const automationMode = getPaymentAutomationMode();
 
     const payment = await prisma.payment.create({
       data: {
         userId: ad.userId,
         adId: ad.id,
         razorpayOrderId: manualReferenceNumber,
+        razorpayPaymentId: manualTransactionRef,
         amount: total.amountInPaise,
         currency: "INR",
         status: "PENDING_MANUAL_VERIFICATION",
@@ -170,22 +187,48 @@ export async function POST(request) {
         manualPayerMobile,
         manualPaymentNote: [
           manualPaymentNote,
+          `Checkout reference: ${checkoutReference}`,
+          `UTR confidence: ${referenceValidation.confidence || "LOW"}`,
+          `Automation mode: ${automationMode}`,
           `Email OTP verified owner mobile: ${ownerMobile}`,
           `Email OTP verified owner email: ${ownerEmail}`
         ]
           .filter(Boolean)
           .join("\n"),
+        failureReason: buildPaymentDetailsJson({
+          payerName: manualPayerName,
+          payerMobile: manualPayerMobile,
+          note: manualPaymentNote,
+          ownerMobile,
+          ownerEmail,
+          validation: referenceValidation,
+          automationMode,
+          checkoutReference
+        }),
         manualSubmittedAt: new Date()
       }
     });
 
+    const reconciliation = await tryAutoReconcilePaymentFromStoredBankEvents(
+      prisma,
+      payment.id
+    );
+
+    const updatedPayment = reconciliation.matched
+      ? await prisma.payment.findUnique({ where: { id: payment.id } })
+      : payment;
+
     return NextResponse.json({
       success: true,
-      message:
-        "Your payment reference has been submitted for manual verification.",
+      message: reconciliation.matched
+        ? "Your payment was automatically matched and verified."
+        : "Your payment reference has been submitted for verification.",
       paymentId: payment.id,
       manualReferenceNumber: payment.manualReferenceNumber,
-      status: payment.status
+      status: updatedPayment?.status || payment.status,
+      automationMode,
+      autoMatched: reconciliation.matched,
+      autoMatchReason: reconciliation.reason || null
     });
   } catch (error) {
     console.error("Manual UPI payment submission failed:", error);
