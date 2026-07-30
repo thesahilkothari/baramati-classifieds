@@ -13,14 +13,14 @@ export default async function Header() {
   const language = getLanguageFromCookieStore(cookieStore);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[#0B2F49] bg-[#0F3D5E] px-3 py-3 shadow-sm">
+    <header className="sticky top-0 z-30 border-b border-[#0B2F49] bg-[#0F3D5E] px-3 py-2.5 shadow-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 overflow-visible">
         <Link
           href="/"
-          className="inline-flex overflow-visible rounded-2xl bg-white px-3 py-2.5 shadow-sm ring-1 ring-white/20"
+          className="inline-flex min-h-[58px] items-center overflow-visible rounded-2xl bg-white px-3 py-2 shadow-sm ring-1 ring-white/20"
           aria-label="My Classifieds home"
         >
-          <BrandLogo compact />
+          <BrandLogo compact showTagline={false} />
         </Link>
 
         <nav className="hidden items-center gap-5 text-sm font-bold text-white lg:flex">
