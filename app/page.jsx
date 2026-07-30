@@ -183,23 +183,23 @@ export default async function HomePage() {
 
       <main className="bg-[#F8FAFC] px-3 pb-24 pt-5 md:px-4 md:pb-10">
         <section className="mx-auto max-w-7xl">
-          <div className="overflow-hidden rounded-3xl border border-[#CBD5E1] bg-white shadow-sm">
-            <div className="grid items-start gap-6 p-4 md:grid-cols-[1fr_0.92fr] md:p-6 lg:p-8">
-              <div className="flex flex-col justify-start">
+          <div className="overflow-visible rounded-[2rem] border border-[#CBD5E1] bg-white shadow-sm">
+            <div className="grid items-start gap-6 p-4 md:p-6 lg:grid-cols-[minmax(0,1.04fr)_minmax(350px,0.96fr)] lg:p-8">
+              <div className="flex min-w-0 flex-col justify-start">
                 <Link
                   href="/"
-                  className="mb-4 inline-flex w-fit rounded-2xl border border-[#CBD5E1] bg-white px-3 py-2 shadow-sm"
+                  className="mb-5 flex w-full max-w-[430px] items-center justify-center overflow-visible rounded-[1.75rem] border border-[#CBD5E1] bg-white p-3 shadow-sm"
                   aria-label="My Classifieds home"
                 >
                   <BrandLogo />
                 </Link>
 
                 <p className="text-sm font-black uppercase tracking-wide text-[#C2410C]">
-                  My Classifieds • Online Classifieds Platform
+                  For tier-II and tier-III cities and towns of Maharashtra
                 </p>
 
-                <h1 className="mt-3 text-4xl font-black leading-tight text-[#0F3D5E] md:text-6xl">
-                  Affordable classifieds for tier-II & tier-III Maharashtra
+                <h1 className="mt-3 max-w-4xl text-3xl font-black leading-tight text-[#0F3D5E] sm:text-4xl md:text-5xl">
+                  Affordable online classifieds for local city needs
                 </h1>
 
                 <p className="mt-5 max-w-3xl text-base leading-8 text-[#475569]">
@@ -273,7 +273,7 @@ export default async function HomePage() {
                     </p>
                   </div>
 
-                  <div className="mt-3 max-h-48 overflow-y-auto pr-1">
+                  <div className="mt-3 max-h-36 overflow-y-auto pr-1 md:max-h-44">
                     <div className="flex flex-wrap gap-2">
                       {cities.map((city) => (
                         <Link
@@ -309,7 +309,9 @@ export default async function HomePage() {
                 </div>
               </div>
 
-              <BrandHeroGraphic />
+              <div className="min-w-0">
+                <BrandHeroGraphic />
+              </div>
             </div>
           </div>
 
