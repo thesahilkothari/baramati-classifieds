@@ -1,5 +1,8 @@
 import { addDays, BUSINESS_ANNUAL_PLAN_KEY, getPlan } from "./adPlans";
 
+export const ADMIN_OVERRIDE_PROVIDER = "ADMIN_OVERRIDE";
+export const ADMIN_OVERRIDE_STATUS = "ADMIN_OVERRIDE";
+
 export const ADMIN_MANAGEABLE_PLAN_KEYS = [
   "FREE_7_DAYS",
   "PAID_7_DAYS",
@@ -118,4 +121,58 @@ export function getAdminPlanLabel(ad) {
   if (ad.adType === "FEATURED") return "Business Annual";
   if (ad.isFeatured) return `${ad.adType} + Featured`;
   return ad.adType;
+}
+
+export function isAdminOverrideAd(ad) {
+  return Boolean(
+    ad?.payments?.some(
+      (payment) =>
+        payment.provider === ADMIN_OVERRIDE_PROVIDER ||
+        payment.status === ADMIN_OVERRIDE_STATUS ||
+        String(payment.purpose || "").startsWith("ADMIN_OVERRIDE")
+    )
+  );
+}
+
+export function buildAdminOverridePaymentLog({
+  adId,
+  userId,
+  planKey,
+  status,
+  action,
+  expiresAt,
+  featuredUntil,
+  note
+}) {
+  const timestamp = Date.now();
+  const safePlan = String(planKey || "NO_PLAN_CHANGE").replace(/[^A-Z0-9_]/gi, "").slice(0, 80);
+  const safeStatus = String(status || "UNCHANGED").replace(/[^A-Z0-9_]/gi, "").slice(0, 40);
+  const safeAction = String(action || "ADMIN_OVERRIDE").slice(0, 120);
+
+  return {
+    userId,
+    adId,
+    razorpayOrderId: `ADMIN-OVERRIDE-${adId}-${timestamp}`,
+    amount: 0,
+    currency: "INR",
+    status: ADMIN_OVERRIDE_STATUS,
+    plan: safePlan,
+    purpose: `ADMIN_OVERRIDE:${safeAction}`,
+    provider: ADMIN_OVERRIDE_PROVIDER,
+    manualReferenceNumber: `ADMIN-OVERRIDE-${adId}-${timestamp}`,
+    manualTransactionRef: `ADMIN-${safePlan}-${safeStatus}-${timestamp}`,
+    manualPayerName: "ADMIN",
+    manualPayerMobile: "",
+    manualPaymentNote: [
+      note || "Admin changed plan, status, featured placement or expiry.",
+      expiresAt ? `Expiry: ${new Date(expiresAt).toISOString()}` : "",
+      featuredUntil ? `Featured until: ${new Date(featuredUntil).toISOString()}` : ""
+    ]
+      .filter(Boolean)
+      .join(" | "),
+    manualSubmittedAt: new Date(),
+    manualVerifiedBy: "ADMIN",
+    manualVerificationNote: "Admin override log created automatically.",
+    verifiedAt: new Date()
+  };
 }
