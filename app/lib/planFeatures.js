@@ -15,6 +15,7 @@ export const PLAN_FEATURES = {
     badge: "Basic",
     badgeMr: "Basic",
     rankWeight: 10,
+    defaultFeatured: false,
     features: [
       "Basic classified listing",
       "Visible for 7 days after approval",
@@ -58,6 +59,7 @@ export const PLAN_FEATURES = {
     badge: "Popular",
     badgeMr: "Popular",
     rankWeight: 30,
+    defaultFeatured: false,
     features: [
       "Better internal visibility than free listings",
       "Visible for 7 days after approval",
@@ -101,6 +103,7 @@ export const PLAN_FEATURES = {
     badge: "Best Value",
     badgeMr: "Best Value",
     rankWeight: 50,
+    defaultFeatured: false,
     features: [
       "Higher internal visibility than paid and free listings",
       "Visible for 30 days after approval",
@@ -128,6 +131,59 @@ export const PLAN_FEATURES = {
     limitationsMr: [
       "Advertiser ची verification किंवा endorsement नाही",
       "Publication moderation अधीन राहील"
+    ]
+  },
+  BUSINESS_ANNUAL_365_DAYS: {
+    key: "BUSINESS_ANNUAL_365_DAYS",
+    publicName: "Business Annual Classified",
+    publicNameMr: "Business Annual Classified",
+    price: 5000,
+    oldPrice: 6000,
+    amountInPaise: 500000,
+    durationDays: 365,
+    durationLabel: "1 year",
+    durationLabelMr: "१ वर्ष",
+    approvalTime: "1 working day",
+    approvalTimeMr: "१ कामकाजाचा दिवस",
+    titleMaxLength: 160,
+    descriptionMaxLength: 2500,
+    badge: "Annual Offer",
+    badgeMr: "Annual Offer",
+    rankWeight: 75,
+    defaultFeatured: true,
+    features: [
+      "Designed for businesses, professionals and service providers",
+      "Discounted annual price: Rs. 5,000 instead of Rs. 6,000",
+      "Includes all Premium Classified features",
+      "Visible for 1 year after approval",
+      "Featured by default for the annual validity period",
+      "Shown after regular Featured add-on ads and before ordinary Premium/Paid ads",
+      "Headline up to 160 characters",
+      "Description up to 2500 characters",
+      "Suitable for recurring services, professional profiles, institutes, shops and business enquiries",
+      "Renewal and follow-up reminders"
+    ],
+    featuresMr: [
+      "Businesses, professionals आणि service providers साठी तयार",
+      "Annual discounted price: Rs. 5,000 instead of Rs. 6,000",
+      "Premium Classified मधील सर्व features included",
+      "Approval नंतर १ वर्ष visible",
+      "पूर्ण annual validity साठी default Featured",
+      "Regular Featured add-on ads नंतर आणि ordinary Premium/Paid ads आधी दाखवले जाते",
+      "Heading १६० characters पर्यंत",
+      "Description २५०० characters पर्यंत",
+      "Recurring services, professional profiles, institutes, shops आणि business enquiries साठी योग्य",
+      "Renewal आणि follow-up reminders"
+    ],
+    limitations: [
+      "Default featured placement is ranked after regular Featured add-on ads",
+      "Does not verify or endorse the advertiser",
+      "Publication remains subject to moderation and listing rules"
+    ],
+    limitationsMr: [
+      "Default featured placement regular Featured add-on ads नंतर ranked आहे",
+      "Advertiser ची verification किंवा endorsement नाही",
+      "Publication moderation आणि listing rules अधीन राहील"
     ]
   }
 };
@@ -158,7 +214,13 @@ export const FEATURED_FEATURES = {
   ]
 };
 
-export const PLAN_ORDER = ["FREE_7_DAYS", "PAID_7_DAYS", "PREMIUM_30_DAYS"];
+export const BUSINESS_ANNUAL_PLAN_KEY = "BUSINESS_ANNUAL_365_DAYS";
+export const PLAN_ORDER = [
+  "FREE_7_DAYS",
+  "PAID_7_DAYS",
+  "PREMIUM_30_DAYS",
+  BUSINESS_ANNUAL_PLAN_KEY
+];
 
 export function getPlanFeatures(planKey) {
   return PLAN_FEATURES[planKey] || PLAN_FEATURES.FREE_7_DAYS;
@@ -181,9 +243,14 @@ export function canPlanUseFeatured(planKey) {
   return ["PAID_7_DAYS", "PREMIUM_30_DAYS"].includes(planKey);
 }
 
+export function isBusinessAnnualPlan(planKey) {
+  return planKey === BUSINESS_ANNUAL_PLAN_KEY;
+}
+
 export function calculatePlanTotal({ planKey, includeFeatured }) {
   const plan = getPlanFeatures(planKey);
-  const shouldAddFeatured = includeFeatured === true && canPlanUseFeatured(planKey);
+  const shouldAddFeatured =
+    includeFeatured === true && canPlanUseFeatured(planKey) && !isBusinessAnnualPlan(planKey);
 
   return {
     amount: plan.price + (shouldAddFeatured ? FEATURED_FEATURES.price : 0),
@@ -193,7 +260,8 @@ export function calculatePlanTotal({ planKey, includeFeatured }) {
     planAmount: plan.price,
     featuredAmount: shouldAddFeatured ? FEATURED_FEATURES.price : 0,
     selectedPlan: plan,
-    includeFeatured: shouldAddFeatured
+    includeFeatured: shouldAddFeatured || plan.defaultFeatured === true,
+    defaultFeatured: plan.defaultFeatured === true
   };
 }
 
