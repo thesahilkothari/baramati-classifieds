@@ -104,10 +104,13 @@ export default function WhatsAppSupportBot({ initialLanguage = "en" }) {
       <button
         type="button"
         onClick={() => setIsOpen((value) => !value)}
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-xl font-black text-white shadow-2xl hover:bg-green-700"
-        aria-label="Open My Classifieds support"
+        className="inline-flex min-h-12 min-w-[132px] items-center justify-center gap-2 rounded-full bg-green-600 px-4 py-3 text-xs font-black uppercase tracking-wide text-white shadow-2xl hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-600/25"
+        aria-label={isOpen ? "Close My Classifieds support" : "Open My Classifieds instant help"}
       >
-        {isOpen ? "×" : "WA"}
+        <span aria-hidden="true" className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 text-base leading-none">
+          {isOpen ? "×" : "?"}
+        </span>
+        <span>{isOpen ? "Close" : "Instant Help"}</span>
       </button>
     </div>
   );
