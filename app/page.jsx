@@ -2,7 +2,6 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { prisma } from "./lib/prisma";
 import AdCard from "./components/AdCard";
-import BrandHeroGraphic from "./components/BrandHeroGraphic";
 import BrandLogo from "./components/BrandLogo";
 import JsonLd from "./components/JsonLd";
 import { getLanguageFromCookieStore, t } from "./lib/i18n";
@@ -153,136 +152,112 @@ export default async function HomePage() {
 
       <main className="bg-[#F8FAFC] px-3 pb-24 pt-4 md:px-4 md:pb-10">
         <section className="mx-auto max-w-7xl">
-          <div className="overflow-visible rounded-[1.6rem] border border-[#CBD5E1] bg-white shadow-sm">
-            <div className="grid items-start gap-4 p-4 md:p-5 lg:grid-cols-[minmax(0,1.08fr)_minmax(300px,0.82fr)] lg:p-6">
+          <section className="rounded-[1.35rem] border border-[#CBD5E1] bg-white p-4 shadow-sm md:p-5">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
                 <Link
                   href="/"
-                  className="mb-3 inline-flex max-w-full items-center justify-center overflow-visible rounded-2xl border border-[#CBD5E1] bg-white px-3 py-2 shadow-sm"
+                  className="inline-flex max-w-full items-center overflow-visible rounded-2xl border border-[#CBD5E1] bg-white px-3 py-2 shadow-sm"
                   aria-label="My Classifieds home"
                 >
                   <BrandLogo />
                 </Link>
 
-                <p className="text-xs font-black uppercase tracking-wide text-[#C2410C]">
+                <p className="mt-3 text-xs font-black uppercase tracking-wide text-[#C2410C]">
                   Baramati’s local classifieds • {BRAND_SCOPE_EN}
                 </p>
 
-                <h1 className="mt-2 max-w-4xl text-2xl font-black leading-tight text-[#0F3D5E] sm:text-3xl md:text-4xl">
+                <h1 className="mt-2 max-w-5xl text-2xl font-black leading-tight text-[#0F3D5E] sm:text-3xl md:text-4xl">
                   Baramati’s everyday opportunities, all in one local place.
                 </h1>
 
-                <p className="mt-2 max-w-3xl text-sm font-bold leading-6 text-[#0F766E] md:text-base">
+                <p className="mt-2 max-w-4xl text-sm font-bold leading-6 text-[#0F766E] md:text-base">
                   बारामतीच्या रोजच्या गरजा आणि संधी—आता एकाच स्थानिक ठिकाणी.
                 </p>
+              </div>
 
-                <p className="mt-3 max-w-3xl text-sm leading-7 text-[#475569] md:text-base">
-                  Find property, jobs, vehicles, agriculture needs, education, local services and business opportunities—or post your own advertisement and connect directly with interested people.
-                </p>
-
-                <form
-                  action="/ads"
-                  className="mt-4 overflow-visible rounded-2xl border border-[#CBD5E1] bg-[#F8FAFC] p-3 shadow-sm"
+              <div className="flex shrink-0 flex-col gap-2 sm:flex-row lg:flex-col xl:flex-row">
+                <Link
+                  href="/post-ad"
+                  className="rounded-xl bg-[#C2410C] px-5 py-3 text-center text-sm font-black uppercase text-white hover:bg-orange-800"
                 >
-                  <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-sm font-black text-[#0F172A]">
-                      Search local advertisements
-                    </p>
-                    <p className="text-[11px] font-black uppercase text-[#475569]">
-                      {APPROVED_LOCATION_COUNT} approved locations
-                    </p>
-                  </div>
+                  Post Ad
+                </Link>
 
-                  <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(220px,1.15fr)_minmax(170px,0.8fr)_minmax(260px,1fr)_auto]">
-                    <label className="sr-only" htmlFor="home-search-keyword">
-                      Search keyword
-                    </label>
-                    <input
-                      id="home-search-keyword"
-                      name="q"
-                      placeholder="Jobs, property, services, vehicles…"
-                      className="min-h-12 w-full min-w-0 rounded-xl border border-[#64748B] bg-white px-4 py-3 text-sm font-semibold text-[#0F172A] outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20"
-                    />
-
-                    <label className="sr-only" htmlFor="home-search-category">
-                      Category
-                    </label>
-                    <select
-                      id="home-search-category"
-                      name="category"
-                      className="min-h-12 w-full min-w-0 rounded-xl border border-[#64748B] bg-white px-4 py-3 text-sm font-semibold text-[#0F172A] outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20"
-                    >
-                      <option value="">All Categories</option>
-                      {categories.map((category) => (
-                        <option key={category.id} value={category.slug}>
-                          {language === "mr" ? category.nameMr || category.nameEn : category.nameEn}
-                        </option>
-                      ))}
-                    </select>
-
-                    <label className="sr-only" htmlFor="home-search-city">
-                      Location
-                    </label>
-                    <select
-                      id="home-search-city"
-                      name="city"
-                      defaultValue="baramati"
-                      className="min-h-12 w-full min-w-[220px] rounded-xl border border-[#64748B] bg-white px-4 py-3 text-sm font-semibold text-[#0F172A] outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 md:min-w-0 xl:min-w-[260px]"
-                    >
-                      <option value="">All Maharashtra Locations</option>
-                      {cities.map((city) => (
-                        <option key={city.slug} value={city.slug}>
-                          {city.name}
-                        </option>
-                      ))}
-                    </select>
-
-                    <button
-                      type="submit"
-                      className="min-h-12 rounded-xl bg-[#0F3D5E] px-6 py-3 text-sm font-black uppercase text-white hover:bg-[#0B2F49] md:col-span-2 xl:col-span-1"
-                    >
-                      Search
-                    </button>
-                  </div>
-                </form>
-
-                <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-                  <Link
-                    href="/post-ad"
-                    className="rounded-xl bg-[#C2410C] px-5 py-3 text-center text-sm font-black uppercase text-white hover:bg-orange-800"
-                  >
-                    Post an Advertisement
-                  </Link>
-
-                  <Link
-                    href="/ads"
-                    className="rounded-xl border border-[#CBD5E1] bg-white px-5 py-3 text-center text-sm font-black uppercase text-[#0F3D5E] hover:bg-slate-50"
-                  >
-                    Browse Local Ads
-                  </Link>
-                </div>
-              </div>
-
-              <div className="hidden min-w-0 lg:block">
-                <BrandHeroGraphic />
+                <Link
+                  href="/ads"
+                  className="rounded-xl border border-[#CBD5E1] bg-white px-5 py-3 text-center text-sm font-black uppercase text-[#0F3D5E] hover:bg-slate-50"
+                >
+                  Browse Ads
+                </Link>
               </div>
             </div>
-          </div>
 
-          <section className="mt-4 rounded-2xl border border-[#CBD5E1] bg-white p-4 shadow-sm">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-xs font-black uppercase tracking-wide text-[#0F766E]">
-                  Explore advertisements by category
+            <form
+              action="/ads"
+              className="mt-4 rounded-2xl border border-[#CBD5E1] bg-[#F8FAFC] p-3 shadow-sm"
+            >
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-black text-[#0F172A]">
+                  Search local advertisements
                 </p>
-                <p className="mt-1 text-sm leading-6 text-[#475569]">
-                  Quick category shortcuts without pushing the classifieds too far down.
+                <p className="text-[11px] font-black uppercase text-[#475569]">
+                  {APPROVED_LOCATION_COUNT} approved locations
                 </p>
               </div>
-              <Link href="/ads" className="text-sm font-black uppercase text-[#0F3D5E]">
-                Browse all
-              </Link>
-            </div>
+
+              <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(260px,1.4fr)_minmax(190px,0.75fr)_minmax(260px,0.95fr)_minmax(120px,0.35fr)]">
+                <label className="sr-only" htmlFor="home-search-keyword">
+                  Search keyword
+                </label>
+                <input
+                  id="home-search-keyword"
+                  name="q"
+                  placeholder="Jobs, property, services, vehicles…"
+                  className="min-h-12 w-full min-w-0 rounded-xl border border-[#64748B] bg-white px-4 py-3 text-sm font-semibold text-[#0F172A] outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20"
+                />
+
+                <label className="sr-only" htmlFor="home-search-category">
+                  Category
+                </label>
+                <select
+                  id="home-search-category"
+                  name="category"
+                  className="min-h-12 w-full min-w-0 rounded-xl border border-[#64748B] bg-white px-4 py-3 text-sm font-semibold text-[#0F172A] outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20"
+                >
+                  <option value="">All Categories</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.slug}>
+                      {language === "mr" ? category.nameMr || category.nameEn : category.nameEn}
+                    </option>
+                  ))}
+                </select>
+
+                <label className="sr-only" htmlFor="home-search-city">
+                  Location
+                </label>
+                <select
+                  id="home-search-city"
+                  name="city"
+                  defaultValue="baramati"
+                  className="min-h-12 w-full min-w-0 rounded-xl border border-[#64748B] bg-white px-4 py-3 text-sm font-semibold text-[#0F172A] outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20"
+                >
+                  <option value="">All Maharashtra Locations</option>
+                  {cities.map((city) => (
+                    <option key={city.slug} value={city.slug}>
+                      {city.name}
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  type="submit"
+                  className="min-h-12 w-full rounded-xl bg-[#0F3D5E] px-5 py-3 text-sm font-black uppercase text-white hover:bg-[#0B2F49] md:col-span-2 xl:col-span-1"
+                >
+                  Search
+                </button>
+              </div>
+            </form>
 
             <div className="mt-3 flex flex-wrap gap-2">
               {HOME_CATEGORY_MICROCOPY.map((item) => (
@@ -290,7 +265,7 @@ export default async function HomePage() {
                   key={item.title}
                   href={item.href}
                   title={item.text}
-                  className="rounded-full border border-[#CBD5E1] bg-[#F8FAFC] px-3 py-2 text-xs font-black uppercase text-[#475569] hover:border-[#0F3D5E] hover:bg-white hover:text-[#0F3D5E]"
+                  className="rounded-full border border-[#CBD5E1] bg-white px-3 py-2 text-[11px] font-black uppercase text-[#475569] hover:border-[#0F3D5E] hover:text-[#0F3D5E]"
                 >
                   {item.title}
                 </Link>
