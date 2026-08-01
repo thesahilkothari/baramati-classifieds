@@ -12,6 +12,7 @@ import {
 } from "./lib/locations";
 import { buildOrganizationSchema, buildWebSiteSchema } from "./lib/jsonLd";
 import { buildPageMetadata } from "./lib/seo";
+import { reactivateFutureDatedExpiredAds } from "./lib/adStatusRepair";
 import {
   BRAND_SCOPE_EN,
   BRAND_SIGNATURE_EN,
@@ -56,6 +57,9 @@ function getAdInclude() {
 
 async function getHomeAds() {
   const now = new Date();
+
+  await reactivateFutureDatedExpiredAds(prisma);
+
   const include = getAdInclude();
   const allowedCityWhere = getAllowedAdCityWhere();
 
