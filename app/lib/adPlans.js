@@ -1,3 +1,5 @@
+export const BUSINESS_ANNUAL_PLAN_KEY = "BUSINESS_ANNUAL_365_DAYS";
+
 export const AD_PLANS = {
   FREE_7_DAYS: {
     key: "FREE_7_DAYS",
@@ -28,6 +30,19 @@ export const AD_PLANS = {
     purpose: "PREMIUM_AD",
     basePlan: "PREMIUM",
     includesFeatured: false
+  },
+  BUSINESS_ANNUAL_365_DAYS: {
+    key: BUSINESS_ANNUAL_PLAN_KEY,
+    label: "Business Annual Classified - 1 Year",
+    amount: 5000,
+    oldAmount: 6000,
+    durationDays: 365,
+    featuredDurationDays: 365,
+    adType: "FEATURED",
+    purpose: "BUSINESS_ANNUAL_AD",
+    basePlan: "BUSINESS_ANNUAL",
+    includesFeatured: true,
+    defaultFeatured: true
   },
   FEATURED_10_DAYS: {
     key: "FEATURED_10_DAYS",
@@ -71,6 +86,7 @@ export function getPostAdPlanKey(basePlan, includeFeatured) {
   if (basePlan === "FREE") return "FREE_7_DAYS";
   if (basePlan === "PAID") return includeFeatured ? "PAID_7_DAYS_FEATURED_10_DAYS" : "PAID_7_DAYS";
   if (basePlan === "PREMIUM") return includeFeatured ? "PREMIUM_30_DAYS_FEATURED_10_DAYS" : "PREMIUM_30_DAYS";
+  if (basePlan === "BUSINESS_ANNUAL") return BUSINESS_ANNUAL_PLAN_KEY;
   return null;
 }
 
@@ -79,6 +95,13 @@ export function addDays(date, days) {
 }
 
 export function getDefaultExpiryForAdType(adType, fromDate = new Date()) {
+  if (adType === "FEATURED") return addDays(fromDate, 365);
   if (adType === "PREMIUM") return addDays(fromDate, 30);
   return addDays(fromDate, 7);
+}
+
+export function getDefaultFeaturedUntilForAd(ad, fromDate = new Date()) {
+  if (!ad?.isFeatured) return null;
+  if (ad.adType === "FEATURED") return addDays(fromDate, 365);
+  return addDays(fromDate, 10);
 }
