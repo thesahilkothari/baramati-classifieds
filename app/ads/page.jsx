@@ -4,7 +4,7 @@ import { prisma } from "../lib/prisma";
 import AdCard from "../components/AdCard";
 import AdSearchFilters from "../components/AdSearchFilters";
 import JsonLd from "../components/JsonLd";
-import { getLanguageFromCookieStore, t } from "../lib/i18n";
+import { getLanguageFromCookieStore } from "../lib/i18n";
 import {
   ALLOWED_TIER2_LOCATION_SLUGS,
   getAllowedAdCityWhere,
@@ -125,10 +125,20 @@ async function fetchRankedAds(baseWhere, now) {
     user: { select: { isVerified: true } }
   };
 
-  const [featuredAds, premiumAds, paidAds, freeAds] = await Promise.all([
+  const activeFeaturedFilter = { OR: [{ featuredUntil: null }, { featuredUntil: { gt: now } }] };
+
+  const [regularFeaturedAds, businessAnnualAds, premiumAds, paidAds, freeAds] = await Promise.all([
     prisma.ad.findMany({
       where: {
-        AND: [baseWhere, { isFeatured: true }, { OR: [{ featuredUntil: null }, { featuredUntil: { gt: now } }] }]
+        AND: [baseWhere, { isFeatured: true }, { adType: { not: "FEATURED" } }, activeFeaturedFilter]
+      },
+      include,
+      orderBy: [{ createdAt: "desc" }],
+      take: 80
+    }),
+    prisma.ad.findMany({
+      where: {
+        AND: [baseWhere, { adType: "FEATURED" }, { isFeatured: true }, activeFeaturedFilter]
       },
       include,
       orderBy: [{ createdAt: "desc" }],
@@ -166,7 +176,15 @@ async function fetchRankedAds(baseWhere, now) {
     })
   ]);
 
-  return { allAds: uniqueAds([...featuredAds, ...premiumAds, ...paidAds, ...freeAds]) };
+  return {
+    allAds: uniqueAds([
+      ...regularFeaturedAds,
+      ...businessAnnualAds,
+      ...premiumAds,
+      ...paidAds,
+      ...freeAds
+    ])
+  };
 }
 
 export default async function AdsPage({ searchParams }) {
@@ -207,9 +225,7 @@ export default async function AdsPage({ searchParams }) {
           <div className="rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-xs font-black uppercase tracking-wide text-[#C2410C]">
-                  Browse Local Ads
-                </p>
+                <p className="text-xs font-black uppercase tracking-wide text-[#C2410C]">Browse Local Ads</p>
                 <h1 className="mt-2 text-3xl font-black leading-tight text-[#0F3D5E] md:text-5xl">
                   Find what Baramati is offering today
                 </h1>
@@ -236,29 +252,21 @@ export default async function AdsPage({ searchParams }) {
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm font-bold text-[#475569]">{resultLabel}</p>
             <p className="text-xs font-bold uppercase text-[#475569]">
-              Paid visibility never means endorsement or verification.
+              Regular Featured ads appear first; Business Annual featured ads appear next. Paid visibility never means endorsement or verification.
             </p>
           </div>
 
           {allAds.length === 0 ? (
             <div className="mt-6 rounded-3xl border border-[#CBD5E1] bg-white p-8 text-center shadow-sm">
-              <h2 className="text-2xl font-black text-[#0F172A]">
-                No advertisements match these filters
-              </h2>
+              <h2 className="text-2xl font-black text-[#0F172A]">No advertisements match these filters</h2>
               <p className="mt-2 text-[#475569]">
                 Try a nearby location or broader category. If you need something specific, you can also post a requirement advertisement.
               </p>
               <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
-                <Link
-                  href="/ads"
-                  className="inline-flex justify-center rounded-xl bg-[#0F3D5E] px-5 py-3 text-sm font-black uppercase text-white"
-                >
+                <Link href="/ads" className="inline-flex justify-center rounded-xl bg-[#0F3D5E] px-5 py-3 text-sm font-black uppercase text-white">
                   Clear Filters
                 </Link>
-                <Link
-                  href="/post-ad"
-                  className="inline-flex justify-center rounded-xl bg-[#C2410C] px-5 py-3 text-sm font-black uppercase text-white"
-                >
+                <Link href="/post-ad" className="inline-flex justify-center rounded-xl bg-[#C2410C] px-5 py-3 text-sm font-black uppercase text-white">
                   Post My Requirement
                 </Link>
               </div>
