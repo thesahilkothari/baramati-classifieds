@@ -4,10 +4,9 @@ import { prisma } from "./lib/prisma";
 import AdCard from "./components/AdCard";
 import BrandLogo from "./components/BrandLogo";
 import JsonLd from "./components/JsonLd";
-import { getLanguageFromCookieStore, t } from "./lib/i18n";
+import { getLanguageFromCookieStore } from "./lib/i18n";
 import {
   APPROVED_LOCATION_COUNT,
-  getAllowedAdCityWhere,
   getAllowedTier2CitySearchOptions
 } from "./lib/locations";
 import { buildOrganizationSchema, buildWebSiteSchema } from "./lib/jsonLd";
@@ -29,20 +28,6 @@ export const metadata = buildPageMetadata({
   path: "/"
 });
 
-function uniqueAds(ads) {
-  const seen = new Set();
-  const result = [];
-
-  for (const ad of ads) {
-    if (!seen.has(ad.id)) {
-      seen.add(ad.id);
-      result.push(ad);
-    }
-  }
-
-  return result;
-}
-
 function getAdInclude() {
   return {
     category: true,
@@ -55,102 +40,47 @@ function getAdInclude() {
   };
 }
 
+function isCurrentFeatured(ad, now) {
+  if (!ad.isFeatured) return false;
+  if (!ad.featuredUntil) return true;
+  return ad.featuredUntil > now;
+}
+
+function getHomepageRank(ad, now) {
+  const featuredNow = isCurrentFeatured(ad, now);
+
+  if (featuredNow && ad.adType !== "FEATURED") return 1;
+  if (ad.adType === "FEATURED") return 2;
+  if (ad.adType === "PREMIUM") return 3;
+  if (ad.adType === "PAID") return 4;
+  if (ad.adType === "FREE") return 5;
+
+  return 6;
+}
+
 async function getHomeAds() {
   const now = new Date();
 
   await reactivateFutureDatedExpiredAds(prisma);
 
-  const include = getAdInclude();
-  const allowedCityWhere = getAllowedAdCityWhere();
+  const ads = await prisma.ad.findMany({
+    where: {
+      status: "ACTIVE",
+      OR: [{ expiresAt: null }, { expiresAt: { gt: now } }]
+    },
+    include: getAdInclude(),
+    orderBy: { createdAt: "desc" },
+    take: 100
+  });
 
-  const activeExpiryFilter = {
-    OR: [{ expiresAt: null }, { expiresAt: { gt: now } }]
-  };
+  return ads.sort((first, second) => {
+    const rankDifference = getHomepageRank(first, now) - getHomepageRank(second, now);
+    if (rankDifference !== 0) return rankDifference;
 
-  const activeFeaturedFilter = {
-    OR: [{ featuredUntil: null }, { featuredUntil: { gt: now } }]
-  };
-
-  const [regularFeaturedAds, businessAnnualAds, premiumAds, paidAds, freeAds] = await Promise.all([
-    prisma.ad.findMany({
-      where: {
-        AND: [
-          { status: "ACTIVE" },
-          allowedCityWhere,
-          { isFeatured: true },
-          { adType: { not: "FEATURED" } },
-          activeExpiryFilter,
-          activeFeaturedFilter
-        ]
-      },
-      include,
-      orderBy: { createdAt: "desc" },
-      take: 24
-    }),
-    prisma.ad.findMany({
-      where: {
-        AND: [
-          { status: "ACTIVE" },
-          allowedCityWhere,
-          { adType: "FEATURED" },
-          { isFeatured: true },
-          activeExpiryFilter,
-          activeFeaturedFilter
-        ]
-      },
-      include,
-      orderBy: { createdAt: "desc" },
-      take: 24
-    }),
-    prisma.ad.findMany({
-      where: {
-        AND: [
-          { status: "ACTIVE" },
-          allowedCityWhere,
-          { adType: "PREMIUM" },
-          activeExpiryFilter
-        ]
-      },
-      include,
-      orderBy: { createdAt: "desc" },
-      take: 24
-    }),
-    prisma.ad.findMany({
-      where: {
-        AND: [
-          { status: "ACTIVE" },
-          allowedCityWhere,
-          { adType: "PAID" },
-          activeExpiryFilter
-        ]
-      },
-      include,
-      orderBy: { createdAt: "desc" },
-      take: 24
-    }),
-    prisma.ad.findMany({
-      where: {
-        AND: [
-          { status: "ACTIVE" },
-          allowedCityWhere,
-          { adType: "FREE" },
-          activeExpiryFilter
-        ]
-      },
-      include,
-      orderBy: { createdAt: "desc" },
-      take: 24
-    })
-  ]);
-
-  const featuredAds = uniqueAds([...regularFeaturedAds, ...businessAnnualAds]).slice(0, 24);
-
-  return {
-    featuredAds,
-    latestAds: uniqueAds([...premiumAds, ...paidAds, ...freeAds])
-      .filter((ad) => !featuredAds.some((featuredAd) => featuredAd.id === ad.id))
-      .slice(0, 24)
-  };
+    const firstTime = new Date(first.createdAt).getTime();
+    const secondTime = new Date(second.createdAt).getTime();
+    return secondTime - firstTime;
+  });
 }
 
 async function getHomeFilters() {
@@ -163,7 +93,7 @@ async function getHomeFilters() {
 export default async function HomePage() {
   const cookieStore = await cookies();
   const language = getLanguageFromCookieStore(cookieStore);
-  const [{ featuredAds, latestAds }, [categories, cities]] = await Promise.all([
+  const [visibleAds, [categories, cities]] = await Promise.all([
     getHomeAds(),
     getHomeFilters()
   ]);
@@ -295,51 +225,26 @@ export default async function HomePage() {
             </div>
           </section>
 
-          {featuredAds.length > 0 && (
-            <section className="mt-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-2xl font-black uppercase text-[#0F172A] md:text-3xl">
-                    {t(language, "featuredClassifieds")}
-                  </h2>
-                  <p className="mt-1 text-sm leading-6 text-[#475569]">
-                    Paid placement can improve visibility. Business Annual ads appear after regular Featured add-on ads.
-                  </p>
-                </div>
-
-                <Link href="/ads" className="text-sm font-black uppercase text-[#0F3D5E]">
-                  {t(language, "viewAllAds")}
-                </Link>
-              </div>
-
-              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {featuredAds.map((ad) => (
-                  <AdCard key={ad.id} ad={ad} language={language} />
-                ))}
-              </div>
-            </section>
-          )}
-
           <section className="mt-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-2xl font-black uppercase text-[#0F172A] md:text-3xl">
-                  Recently posted near you
+                  Active Classifieds
                 </h2>
                 <p className="mt-1 text-sm leading-6 text-[#475569]">
-                  Fresh local advertisements from Baramati and other Maharashtra locations.
+                  Showing all active non-expired advertisements. Order: regular Featured, Business Annual, Premium, Paid and Free.
                 </p>
               </div>
 
               <Link href="/ads" className="text-sm font-black uppercase text-[#0F3D5E]">
-                {t(language, "viewAllAds")}
+                Browse with filters
               </Link>
             </div>
 
-            {latestAds.length === 0 ? (
+            {visibleAds.length === 0 ? (
               <div className="mt-4 rounded-3xl border border-[#CBD5E1] bg-white p-8 text-center shadow-sm">
                 <p className="text-lg font-bold text-[#475569]">
-                  All active advertisements are currently shown above according to their paid visibility order.
+                  No active advertisements are available right now.
                 </p>
                 <Link
                   href="/post-ad"
@@ -350,7 +255,7 @@ export default async function HomePage() {
               </div>
             ) : (
               <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {latestAds.map((ad) => (
+                {visibleAds.map((ad) => (
                   <AdCard key={ad.id} ad={ad} language={language} />
                 ))}
               </div>
