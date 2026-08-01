@@ -2,7 +2,13 @@ import { NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
 import { getAdminSession } from "../../../../lib/adminAuth";
 import { addDays, getDefaultExpiryForAdType } from "../../../../lib/adPlans";
-import { ADMIN_MANAGEABLE_PLAN_KEYS, buildAdminPlanUpdate, parseAdminDate, parsePositiveInt } from "../../../../lib/adminAdTools";
+import {
+  ADMIN_MANAGEABLE_PLAN_KEYS,
+  buildAdminOverridePaymentLog,
+  buildAdminPlanUpdate,
+  parseAdminDate,
+  parsePositiveInt
+} from "../../../../lib/adminAdTools";
 import {
   buildAdApprovedEmail,
   buildAdRejectedEmail,
@@ -28,6 +34,10 @@ function resolveFeaturedUntil({ ad, updateData, now }) {
     return updateData.expiresAt || ad.expiresAt || addDays(now, 365);
   }
   return addDays(now, 10);
+}
+
+function shouldCreateOverrideLog({ hasPlanUpdate, explicitExpiry, durationDays, clearFeatured }) {
+  return Boolean(hasPlanUpdate || explicitExpiry || durationDays || clearFeatured);
 }
 
 export async function PATCH(request, { params }) {
@@ -67,7 +77,8 @@ export async function PATCH(request, { params }) {
       return NextResponse.json({ error: "Ad not found." }, { status: 404 });
     }
 
-    const targetStatus = requestedStatus || existingAd.status;
+    const autoReactivateByOverride = !requestedStatus && Boolean(hasPlanUpdate || explicitExpiry || durationDays);
+    const targetStatus = requestedStatus || (autoReactivateByOverride ? "ACTIVE" : existingAd.status);
 
     if (targetStatus === "ACTIVE") {
       const pendingManualPayment = await prisma.payment.findFirst({
@@ -78,7 +89,7 @@ export async function PATCH(request, { params }) {
         }
       });
 
-      if (pendingManualPayment && !hasPlanUpdate) {
+      if (pendingManualPayment && !hasPlanUpdate && !autoReactivateByOverride) {
         return NextResponse.json(
           {
             error:
@@ -93,7 +104,7 @@ export async function PATCH(request, { params }) {
     const now = new Date();
     const updateData = {};
 
-    if (requestedStatus) updateData.status = requestedStatus;
+    if (requestedStatus || autoReactivateByOverride) updateData.status = targetStatus;
 
     if (hasPlanUpdate) {
       Object.assign(
@@ -144,15 +155,43 @@ export async function PATCH(request, { params }) {
 
     if (targetStatus === "PENDING") updateData.approvedAt = null;
 
-    const updatedAd = await prisma.ad.update({
-      where: { id: adId },
-      data: updateData,
-      include: {
-        category: true,
-        city: true,
-        user: true,
-        payments: { orderBy: { createdAt: "desc" }, take: 3 }
+    const logOverride = shouldCreateOverrideLog({
+      hasPlanUpdate,
+      explicitExpiry,
+      durationDays,
+      clearFeatured
+    });
+
+    const updatedAd = await prisma.$transaction(async (tx) => {
+      const ad = await tx.ad.update({
+        where: { id: adId },
+        data: updateData,
+        include: {
+          category: true,
+          city: true,
+          user: true,
+          payments: { orderBy: { createdAt: "desc" }, take: 3 }
+        }
+      });
+
+      if (logOverride) {
+        await tx.payment.create({
+          data: buildAdminOverridePaymentLog({
+            adId,
+            userId: existingAd.userId,
+            planKey: planKey || "NO_PLAN_CHANGE",
+            status: ad.status,
+            action: clearFeatured ? "CLEAR_FEATURED" : "PLAN_STATUS_EXPIRY_OVERRIDE",
+            expiresAt: ad.expiresAt,
+            featuredUntil: ad.featuredUntil,
+            note: autoReactivateByOverride
+              ? "Admin override reactivated the advertisement and reassigned plan/expiry."
+              : "Admin override updated plan, featured placement or expiry."
+          })
+        });
       }
+
+      return ad;
     });
 
     if (previousStatus !== targetStatus && targetStatus === "ACTIVE") {
@@ -171,7 +210,9 @@ export async function PATCH(request, { params }) {
 
     return NextResponse.json({
       success: true,
-      message: "Ad updated successfully.",
+      message: autoReactivateByOverride
+        ? "Admin override applied and ad reactivated successfully."
+        : "Ad updated successfully.",
       ad: updatedAd
     });
   } catch (error) {
