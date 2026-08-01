@@ -4,6 +4,7 @@ import PostAdForm from "../components/PostAdForm";
 import { getLanguageFromCookieStore } from "../lib/i18n";
 import { getAllowedTier2Cities } from "../lib/locations";
 import { buildPageMetadata } from "../lib/seo";
+import { BUSINESS_ANNUAL_PLAN_KEY } from "../lib/adPlans";
 
 export const metadata = buildPageMetadata({
   title: "Post a Classified Ad in Baramati | My Classifieds",
@@ -15,7 +16,10 @@ export const metadata = buildPageMetadata({
 const PLAN_QUERY_MAP = {
   free: "FREE_7_DAYS",
   paid: "PAID_7_DAYS",
-  premium: "PREMIUM_30_DAYS"
+  premium: "PREMIUM_30_DAYS",
+  business: BUSINESS_ANNUAL_PLAN_KEY,
+  "business-annual": BUSINESS_ANNUAL_PLAN_KEY,
+  annual: BUSINESS_ANNUAL_PLAN_KEY
 };
 
 export default async function PostAdPage({ searchParams }) {
@@ -59,9 +63,9 @@ export default async function PostAdPage({ searchParams }) {
               </p>
             </div>
             <div className="rounded-2xl border border-[#CBD5E1] bg-[#F8FAFC] p-4 text-sm leading-6 text-[#475569]">
-              <p className="font-black uppercase text-[#0F172A]">Built for Baramati. Open across Maharashtra.</p>
+              <p className="font-black uppercase text-[#0F172A]">Business annual plan available</p>
               <p className="mt-2">
-                Select the real location where the opportunity, item or service is available. Mumbai, Pune, Nagpur and similar metro-first locations remain outside the current launch focus.
+                Businesses, professionals and service providers can choose the annual plan at Rs. 5,000 instead of Rs. 6,000, with Premium features and default Featured visibility.
               </p>
             </div>
           </div>
