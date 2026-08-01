@@ -9,7 +9,7 @@ export default function BrandLogo({ compact = false }) {
       aria-label="My Classifieds"
     >
       <img
-        src="/brand/my-classifieds-logo.svg?v=official-20260730-v3"
+        src="/brand/my-classifieds-logo.svg?v=tagline-clean-20260801-v1"
         alt="My Classifieds - Online Classifieds Platform"
         className={`block h-auto max-w-full shrink-0 object-contain ${widthClass}`}
         decoding="async"
