@@ -81,7 +81,7 @@ async function getHomeAds() {
       },
       include,
       orderBy: { createdAt: "desc" },
-      take: 8
+      take: 24
     }),
     prisma.ad.findMany({
       where: {
@@ -96,7 +96,7 @@ async function getHomeAds() {
       },
       include,
       orderBy: { createdAt: "desc" },
-      take: 8
+      take: 24
     }),
     prisma.ad.findMany({
       where: {
@@ -109,7 +109,7 @@ async function getHomeAds() {
       },
       include,
       orderBy: { createdAt: "desc" },
-      take: 8
+      take: 24
     }),
     prisma.ad.findMany({
       where: {
@@ -122,7 +122,7 @@ async function getHomeAds() {
       },
       include,
       orderBy: { createdAt: "desc" },
-      take: 8
+      take: 24
     }),
     prisma.ad.findMany({
       where: {
@@ -135,17 +135,17 @@ async function getHomeAds() {
       },
       include,
       orderBy: { createdAt: "desc" },
-      take: 12
+      take: 24
     })
   ]);
 
-  const featuredAds = uniqueAds([...regularFeaturedAds, ...businessAnnualAds]).slice(0, 8);
+  const featuredAds = uniqueAds([...regularFeaturedAds, ...businessAnnualAds]).slice(0, 24);
 
   return {
     featuredAds,
     latestAds: uniqueAds([...premiumAds, ...paidAds, ...freeAds])
       .filter((ad) => !featuredAds.some((featuredAd) => featuredAd.id === ad.id))
-      .slice(0, 12)
+      .slice(0, 24)
   };
 }
 
@@ -309,7 +309,7 @@ export default async function HomePage() {
               </div>
 
               <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {featuredAds.slice(0, 4).map((ad) => (
+                {featuredAds.map((ad) => (
                   <AdCard key={ad.id} ad={ad} language={language} />
                 ))}
               </div>
@@ -335,13 +335,13 @@ export default async function HomePage() {
             {latestAds.length === 0 ? (
               <div className="mt-4 rounded-3xl border border-[#CBD5E1] bg-white p-8 text-center shadow-sm">
                 <p className="text-lg font-bold text-[#475569]">
-                  Nothing matches your search yet. Be the first to post a relevant advertisement.
+                  All active advertisements are currently shown above according to their paid visibility order.
                 </p>
                 <Link
                   href="/post-ad"
                   className="mt-5 inline-flex rounded-xl bg-[#C2410C] px-6 py-3 text-sm font-black uppercase text-white"
                 >
-                  Post the First Ad
+                  Post an Ad
                 </Link>
               </div>
             ) : (
