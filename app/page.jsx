@@ -67,12 +67,28 @@ async function getHomeAds() {
     OR: [{ featuredUntil: null }, { featuredUntil: { gt: now } }]
   };
 
-  const [featuredAds, premiumAds, paidAds, freeAds] = await Promise.all([
+  const [regularFeaturedAds, businessAnnualAds, premiumAds, paidAds, freeAds] = await Promise.all([
     prisma.ad.findMany({
       where: {
         AND: [
           { status: "ACTIVE" },
           allowedCityWhere,
+          { isFeatured: true },
+          { adType: { not: "FEATURED" } },
+          activeExpiryFilter,
+          activeFeaturedFilter
+        ]
+      },
+      include,
+      orderBy: { createdAt: "desc" },
+      take: 8
+    }),
+    prisma.ad.findMany({
+      where: {
+        AND: [
+          { status: "ACTIVE" },
+          allowedCityWhere,
+          { adType: "FEATURED" },
           { isFeatured: true },
           activeExpiryFilter,
           activeFeaturedFilter
@@ -122,6 +138,8 @@ async function getHomeAds() {
       take: 12
     })
   ]);
+
+  const featuredAds = uniqueAds([...regularFeaturedAds, ...businessAnnualAds]).slice(0, 8);
 
   return {
     featuredAds,
@@ -281,7 +299,7 @@ export default async function HomePage() {
                     {t(language, "featuredClassifieds")}
                   </h2>
                   <p className="mt-1 text-sm leading-6 text-[#475569]">
-                    Paid placement can improve visibility, but it is not verification or endorsement.
+                    Paid placement can improve visibility. Business Annual ads appear after regular Featured add-on ads.
                   </p>
                 </div>
 
