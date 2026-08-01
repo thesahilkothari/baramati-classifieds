@@ -13,9 +13,9 @@ import { getLanguageFromCookieStore, t } from "../lib/i18n";
 import { buildPageMetadata } from "../lib/seo";
 
 export const metadata = buildPageMetadata({
-  title: "Pricing | My Classifieds",
+  title: "Classified Ad Pricing | Free, Paid & Premium — My Classifieds",
   description:
-    "Pricing plans for free, paid, premium and featured classified ads on My Classifieds.",
+    "Compare Free, Paid and Premium classified-advertising options on My Classifieds and choose the visibility suitable for your local advertisement.",
   path: "/pricing"
 });
 
@@ -27,87 +27,101 @@ function getPlanHref(planKey) {
   return "/post-ad";
 }
 
+function planSummary(planKey) {
+  if (planKey === "FREE_7_DAYS") {
+    return "A simple way to publish a genuine local advertisement.";
+  }
+  if (planKey === "PAID_7_DAYS") {
+    return "Better placement for advertisements that need added visibility.";
+  }
+  if (planKey === "PREMIUM_30_DAYS") {
+    return "Highest available prominence for priority advertisements.";
+  }
+  return "Visibility according to the applicable plan terms.";
+}
+
 export default async function PricingPage() {
   const cookieStore = await cookies();
   const language = getLanguageFromCookieStore(cookieStore);
   const plans = getPlanFeatureList();
 
   return (
-    <main className="bg-slate-100 px-4 py-6">
+    <main className="bg-[#F8FAFC] px-4 py-6">
       <section className="mx-auto max-w-7xl">
-        <div className="rounded-2xl border-2 border-slate-900 bg-white p-5 shadow-sm">
+        <div className="rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm md:p-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-black uppercase tracking-wide text-red-600">
-                {t(language, "pricing")}
+              <p className="text-xs font-black uppercase tracking-wide text-[#C2410C]">
+                Classified Ad Pricing
               </p>
 
-              <h1 className="mt-1 text-2xl font-black uppercase text-slate-950 md:text-3xl">
-                {t(language, "pricingTitle")}
+              <h1 className="mt-2 max-w-4xl text-3xl font-black leading-tight text-[#0F3D5E] md:text-5xl">
+                Start free. Choose more visibility when it matters.
               </h1>
 
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-700">
-                {t(language, "pricingIntro")}
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-[#475569] md:text-base">
+                Every advertiser can start with a standard advertisement. Paid options are available when you want stronger placement or longer visibility under the applicable plan terms.
               </p>
             </div>
 
             <Link
               href="/post-ad"
-              className="rounded-xl bg-red-600 px-5 py-3 text-sm font-black uppercase text-white hover:bg-red-700"
+              className="rounded-xl bg-[#C2410C] px-5 py-3 text-sm font-black uppercase text-white hover:bg-orange-800"
             >
-              {t(language, "placeClassified")}
+              Post My Advertisement
             </Link>
           </div>
         </div>
 
-        <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 p-5 text-sm leading-6 text-blue-900">
-          {t(language, "manualUpiNotice")} {t(language, "gstInclusive")}.
+        <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-7 text-amber-900">
+          Paid placement improves visibility on the platform; it does not guarantee enquiries, a transaction, employment, sale or any particular result. {t(language, "manualUpiNotice")} {t(language, "gstInclusive")}.
         </div>
 
         <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {plans.map((plan) => (
             <article
               key={plan.key}
-              className="rounded-3xl border-2 border-slate-200 bg-white p-5 shadow-sm"
+              className="rounded-3xl border border-[#CBD5E1] bg-white p-5 shadow-sm"
             >
               <div className="flex items-start justify-between gap-3">
-                <h2 className="text-xl font-black uppercase text-slate-950">
-                  {getLocalizedPlanName(plan, language)}
-                </h2>
+                <div>
+                  <h2 className="text-xl font-black uppercase text-[#0F172A]">
+                    {getLocalizedPlanName(plan, language)}
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-[#475569]">
+                    {planSummary(plan.key)}
+                  </p>
+                </div>
 
-                <span className="rounded bg-slate-950 px-3 py-1 text-[11px] font-black uppercase text-white">
+                <span className="rounded bg-[#0F3D5E] px-3 py-1 text-[11px] font-black uppercase text-white">
                   {plan.badge}
                 </span>
               </div>
 
-              <p className="mt-4 text-4xl font-black text-red-600">
+              <p className="mt-4 text-4xl font-black text-[#C2410C]">
                 {formatPlanAmount(plan.price)}
               </p>
 
-              <p className="mt-1 text-xs font-black uppercase text-slate-600">
-                {t(language, "gstInclusive")} | {t(language, "validFor")}{" "}
-                {getLocalizedPlanDuration(plan, language)}
+              <p className="mt-1 text-xs font-black uppercase text-[#475569]">
+                {t(language, "gstInclusive")} | {t(language, "validFor")} {getLocalizedPlanDuration(plan, language)}
               </p>
 
-              <div className="mt-4 rounded-xl bg-slate-50 p-3 text-sm leading-6 text-slate-700">
+              <div className="mt-4 rounded-xl bg-[#F8FAFC] p-3 text-sm leading-6 text-[#475569]">
                 <p>
-                  <strong>{t(language, "headingLimit")}:</strong>{" "}
-                  {plan.titleMaxLength} characters
+                  <strong>{t(language, "headingLimit")}:</strong> {plan.titleMaxLength} characters
                 </p>
                 <p>
-                  <strong>{t(language, "descriptionLimit")}:</strong>{" "}
-                  {plan.descriptionMaxLength} characters
+                  <strong>{t(language, "descriptionLimit")}:</strong> {plan.descriptionMaxLength} characters
                 </p>
                 <p>
-                  <strong>{t(language, "approval")}:</strong>{" "}
-                  {getLocalizedApprovalTime(plan, language)}
+                  <strong>{t(language, "approval")}:</strong> {getLocalizedApprovalTime(plan, language)}
                 </p>
               </div>
 
-              <ul className="mt-5 space-y-2 text-sm font-semibold text-slate-700">
+              <ul className="mt-5 space-y-2 text-sm font-semibold text-[#475569]">
                 {getLocalizedPlanFeatures(plan, language).map((feature) => (
                   <li key={feature} className="flex gap-2">
-                    <span className="font-black text-green-700">✓</span>
+                    <span className="font-black text-[#0F766E]">✓</span>
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -115,59 +129,58 @@ export default async function PricingPage() {
 
               <Link
                 href={getPlanHref(plan.key)}
-                className="mt-6 flex w-full justify-center rounded-xl bg-red-600 px-5 py-3 text-sm font-black uppercase text-white hover:bg-red-700"
+                className="mt-6 flex w-full justify-center rounded-xl bg-[#0F3D5E] px-5 py-3 text-sm font-black uppercase text-white hover:bg-[#0B2F49]"
               >
                 {t(language, "choosePlanButton")}
               </Link>
             </article>
           ))}
 
-          <article className="rounded-3xl border-2 border-orange-400 bg-orange-50 p-5 shadow-sm">
-            <h2 className="text-xl font-black uppercase text-slate-950">
-              {language === "mr"
-                ? FEATURED_FEATURES.publicNameMr
-                : FEATURED_FEATURES.publicName}
+          <article className="rounded-3xl border border-[#F59E0B] bg-amber-50 p-5 shadow-sm">
+            <h2 className="text-xl font-black uppercase text-[#0F172A]">
+              {language === "mr" ? FEATURED_FEATURES.publicNameMr : FEATURED_FEATURES.publicName}
             </h2>
 
-            <p className="mt-4 text-4xl font-black text-orange-600">
+            <p className="mt-3 text-sm leading-6 text-[#475569]">
+              Featured placement is available only for an eligible paid listing and applies for the add-on period.
+            </p>
+
+            <p className="mt-4 text-4xl font-black text-[#C2410C]">
               {formatPlanAmount(FEATURED_FEATURES.price)}
             </p>
 
-            <p className="mt-1 text-xs font-black uppercase text-slate-600">
-              {t(language, "validFor")}{" "}
-              {language === "mr"
-                ? FEATURED_FEATURES.durationLabelMr
-                : FEATURED_FEATURES.durationLabel}
+            <p className="mt-1 text-xs font-black uppercase text-[#475569]">
+              {t(language, "validFor")} {language === "mr" ? FEATURED_FEATURES.durationLabelMr : FEATURED_FEATURES.durationLabel}
             </p>
 
-            <ul className="mt-5 space-y-2 text-sm font-semibold text-slate-700">
-              {(language === "mr"
-                ? FEATURED_FEATURES.featuresMr
-                : FEATURED_FEATURES.features
-              ).map((feature) => (
+            <ul className="mt-5 space-y-2 text-sm font-semibold text-[#475569]">
+              {(language === "mr" ? FEATURED_FEATURES.featuresMr : FEATURED_FEATURES.features).map((feature) => (
                 <li key={feature} className="flex gap-2">
-                  <span className="font-black text-green-700">✓</span>
+                  <span className="font-black text-[#0F766E]">✓</span>
                   <span>{feature}</span>
                 </li>
               ))}
             </ul>
 
-            <p className="mt-6 rounded-xl border border-orange-300 bg-white px-5 py-3 text-center text-sm font-black uppercase text-orange-800">
-              {language === "mr"
-                ? "Paid किंवा Premium plan निवडल्यानंतर उपलब्ध"
-                : "Available after selecting Paid or Premium"}
+            <p className="mt-6 rounded-xl border border-[#F59E0B] bg-white px-5 py-3 text-center text-sm font-black uppercase text-[#0F3D5E]">
+              {language === "mr" ? "Paid किंवा Premium plan निवडल्यानंतर उपलब्ध" : "Available after selecting Paid or Premium"}
             </p>
           </article>
         </div>
 
-        <section className="mt-8 rounded-3xl border bg-yellow-50 p-6 shadow-sm">
-          <h2 className="text-2xl font-black uppercase text-yellow-950">
-            {t(language, "importantNote")}
+        <section className="mt-8 rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm">
+          <h2 className="text-2xl font-black uppercase text-[#0F172A]">
+            Not sure which option fits? Start with Free.
           </h2>
-
-          <p className="mt-4 text-sm leading-7 text-yellow-900">
-            {t(language, "moderationNote")}
+          <p className="mt-4 text-sm leading-7 text-[#475569]">
+            You can choose an eligible upgrade later. Keep your advertisement accurate and complete—clarity matters as much as placement.
           </p>
+          <Link
+            href="/post-ad?plan=free"
+            className="mt-5 inline-flex rounded-xl bg-[#C2410C] px-5 py-3 text-sm font-black uppercase text-white"
+          >
+            Post My Advertisement
+          </Link>
         </section>
       </section>
     </main>
