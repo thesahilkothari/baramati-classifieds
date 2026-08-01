@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import {
+  BUSINESS_ANNUAL_PLAN_KEY,
   FEATURED_FEATURES,
   getLocalizedApprovalTime,
   getLocalizedPlanDuration,
@@ -13,9 +14,9 @@ import { getLanguageFromCookieStore, t } from "../lib/i18n";
 import { buildPageMetadata } from "../lib/seo";
 
 export const metadata = buildPageMetadata({
-  title: "Classified Ad Pricing | Free, Paid & Premium — My Classifieds",
+  title: "Classified Ad Pricing | Free, Paid, Premium & Business Annual — My Classifieds",
   description:
-    "Compare Free, Paid and Premium classified-advertising options on My Classifieds and choose the visibility suitable for your local advertisement.",
+    "Compare Free, Paid, Premium and Business Annual classified-advertising options on My Classifieds and choose the visibility suitable for your local advertisement.",
   path: "/pricing"
 });
 
@@ -23,20 +24,16 @@ function getPlanHref(planKey) {
   if (planKey === "FREE_7_DAYS") return "/post-ad?plan=free";
   if (planKey === "PAID_7_DAYS") return "/post-ad?plan=paid";
   if (planKey === "PREMIUM_30_DAYS") return "/post-ad?plan=premium";
+  if (planKey === BUSINESS_ANNUAL_PLAN_KEY) return "/post-ad?plan=business-annual";
 
   return "/post-ad";
 }
 
 function planSummary(planKey) {
-  if (planKey === "FREE_7_DAYS") {
-    return "A simple way to publish a genuine local advertisement.";
-  }
-  if (planKey === "PAID_7_DAYS") {
-    return "Better placement for advertisements that need added visibility.";
-  }
-  if (planKey === "PREMIUM_30_DAYS") {
-    return "Highest available prominence for priority advertisements.";
-  }
+  if (planKey === "FREE_7_DAYS") return "A simple way to publish a genuine local advertisement.";
+  if (planKey === "PAID_7_DAYS") return "Better placement for advertisements that need added visibility.";
+  if (planKey === "PREMIUM_30_DAYS") return "Higher visibility for property, jobs, business and urgent advertisements.";
+  if (planKey === BUSINESS_ANNUAL_PLAN_KEY) return "A yearly visibility option for businesses, professionals and service providers.";
   return "Visibility according to the applicable plan terms.";
 }
 
@@ -60,7 +57,7 @@ export default async function PricingPage() {
               </h1>
 
               <p className="mt-4 max-w-3xl text-sm leading-7 text-[#475569] md:text-base">
-                Every advertiser can start with a standard advertisement. Paid options are available when you want stronger placement or longer visibility under the applicable plan terms.
+                Every advertiser can start with a standard advertisement. Paid options are available when you want stronger placement, longer visibility, or an annual business presence.
               </p>
             </div>
 
@@ -77,11 +74,15 @@ export default async function PricingPage() {
           Paid placement improves visibility on the platform; it does not guarantee enquiries, a transaction, employment, sale or any particular result. {t(language, "manualUpiNotice")} {t(language, "gstInclusive")}.
         </div>
 
-        <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           {plans.map((plan) => (
             <article
               key={plan.key}
-              className="rounded-3xl border border-[#CBD5E1] bg-white p-5 shadow-sm"
+              className={`rounded-3xl border p-5 shadow-sm ${
+                plan.key === BUSINESS_ANNUAL_PLAN_KEY
+                  ? "border-[#F59E0B] bg-amber-50"
+                  : "border-[#CBD5E1] bg-white"
+              }`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -98,24 +99,31 @@ export default async function PricingPage() {
                 </span>
               </div>
 
-              <p className="mt-4 text-4xl font-black text-[#C2410C]">
-                {formatPlanAmount(plan.price)}
-              </p>
+              <div className="mt-4">
+                {plan.oldPrice && (
+                  <p className="text-sm font-black uppercase text-[#475569] line-through">
+                    {formatPlanAmount(plan.oldPrice)}
+                  </p>
+                )}
+                <p className="text-4xl font-black text-[#C2410C]">
+                  {formatPlanAmount(plan.price)}
+                </p>
+              </div>
 
               <p className="mt-1 text-xs font-black uppercase text-[#475569]">
                 {t(language, "gstInclusive")} | {t(language, "validFor")} {getLocalizedPlanDuration(plan, language)}
               </p>
 
+              {plan.defaultFeatured && (
+                <p className="mt-3 rounded-xl bg-white px-3 py-2 text-xs font-black uppercase text-[#0F3D5E]">
+                  Featured by default; ranked after regular Featured add-on ads.
+                </p>
+              )}
+
               <div className="mt-4 rounded-xl bg-[#F8FAFC] p-3 text-sm leading-6 text-[#475569]">
-                <p>
-                  <strong>{t(language, "headingLimit")}:</strong> {plan.titleMaxLength} characters
-                </p>
-                <p>
-                  <strong>{t(language, "descriptionLimit")}:</strong> {plan.descriptionMaxLength} characters
-                </p>
-                <p>
-                  <strong>{t(language, "approval")}:</strong> {getLocalizedApprovalTime(plan, language)}
-                </p>
+                <p><strong>{t(language, "headingLimit")}:</strong> {plan.titleMaxLength} characters</p>
+                <p><strong>{t(language, "descriptionLimit")}:</strong> {plan.descriptionMaxLength} characters</p>
+                <p><strong>{t(language, "approval")}:</strong> {getLocalizedApprovalTime(plan, language)}</p>
               </div>
 
               <ul className="mt-5 space-y-2 text-sm font-semibold text-[#475569]">
@@ -135,38 +143,40 @@ export default async function PricingPage() {
               </Link>
             </article>
           ))}
-
-          <article className="rounded-3xl border border-[#F59E0B] bg-amber-50 p-5 shadow-sm">
-            <h2 className="text-xl font-black uppercase text-[#0F172A]">
-              {language === "mr" ? FEATURED_FEATURES.publicNameMr : FEATURED_FEATURES.publicName}
-            </h2>
-
-            <p className="mt-3 text-sm leading-6 text-[#475569]">
-              Featured placement is available only for an eligible paid listing and applies for the add-on period.
-            </p>
-
-            <p className="mt-4 text-4xl font-black text-[#C2410C]">
-              {formatPlanAmount(FEATURED_FEATURES.price)}
-            </p>
-
-            <p className="mt-1 text-xs font-black uppercase text-[#475569]">
-              {t(language, "validFor")} {language === "mr" ? FEATURED_FEATURES.durationLabelMr : FEATURED_FEATURES.durationLabel}
-            </p>
-
-            <ul className="mt-5 space-y-2 text-sm font-semibold text-[#475569]">
-              {(language === "mr" ? FEATURED_FEATURES.featuresMr : FEATURED_FEATURES.features).map((feature) => (
-                <li key={feature} className="flex gap-2">
-                  <span className="font-black text-[#0F766E]">✓</span>
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-
-            <p className="mt-6 rounded-xl border border-[#F59E0B] bg-white px-5 py-3 text-center text-sm font-black uppercase text-[#0F3D5E]">
-              {language === "mr" ? "Paid किंवा Premium plan निवडल्यानंतर उपलब्ध" : "Available after selecting Paid or Premium"}
-            </p>
-          </article>
         </div>
+
+        <article className="mt-5 rounded-3xl border border-[#F59E0B] bg-white p-5 shadow-sm">
+          <div className="grid gap-5 md:grid-cols-[0.8fr_1.2fr]">
+            <div>
+              <h2 className="text-xl font-black uppercase text-[#0F172A]">
+                {language === "mr" ? FEATURED_FEATURES.publicNameMr : FEATURED_FEATURES.publicName}
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-[#475569]">
+                Featured placement is available only for an eligible Paid or Premium listing and applies for the add-on period.
+              </p>
+              <p className="mt-4 text-4xl font-black text-[#C2410C]">
+                {formatPlanAmount(FEATURED_FEATURES.price)}
+              </p>
+              <p className="mt-1 text-xs font-black uppercase text-[#475569]">
+                {t(language, "validFor")} {language === "mr" ? FEATURED_FEATURES.durationLabelMr : FEATURED_FEATURES.durationLabel}
+              </p>
+            </div>
+
+            <div>
+              <ul className="space-y-2 text-sm font-semibold text-[#475569]">
+                {(language === "mr" ? FEATURED_FEATURES.featuresMr : FEATURED_FEATURES.features).map((feature) => (
+                  <li key={feature} className="flex gap-2">
+                    <span className="font-black text-[#0F766E]">✓</span>
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-5 rounded-xl border border-[#F59E0B] bg-amber-50 px-5 py-3 text-center text-sm font-black uppercase text-[#0F3D5E]">
+                {language === "mr" ? "Paid किंवा Premium plan निवडल्यानंतर उपलब्ध" : "Available after selecting Paid or Premium"}
+              </p>
+            </div>
+          </div>
+        </article>
 
         <section className="mt-8 rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm">
           <h2 className="text-2xl font-black uppercase text-[#0F172A]">
@@ -175,10 +185,7 @@ export default async function PricingPage() {
           <p className="mt-4 text-sm leading-7 text-[#475569]">
             You can choose an eligible upgrade later. Keep your advertisement accurate and complete—clarity matters as much as placement.
           </p>
-          <Link
-            href="/post-ad?plan=free"
-            className="mt-5 inline-flex rounded-xl bg-[#C2410C] px-5 py-3 text-sm font-black uppercase text-white"
-          >
+          <Link href="/post-ad?plan=free" className="mt-5 inline-flex rounded-xl bg-[#C2410C] px-5 py-3 text-sm font-black uppercase text-white">
             Post My Advertisement
           </Link>
         </section>
