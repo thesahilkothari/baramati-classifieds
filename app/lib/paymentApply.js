@@ -1,4 +1,4 @@
-import { addDays, getPlan } from "./adPlans";
+import { addDays, getPlan, BUSINESS_ANNUAL_PLAN_KEY } from "./adPlans";
 
 export function verifyRazorpayPaymentSignature({ orderId, paymentId, signature, keySecret }) {
   const crypto = require("crypto");
@@ -26,7 +26,12 @@ export async function applyPaidPlanToAd(tx, { adId, planKey }) {
   const updateData = {};
   const shouldApplyPaid = plan.key === "PAID_7_DAYS" || plan.key === "PAID_7_DAYS_FEATURED_10_DAYS";
   const shouldApplyPremium = plan.key === "PREMIUM_30_DAYS" || plan.key === "PREMIUM_30_DAYS_FEATURED_10_DAYS";
-  const shouldApplyFeatured = plan.key === "FEATURED_10_DAYS" || plan.key === "PAID_7_DAYS_FEATURED_10_DAYS" || plan.key === "PREMIUM_30_DAYS_FEATURED_10_DAYS";
+  const shouldApplyBusinessAnnual = plan.key === BUSINESS_ANNUAL_PLAN_KEY;
+  const shouldApplyFeatured =
+    plan.key === "FEATURED_10_DAYS" ||
+    plan.key === "PAID_7_DAYS_FEATURED_10_DAYS" ||
+    plan.key === "PREMIUM_30_DAYS_FEATURED_10_DAYS" ||
+    shouldApplyBusinessAnnual;
 
   if (shouldApplyPaid) {
     updateData.adType = "PAID";
@@ -44,7 +49,20 @@ export async function applyPaidPlanToAd(tx, { adId, planKey }) {
     if (ad.status === "ACTIVE") updateData.expiresAt = addDays(now, 30);
   }
 
-  if (shouldApplyFeatured) {
+  if (shouldApplyBusinessAnnual) {
+    updateData.adType = "FEATURED";
+    updateData.isFeatured = true;
+    updateData.expiryNoticeSentAt = null;
+    updateData.renewalNoticeSentAt = null;
+    updateData.followUpNoticeSentAt = null;
+    if (ad.status === "ACTIVE") {
+      const annualExpiry = addDays(now, 365);
+      updateData.expiresAt = annualExpiry;
+      updateData.featuredUntil = annualExpiry;
+    }
+  }
+
+  if (shouldApplyFeatured && !shouldApplyBusinessAnnual) {
     if (plan.key === "FEATURED_10_DAYS" && ad.adType === "FREE") {
       throw new Error("Featured add-on can be applied only to paid or premium ads.");
     }
