@@ -7,6 +7,11 @@ const adminLinks = [
     description: "Counts and shortcuts"
   },
   {
+    href: "/admin/ads/create",
+    label: "Create Ad",
+    description: "Admin-created ads"
+  },
+  {
     href: "/admin/growth",
     label: "Growth",
     description: "Revenue and retention"
@@ -73,16 +78,15 @@ export default function AdminNav() {
             </Link>
 
             <Link
-              href="/post-ad"
-              target="_blank"
-              className="rounded-xl bg-red-600 px-4 py-2 text-xs font-black uppercase text-white hover:bg-red-700"
+              href="/admin/ads/create"
+              className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-black uppercase text-white hover:bg-blue-700"
             >
-              Post Test Ad
+              Create Ad
             </Link>
           </div>
         </div>
 
-        <nav className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-9">
+        <nav className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-10">
           {adminLinks.map((link) => (
             <Link
               key={link.href}
