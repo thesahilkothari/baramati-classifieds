@@ -56,6 +56,7 @@ function getReportCopy(language) {
 
 export default function AdCard({ ad, language = "en" }) {
   const showFeatured = shouldShowFeatured(ad);
+  const isBusinessAnnual = ad?.adType === "FEATURED";
   const verifiedSeller = Boolean(ad?.user?.isVerified);
   const categoryName = language === "mr" ? ad.category?.nameMr || ad.category?.nameEn : ad.category?.nameEn;
   const categoryIcon = getCategoryIcon(ad.category?.slug);
@@ -72,6 +73,12 @@ export default function AdCard({ ad, language = "en" }) {
           {showFeatured && (
             <span className="rounded bg-[#F59E0B] px-2.5 py-1 text-[10px] font-black uppercase text-[#0F172A]">
               {t(language, "featured")}
+            </span>
+          )}
+
+          {isBusinessAnnual && (
+            <span className="rounded bg-purple-100 px-2.5 py-1 text-[10px] font-black uppercase text-purple-800">
+              Annual
             </span>
           )}
 
