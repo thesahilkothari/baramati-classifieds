@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "../../lib/prisma";
 import { getAdminSession } from "../../lib/adminAuth";
+import { getAdminPlanLabel } from "../../lib/adminAdTools";
 import AdminAdActions from "../../components/AdminAdActions";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +23,15 @@ function formatPrice(price) {
     currency: "INR",
     maximumFractionDigits: 0
   }).format(amount);
+}
+
+function formatDate(value) {
+  if (!value) return "Not set";
+
+  return new Intl.DateTimeFormat("en-IN", {
+    dateStyle: "medium",
+    timeStyle: "short"
+  }).format(new Date(value));
 }
 
 function statusBadge(status) {
@@ -46,35 +56,26 @@ export default async function AdminAdsPage({ searchParams }) {
   const params = await searchParams;
   const status = params?.status || "PENDING";
 
-  const where =
-    status === "ALL"
-      ? {}
-      : {
-          status
-        };
+  const where = status === "ALL" ? {} : { status };
 
   const ads = await prisma.ad.findMany({
-  where,
-  include: {
-    category: true,
-    city: true,
-    user: true,
-    payments: {
-      orderBy: {
-        createdAt: "desc"
-      },
-      take: 3
-    }
-  },
-  orderBy: { createdAt: "desc" },
-  take: 100
-});
+    where,
+    include: {
+      category: true,
+      city: true,
+      user: true,
+      payments: {
+        orderBy: { createdAt: "desc" },
+        take: 3
+      }
+    },
+    orderBy: { createdAt: "desc" },
+    take: 100
+  });
 
   const counts = await prisma.ad.groupBy({
     by: ["status"],
-    _count: {
-      status: true
-    }
+    _count: { status: true }
   });
 
   const countMap = counts.reduce((acc, item) => {
@@ -87,33 +88,35 @@ export default async function AdminAdsPage({ searchParams }) {
       <section className="mx-auto max-w-7xl">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-bold uppercase tracking-wide text-blue-700">
-              Admin Panel
+            <p className="text-sm font-bold uppercase tracking-wide text-blue-700">Admin Panel</p>
+            <h1 className="mt-2 text-4xl font-extrabold text-slate-900">Manage Classified Ads</h1>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+              Approve, reject, create, promote and reassign expiry of advertisements from this screen.
             </p>
-            <h1 className="mt-2 text-4xl font-extrabold text-slate-900">
-              Manage Classified Ads
-            </h1>
           </div>
 
-          <form action="/api/admin/logout" method="POST">
-            <button
-              type="submit"
-              className="rounded-xl border px-5 py-3 font-bold text-slate-700 hover:bg-white"
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/admin/ads/create"
+              className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-black uppercase text-white hover:bg-blue-800"
             >
-              Logout
-            </button>
-          </form>
+              Create Ad
+            </Link>
+            <form action="/api/admin/logout" method="POST">
+              <button type="submit" className="rounded-xl border px-5 py-3 font-bold text-slate-700 hover:bg-white">
+                Logout
+              </button>
+            </form>
+          </div>
         </div>
 
         <div className="mt-8 flex flex-wrap gap-3">
-          {["PENDING", "ACTIVE", "REJECTED", "SOLD", "ALL"].map((item) => (
+          {["PENDING", "ACTIVE", "REJECTED", "EXPIRED", "SOLD", "ALL"].map((item) => (
             <Link
               key={item}
               href={`/admin/ads?status=${item}`}
               className={`rounded-xl px-4 py-2 text-sm font-bold ${
-                status === item
-                  ? "bg-blue-700 text-white"
-                  : "border bg-white text-slate-700 hover:bg-slate-50"
+                status === item ? "bg-blue-700 text-white" : "border bg-white text-slate-700 hover:bg-slate-50"
               }`}
             >
               {item} {item !== "ALL" ? `(${countMap[item] || 0})` : ""}
@@ -128,24 +131,23 @@ export default async function AdminAdsPage({ searchParams }) {
             </div>
           ) : (
             ads.map((ad) => (
-              <article
-                key={ad.id}
-                className="rounded-3xl border bg-white p-6 shadow-sm"
-              >
+              <article key={ad.id} className="rounded-3xl border bg-white p-6 shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap gap-2">
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-bold ${statusBadge(
-                          ad.status
-                        )}`}
-                      >
+                      <span className={`rounded-full px-3 py-1 text-xs font-bold ${statusBadge(ad.status)}`}>
                         {ad.status}
                       </span>
 
                       {ad.isFeatured && (
                         <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-bold text-yellow-800">
                           Featured
+                        </span>
+                      )}
+
+                      {ad.adType === "FEATURED" && (
+                        <span className="rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-purple-800">
+                          Business Annual
                         </span>
                       )}
 
@@ -158,62 +160,38 @@ export default async function AdminAdsPage({ searchParams }) {
                       </span>
                     </div>
 
-                    <h2 className="mt-4 text-2xl font-bold text-slate-900">
-                      {ad.title}
-                    </h2>
+                    <h2 className="mt-4 text-2xl font-bold text-slate-900">#{ad.id} {ad.title}</h2>
 
-                    <p className="mt-2 text-xl font-extrabold text-blue-700">
-                      {formatPrice(ad.price)}
-                    </p>
+                    <p className="mt-2 text-xl font-extrabold text-blue-700">{formatPrice(ad.price)}</p>
 
-                    <p className="mt-3 max-w-4xl whitespace-pre-line text-slate-700">
-                      {ad.description}
-                    </p>
+                    <p className="mt-3 max-w-4xl whitespace-pre-line text-slate-700">{ad.description}</p>
 
-                    <div className="mt-4 grid gap-2 text-sm text-slate-600 md:grid-cols-2">
-                      <p>
-                        <span className="font-bold text-slate-900">
-                          Seller:
-                        </span>{" "}
-                        {ad.user?.name || "Not provided"}
-                      </p>
-                      <p>
-                        <span className="font-bold text-slate-900">
-                          Mobile:
-                        </span>{" "}
-                        {ad.mobile}
-                      </p>
-                      <p>
-                        <span className="font-bold text-slate-900">
-                          WhatsApp:
-                        </span>{" "}
-                        {ad.whatsapp || ad.mobile}
-                      </p>
-                      <p>
-                        <span className="font-bold text-slate-900">
-                          Address:
-                        </span>{" "}
-                        {ad.address || "Not provided"}
-                      </p>
+                    <div className="mt-4 grid gap-2 text-sm text-slate-600 md:grid-cols-2 xl:grid-cols-3">
+                      <p><span className="font-bold text-slate-900">Seller:</span> {ad.user?.name || "Not provided"}</p>
+                      <p><span className="font-bold text-slate-900">Mobile:</span> {ad.mobile}</p>
+                      <p><span className="font-bold text-slate-900">WhatsApp:</span> {ad.whatsapp || ad.mobile}</p>
+                      <p><span className="font-bold text-slate-900">Address:</span> {ad.address || "Not provided"}</p>
+                      <p><span className="font-bold text-slate-900">Plan:</span> {getAdminPlanLabel(ad)}</p>
+                      <p><span className="font-bold text-slate-900">Views:</span> {ad.views}</p>
+                      <p><span className="font-bold text-slate-900">Approved:</span> {formatDate(ad.approvedAt)}</p>
+                      <p><span className="font-bold text-slate-900">Expires:</span> {formatDate(ad.expiresAt)}</p>
+                      <p><span className="font-bold text-slate-900">Featured Until:</span> {formatDate(ad.featuredUntil)}</p>
                     </div>
-{ad.payments?.length > 0 && (
-  <div className="mt-4 rounded-2xl bg-blue-50 p-4 text-sm text-blue-900">
-    <p className="font-bold">Payment History</p>
 
-    <div className="mt-2 space-y-1">
-      {ad.payments.map((payment) => (
-        <p key={payment.id}>
-          {payment.status} | ₹{payment.amount / 100} |{" "}
-          {payment.razorpayPaymentId || payment.razorpayOrderId}
-        </p>
-      ))}
-    </div>
-  </div>
-)}
-                    <AdminAdActions
-                      adId={ad.id}
-                      currentStatus={ad.status}
-                    />
+                    {ad.payments?.length > 0 && (
+                      <div className="mt-4 rounded-2xl bg-blue-50 p-4 text-sm text-blue-900">
+                        <p className="font-bold">Payment History</p>
+                        <div className="mt-2 space-y-1">
+                          {ad.payments.map((payment) => (
+                            <p key={payment.id}>
+                              {payment.status} | ₹{payment.amount / 100} | {payment.plan || payment.purpose || "Plan"} | {payment.razorpayPaymentId || payment.manualTransactionRef || payment.razorpayOrderId}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <AdminAdActions adId={ad.id} currentStatus={ad.status} />
                   </div>
 
                   {ad.status === "ACTIVE" && (
