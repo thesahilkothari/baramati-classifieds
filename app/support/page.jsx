@@ -1,78 +1,58 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
-import { SUPPORT_FAQS, getLocalizedFaqText, getSupportWhatsAppUrl } from "../lib/supportFaq";
-import { getLanguageFromCookieStore, t } from "../lib/i18n";
+import { HELP_FAQS } from "../lib/brandCopy";
 import { buildPageMetadata } from "../lib/seo";
 
 export const metadata = buildPageMetadata({
-  title: "Help Centre | My Classifieds",
+  title: "Help Centre: Posting, Pricing & Ad Approval | My Classifieds",
   description:
-    "Get quick answers about posting ads, pricing, approval time and manual UPI payment on My Classifieds.",
+    "Find clear answers about posting, moderation, pricing, upgrades, renewals, safety and grievances on My Classifieds.",
   path: "/support"
 });
 
-export default async function SupportPage() {
-  const cookieStore = await cookies();
-  const language = getLanguageFromCookieStore(cookieStore);
-
+export default function SupportPage() {
   return (
-    <main className="bg-slate-100 px-4 py-10">
+    <main className="bg-[#F8FAFC] px-4 py-10">
       <section className="mx-auto max-w-5xl">
-        <div className="rounded-3xl border-2 border-slate-900 bg-white p-6 shadow-sm md:p-8">
-          <p className="text-sm font-black uppercase tracking-wide text-green-700">
-            {t(language, "support")}
+        <div className="rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm md:p-8">
+          <p className="text-xs font-black uppercase tracking-wide text-[#C2410C]">
+            Help Centre
           </p>
 
-          <h1 className="mt-3 text-4xl font-black uppercase text-slate-950 md:text-5xl">
-            {t(language, "supportPageTitle")}
+          <h1 className="mt-3 max-w-4xl text-3xl font-black leading-tight text-[#0F3D5E] md:text-5xl">
+            Quick answers. Local support when you need it.
           </h1>
 
-          <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-700">
-            {t(language, "supportPageIntro")}
+          <p className="mt-4 max-w-3xl text-sm leading-7 text-[#475569] md:text-base">
+            Find clear answers about posting, moderation, pricing, upgrades, renewals, safety and grievances.
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href="/post-ad"
-              className="rounded-xl bg-red-600 px-5 py-3 text-sm font-black uppercase text-white hover:bg-red-700"
+              className="rounded-xl bg-[#C2410C] px-5 py-3 text-sm font-black uppercase text-white hover:bg-orange-800"
             >
-              {t(language, "postAd")}
+              Post an Advertisement
             </Link>
-
-            <a
-              href={getSupportWhatsAppUrl("", language)}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-xl bg-green-600 px-5 py-3 text-sm font-black uppercase text-white hover:bg-green-700"
+            <Link
+              href="/contact"
+              className="rounded-xl border border-[#CBD5E1] bg-white px-5 py-3 text-sm font-black uppercase text-[#0F3D5E] hover:bg-slate-50"
             >
-              {t(language, "whatsappSupport")}
-            </a>
+              Contact Support
+            </Link>
           </div>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
-          {SUPPORT_FAQS.map((faq) => {
-            const localized = getLocalizedFaqText(faq, language);
-
-            return (
-              <article key={faq.id} className="rounded-3xl border bg-white p-5 shadow-sm">
-                <h2 className="text-xl font-black text-slate-950">
-                  {localized.question}
-                </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-700">
-                  {localized.answer}
-                </p>
-                <a
-                  href={getSupportWhatsAppUrl(faq.id, language)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-5 inline-flex rounded-xl border border-green-600 px-4 py-2 text-xs font-black uppercase text-green-700"
-                >
-                  {t(language, "whatsappSupport")}
-                </a>
-              </article>
-            );
-          })}
+          {HELP_FAQS.map((faq) => (
+            <article key={faq.question} className="rounded-3xl border border-[#CBD5E1] bg-white p-5 shadow-sm">
+              <h2 className="text-xl font-black text-[#0F172A]">
+                {faq.question}
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-[#475569]">
+                {faq.answer}
+              </p>
+            </article>
+          ))}
         </div>
       </section>
     </main>
