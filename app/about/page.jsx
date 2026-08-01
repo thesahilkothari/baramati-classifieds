@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { buildPageMetadata } from "../lib/seo";
-import BrandHeroGraphic from "../components/BrandHeroGraphic";
 import JsonLd from "../components/JsonLd";
 import { buildBreadcrumbSchema, buildOrganizationSchema } from "../lib/jsonLd";
 import {
@@ -10,98 +9,52 @@ import {
   COMPANY_PUBLIC_PHONE,
   COMPANY_REGISTERED_OFFICE
 } from "../lib/companyDetails";
-import { ALLOWED_TIER2_LOCATIONS, APPROVED_LOCATION_COUNT } from "../lib/locations";
+import { BRAND_SIGNATURE_MR } from "../lib/brandCopy";
 
 export const metadata = buildPageMetadata({
-  title: "About My Classifieds | Affordable Classifieds for Tier-II and Tier-III Maharashtra",
+  title: "About My Classifieds | Baramati’s Local Advertising Platform",
   description:
-    "My Classifieds is an affordable online classifieds platform designed for tier-II and tier-III cities and towns of Maharashtra, helping people post property, jobs, services and local ads easily.",
+    "Learn why My Classifieds was created to make local opportunities in Baramati and Maharashtra easier to advertise, discover and discuss directly.",
   path: "/about"
 });
 
-const publicMissionPoints = [
-  "Built for tier-II and tier-III Maharashtra cities and towns where traditional newspaper classifieds can be costly for ordinary citizens and small businesses.",
-  "Designed as an affordable local yellow-page style service for people who want to buy, sell, rent, hire, work, offer services or find nearby opportunities.",
-  "Focused on simple text-first classifieds so the platform remains fast, searchable, mobile-friendly and accessible on ordinary internet connections.",
-  "Open to legally permissible classifieds only, subject to moderation, listing rules, safety checks and user reporting mechanisms."
-];
-
-const publicMissionPointsMr = [
-  "महाराष्ट्रातील tier-II आणि tier-III शहरांसाठी तयार केलेले, जिथे वृत्तपत्रातील classified जाहिराती सामान्य नागरिक व छोट्या व्यवसायांसाठी खर्चिक ठरू शकतात.",
-  "खरेदी, विक्री, भाडे, नोकरी, सेवा, freelancers आणि स्थानिक संधींसाठी affordable local yellow-page style सेवा म्हणून विकसित केलेले.",
-  "जलद, शोधण्यास सोपे आणि mobile-first अनुभवासाठी text-first classifieds वर भर.",
-  "केवळ कायदेशीरदृष्ट्या अनुमत जाहिराती, moderation, listing rules, safety checks आणि user reporting mechanisms अंतर्गत."
-];
-
-const categoryGroups = [
+const differences = [
   {
-    title: "Buy, sell or rent",
-    text:
-      "Property, vehicles, furniture, electronics, appliances, equipment and other legally saleable or rentable items.",
-    mr:
-      "मालमत्ता, वाहने, फर्निचर, electronics, appliances, equipment आणि कायदेशीररीत्या विक्री/भाड्याने देता येणाऱ्या वस्तू.",
-    accent: "#C2410C"
+    title: "Local relevance",
+    text: "Baramati-first discovery instead of an overwhelming national feed."
   },
   {
-    title: "Jobs and work opportunities",
-    text:
-      "Job seekers can discover local openings, while employers and businesses can post simple hiring classifieds.",
-    mr:
-      "नोकरी शोधणाऱ्यांसाठी स्थानिक openings आणि employers/businesses साठी सोपी hiring classifieds.",
-    accent: "#0F3D5E"
+    title: "Simple use",
+    text: "Clear categories and straightforward advertisement posting."
   },
   {
-    title: "Daily local services",
-    text:
-      "Electricians, plumbers, carpenters, packers and movers, transporters, cabs, tutors, drivers, contractors and more.",
-    mr:
-      "Electrician, plumber, carpenter, packers and movers, transporter, cab, tutor, driver, contractor आणि इतर स्थानिक सेवा.",
-    accent: "#0F766E"
+    title: "Direct contact",
+    text: "Interested users can contact advertisers by the available call or messaging options."
   },
   {
-    title: "Care, support and professionals",
-    text:
-      "Nurses, caregivers, caretakers, freelancers and local professionals such as CAs, architects, doctors, lawyers and consultants.",
-    mr:
-      "Nurses, caregivers, caretakers, freelancers आणि CA, architect, doctor, lawyer, consultant यांसारखे local professionals.",
-    accent: "#0F3D5E"
+    title: "Moderated publishing",
+    text: "Submitted advertisements are reviewed before publication under the platform’s listing rules."
+  },
+  {
+    title: "Marathi and English accessibility",
+    text: "Designed for the language preferences of local users."
+  },
+  {
+    title: "Responsible operation",
+    text: "Safety guidance, reporting tools, grievance support and public policies are available to users."
   }
 ];
 
-const platformPrinciples = [
-  {
-    title: "Affordable reach",
-    text:
-      "Local visibility should not be limited only to those who can afford repeated print advertisements. My Classifieds gives a simpler digital route for local needs and everyday opportunities."
-  },
-  {
-    title: "Search-first utility",
-    text:
-      "The platform is designed around search, category and location rather than clutter. A user should be able to quickly find what is useful nearby."
-  },
-  {
-    title: "Smaller-city focus",
-    text:
-      "The purpose is not to imitate a luxury marketplace. It is to become a practical city-level classifieds and yellow-page style layer for Maharashtra's tier-II and tier-III places."
-  },
-  {
-    title: "Responsible publishing",
-    text:
-      "Every ad remains subject to platform rules. My Classifieds facilitates publishing and contact, but users must independently verify people, documents, services and payments before transacting."
-  }
+const categories = [
+  "Property",
+  "Jobs",
+  "Vehicles",
+  "Agriculture",
+  "Education",
+  "Electronics",
+  "Local Services",
+  "Business & Commercial"
 ];
-
-function NumberedStep({ number, title, text }) {
-  return (
-    <div className="rounded-3xl border border-[#CBD5E1] bg-white p-5 shadow-sm">
-      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#0F3D5E] text-sm font-black text-white">
-        {number}
-      </div>
-      <h3 className="mt-4 text-lg font-black uppercase text-[#0F172A]">{title}</h3>
-      <p className="mt-2 text-sm leading-7 text-[#475569]">{text}</p>
-    </div>
-  );
-}
 
 export default function AboutPage() {
   return (
@@ -125,214 +78,136 @@ export default function AboutPage() {
             / About
           </nav>
 
-          <header className="overflow-hidden rounded-3xl border border-[#CBD5E1] bg-white shadow-sm">
-            <div className="grid gap-0 lg:grid-cols-[0.96fr_1fr]">
-              <div className="p-6 md:p-8 lg:p-10">
-                <p className="text-xs font-black uppercase tracking-wide text-[#C2410C]">
-                  My Classifieds • Online Classifieds Platform
-                </p>
+          <header className="rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm md:p-10">
+            <p className="text-xs font-black uppercase tracking-wide text-[#C2410C]">
+              About My Classifieds
+            </p>
 
-                <h1 className="mt-3 text-3xl font-black leading-tight text-[#0F3D5E] md:text-5xl">
-                  Local classifieds made affordable for tier-II and tier-III Maharashtra
-                </h1>
+            <h1 className="mt-3 max-w-4xl text-3xl font-black leading-tight text-[#0F3D5E] md:text-5xl">
+              Local opportunities deserve a local place.
+            </h1>
 
-                <p className="mt-5 text-base leading-8 text-[#475569]">
-                  My Classifieds was created for cities and towns where a simple classified advertisement in a newspaper, local weekly or fortnightly can still be costly and inconvenient for the common public. We bring everyday local needs to your fingertips: buy, sell, rent, hire, find jobs, offer services and connect with nearby people through a simple online classifieds platform.
-                </p>
-
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                  <Link
-                    href="/post-ad"
-                    className="rounded-xl bg-[#C2410C] px-5 py-3 text-center text-sm font-black uppercase text-white hover:bg-orange-800"
-                  >
-                    Post Free Ad
-                  </Link>
-
-                  <Link
-                    href="/ads"
-                    className="rounded-xl bg-[#0F3D5E] px-5 py-3 text-center text-sm font-black uppercase text-white hover:bg-[#0B2F49]"
-                  >
-                    Browse Local Ads
-                  </Link>
-                </div>
-              </div>
-
-              <div className="border-t bg-[#F8FAFC] p-4 lg:border-l lg:border-t-0">
-                <BrandHeroGraphic />
-              </div>
-            </div>
+            <p className="mt-5 max-w-4xl text-base leading-8 text-[#475569] md:text-lg">
+              My Classifieds is a simple local classified-advertising platform created for the everyday needs of Baramati and surrounding communities. It helps individuals, professionals, employers, institutions and businesses publish useful information and connect directly with interested people.
+            </p>
           </header>
 
           <section className="mt-6 rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm md:p-8">
             <p className="text-xs font-black uppercase tracking-wide text-[#0F766E]">
-              The idea behind the platform
+              Our story
             </p>
             <h2 className="mt-2 text-2xl font-black uppercase text-[#0F172A] md:text-3xl">
-              A digital yellow page for smaller Maharashtra cities
+              Why My Classifieds was created
             </h2>
-            <p className="mt-4 text-sm leading-8 text-[#475569] md:text-base">
-              My Classifieds is built as an affordable local utility. It is not meant to be a crowded luxury marketplace. It is meant to be useful: a clean, searchable, city-focused classifieds service where people in selected Maharashtra cities and towns can publish everyday requirements and discover nearby opportunities without depending only on costly print ads.
-            </p>
-
-            <div className="mt-6 grid gap-3 md:grid-cols-2">
-              {publicMissionPoints.map((point) => (
-                <div key={point} className="rounded-2xl border border-[#CBD5E1] bg-[#F8FAFC] p-4 text-sm leading-7 text-[#475569]">
-                  {point}
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-4 grid gap-3 md:grid-cols-2">
-              {publicMissionPointsMr.map((point) => (
-                <div key={point} className="rounded-2xl border border-[#CBD5E1] bg-white p-4 text-sm leading-7 text-[#475569]">
-                  {point}
-                </div>
-              ))}
+            <div className="mt-4 space-y-4 text-sm leading-8 text-[#475569] md:text-base">
+              <p>
+                For years, local classified advertisements helped people find homes, jobs, vehicles, services and business opportunities through newspapers and word of mouth. Today, much of this information is scattered across social-media posts, messaging groups and personal contacts. Useful advertisements are easily missed, become difficult to search, and often disappear quickly.
+              </p>
+              <p>
+                My Classifieds was created to bring that familiar local-advertising experience into one simple digital place—easy to access on a mobile phone, organised by category and location, and designed for direct contact.
+              </p>
             </div>
           </section>
 
-          <section className="mt-6 rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm md:p-8">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-xs font-black uppercase tracking-wide text-[#C2410C]">
-                  Current location coverage
-                </p>
-                <h2 className="mt-2 text-2xl font-black uppercase text-[#0F172A] md:text-3xl">
-                  {APPROVED_LOCATION_COUNT} selected Maharashtra cities and towns
-                </h2>
-              </div>
-              <Link href="/ads" className="text-sm font-black uppercase text-[#0F3D5E]">
-                Browse by location
-              </Link>
-            </div>
-
-            <p className="mt-4 text-sm leading-7 text-[#475569]">
-              The launch focus is on non-metro local markets across Western Maharashtra, North Maharashtra, Marathwada, Vidarbha and Konkan. Mumbai, Pune, Nagpur and similar metro-first locations are intentionally outside the current launch focus.
-            </p>
-
-            <div className="mt-5 max-h-72 overflow-y-auto rounded-2xl border border-[#CBD5E1] bg-[#F8FAFC] p-4">
-              <div className="flex flex-wrap gap-2">
-                {ALLOWED_TIER2_LOCATIONS.map((city) => (
-                  <Link
-                    key={city.slug}
-                    href={`/ads?city=${city.slug}`}
-                    className="rounded-full border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-black uppercase text-[#475569] hover:border-[#0F3D5E] hover:text-[#0F3D5E]"
+          <section className="mt-6 grid gap-4 md:grid-cols-[0.85fr_1.15fr]">
+            <article className="rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm">
+              <h2 className="text-2xl font-black uppercase text-[#0F172A]">
+                What people can find here
+              </h2>
+              <p className="mt-4 text-sm leading-8 text-[#475569]">
+                Users can browse or publish advertisements relating to property, jobs, vehicles, agriculture, education, electronics, local services and business or commercial opportunities. The platform begins with a strong Baramati focus while remaining open to relevant advertisements from across Maharashtra.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2">
+                {categories.map((category) => (
+                  <span
+                    key={category}
+                    className="rounded-full border border-[#CBD5E1] bg-[#F8FAFC] px-3 py-2 text-xs font-black uppercase text-[#475569]"
                   >
-                    {city.name}
-                  </Link>
+                    {category}
+                  </span>
                 ))}
               </div>
-            </div>
-          </section>
+            </article>
 
-          <section className="mt-6">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-xs font-black uppercase tracking-wide text-[#C2410C]">
-                  What people can use it for
-                </p>
-                <h2 className="mt-2 text-2xl font-black uppercase text-[#0F172A] md:text-3xl">
-                  Classifieds for real local life
-                </h2>
+            <article className="rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm">
+              <h2 className="text-2xl font-black uppercase text-[#0F172A]">
+                What makes the platform different
+              </h2>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                {differences.map((item) => (
+                  <div key={item.title} className="rounded-2xl border border-[#CBD5E1] bg-[#F8FAFC] p-4">
+                    <h3 className="text-sm font-black uppercase text-[#0F3D5E]">
+                      {item.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-[#475569]">
+                      {item.text}
+                    </p>
+                  </div>
+                ))}
               </div>
-              <Link href="/post-ad" className="text-sm font-black uppercase text-[#0F3D5E]">
-                Start with a free ad
-              </Link>
-            </div>
-
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
-              {categoryGroups.map((group) => (
-                <article key={group.title} className="rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm">
-                  <div className="h-2 w-16 rounded-full" style={{ backgroundColor: group.accent }} />
-                  <h3 className="mt-4 text-xl font-black uppercase text-[#0F172A]">
-                    {group.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-7 text-[#475569]">{group.text}</p>
-                  <p className="mt-3 rounded-2xl bg-[#F8FAFC] p-4 text-sm leading-7 text-[#475569]">
-                    {group.mr}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          <section className="mt-6 grid gap-4 md:grid-cols-4">
-            {platformPrinciples.map((principle) => (
-              <article key={principle.title} className="rounded-3xl border border-[#CBD5E1] bg-white p-5 shadow-sm">
-                <h3 className="text-base font-black uppercase text-[#0F3D5E]">
-                  {principle.title}
-                </h3>
-                <p className="mt-3 text-sm leading-7 text-[#475569]">
-                  {principle.text}
-                </p>
-              </article>
-            ))}
+            </article>
           </section>
 
           <section className="mt-6 rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm md:p-8">
-            <p className="text-xs font-black uppercase tracking-wide text-[#0F766E]">
-              How it works
+            <p className="text-xs font-black uppercase tracking-wide text-[#C2410C]">
+              Our purpose
             </p>
             <h2 className="mt-2 text-2xl font-black uppercase text-[#0F172A] md:text-3xl">
-              Simple for users, moderated for safety
+              To make local information easier to advertise, easier to find and easier to act upon.
             </h2>
-            <div className="mt-5 grid gap-4 md:grid-cols-3">
-              <NumberedStep
-                number="1"
-                title="Post your need"
-                text="Write a plain-text classified for a legal item, property, job, service or local requirement. Keep it short, clear and useful."
-              />
-              <NumberedStep
-                number="2"
-                title="Admin moderation"
-                text="Ads are reviewed before publication so prohibited, misleading or unsafe content can be restricted under platform rules."
-              />
-              <NumberedStep
-                number="3"
-                title="Connect directly"
-                text="Interested people can contact the advertiser directly. Users should verify details independently before payment or commitment."
-              />
-            </div>
+            <p className="mt-4 text-sm leading-8 text-[#475569] md:text-base">
+              We want a local employer to find suitable applicants, a family to discover a rental, a skilled professional to reach nearby customers, an institute to announce an opportunity, and a business to communicate its genuine offering—all through a clear, searchable advertisement.
+            </p>
+          </section>
+
+          <section className="mt-6 grid gap-4 md:grid-cols-2">
+            <article className="rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm">
+              <h2 className="text-2xl font-black uppercase text-[#0F172A]">
+                Our role—and the user’s role
+              </h2>
+              <p className="mt-4 text-sm leading-8 text-[#475569]">
+                My Classifieds provides space for classified advertisements and direct connections. It does not act as the seller, buyer, broker, employer, recruiter, payment intermediary or guarantor of a transaction merely because an advertisement appears on the platform.
+              </p>
+              <p className="mt-4 text-sm leading-8 text-[#475569]">
+                Users should independently verify identities, ownership, qualifications, goods, services, documents, prices and payment terms before acting. Advertisements that appear suspicious or violate the Listing Rules should be reported promptly.
+              </p>
+            </article>
+
+            <article className="rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm">
+              <h2 className="text-2xl font-black uppercase text-[#0F172A]">
+                Built locally, growing responsibly
+              </h2>
+              <p className="mt-4 text-sm leading-8 text-[#475569]">
+                My Classifieds is operated by {COMPANY_LEGAL_NAME}. The platform is being developed gradually, with emphasis on useful local inventory, responsible moderation, practical user support and sustainable growth—not exaggerated claims or artificial popularity numbers.
+              </p>
+              <div className="mt-5 rounded-2xl bg-[#F8FAFC] p-4 text-sm leading-7 text-[#475569]">
+                <p className="font-black text-[#0F172A]">Compact operator disclosure</p>
+                <p className="mt-2">
+                  {COMPANY_LEGAL_NAME}, CIN {COMPANY_CIN}, registered office: {COMPANY_REGISTERED_OFFICE}. For platform support or grievances, write to {COMPANY_PUBLIC_EMAIL} or call {COMPANY_PUBLIC_PHONE}.
+                </p>
+              </div>
+            </article>
           </section>
 
           <section className="mt-6 rounded-3xl border border-[#CBD5E1] bg-[#0F3D5E] p-6 text-white shadow-sm md:p-8">
-            <p className="text-xs font-black uppercase tracking-wide text-orange-200">
-              Our positioning
-            </p>
-            <h2 className="mt-2 text-3xl font-black uppercase md:text-4xl">
-              My Classifieds brings local opportunities to your fingertips.
+            <h2 className="text-3xl font-black uppercase md:text-4xl">
+              Something to offer? Something to find? Start locally.
             </h2>
-            <p className="mt-4 max-w-4xl text-sm leading-8 text-slate-100 md:text-base">
-              For a local resident, it can be a place to sell a used item. For a job seeker, it can be a place to find work. For a small business, it can be a low-cost visibility channel. For a service provider, it can become a local city directory. That is the purpose of My Classifieds: affordable, searchable, responsible local advertising for tier-II and tier-III Maharashtra.
+            <p className="mt-4 text-lg font-black text-orange-100">
+              {BRAND_SIGNATURE_MR}
             </p>
-          </section>
-
-          <section className="mt-6 rounded-3xl border border-[#CBD5E1] bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-black uppercase text-[#0F172A]">
-              Operator disclosure
-            </h2>
-
-            <p className="mt-3 text-sm leading-7 text-[#475569]">
-              My Classifieds is owned and operated by {COMPANY_LEGAL_NAME}. CIN: {COMPANY_CIN}. Registered Office: {COMPANY_REGISTERED_OFFICE}. Contact: {COMPANY_PUBLIC_EMAIL} | {COMPANY_PUBLIC_PHONE}.
-            </p>
-
-            <p className="mt-3 rounded-2xl bg-[#F8FAFC] p-4 text-sm leading-7 text-[#475569]">
-              My Classifieds facilitates advertisement publication and contact between users. The platform does not independently verify ownership, title, employment offers, professional qualifications, service quality, documents, product condition or payments. Users must carry out their own due diligence before any transaction.
-            </p>
-
-            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/post-ad"
+                className="rounded-xl bg-[#C2410C] px-5 py-3 text-center text-sm font-black uppercase text-white hover:bg-orange-800"
+              >
+                Post an Advertisement
+              </Link>
               <Link
                 href="/ads"
-                className="rounded-xl bg-[#0F3D5E] px-5 py-3 text-center text-sm font-black uppercase text-white"
+                className="rounded-xl bg-white px-5 py-3 text-center text-sm font-black uppercase text-[#0F3D5E]"
               >
-                Browse Ads
-              </Link>
-
-              <Link
-                href="/legal/corporate"
-                className="rounded-xl border border-[#CBD5E1] px-5 py-3 text-center text-sm font-black uppercase text-[#0F3D5E]"
-              >
-                Legal Information
+                Browse Local Ads
               </Link>
             </div>
           </section>
