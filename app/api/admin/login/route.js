@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { ADMIN_COOKIE_NAME, signAdminToken } from "../../../lib/adminAuth";
+import {
+  ADMIN_COOKIE_NAME,
+  ADMIN_IDLE_TIMEOUT_SECONDS,
+  getAdminCookieOptions,
+  signAdminToken
+} from "../../../lib/adminAuth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -27,17 +32,14 @@ export async function POST(request) {
 
     const response = NextResponse.json({
       success: true,
-      message: "Admin login successful."
+      message: "Admin login successful.",
+      idleTimeoutSeconds: ADMIN_IDLE_TIMEOUT_SECONDS
     });
 
     response.cookies.set({
       name: ADMIN_COOKIE_NAME,
       value: token,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7
+      ...getAdminCookieOptions()
     });
 
     return response;
