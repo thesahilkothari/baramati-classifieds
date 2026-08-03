@@ -1,23 +1,17 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
+import { ArrowRight, CheckCircle2, PlusCircle } from "lucide-react";
 import { prisma } from "./lib/prisma";
 import AdCard from "./components/AdCard";
-import BrandLogo from "./components/BrandLogo";
+import CategoryStrip from "./components/redesign/CategoryStrip";
+import SafetyBand from "./components/redesign/SafetyBand";
 import JsonLd from "./components/JsonLd";
 import { getLanguageFromCookieStore } from "./lib/i18n";
-import {
-  APPROVED_LOCATION_COUNT,
-  getAllowedTier2CitySearchOptions
-} from "./lib/locations";
 import { buildOrganizationSchema, buildWebSiteSchema } from "./lib/jsonLd";
 import { buildPageMetadata } from "./lib/seo";
 import { reactivateFutureDatedExpiredAds } from "./lib/adStatusRepair";
-import {
-  BRAND_SCOPE_EN,
-  BRAND_SIGNATURE_EN,
-  BRAND_SIGNATURE_MR,
-  HOME_CATEGORY_MICROCOPY
-} from "./lib/brandCopy";
+import { BRAND_SIGNATURE_EN, BRAND_SIGNATURE_MR } from "./lib/brandCopy";
+import { sortAdsForHomepage } from "./lib/redesign/adViewModel";
 
 export const dynamic = "force-dynamic";
 
@@ -32,30 +26,16 @@ function getAdInclude() {
   return {
     category: true,
     city: true,
+    images: {
+      orderBy: { id: "asc" },
+      take: 1
+    },
     user: {
       select: {
         isVerified: true
       }
     }
   };
-}
-
-function isCurrentFeatured(ad, now) {
-  if (!ad.isFeatured) return false;
-  if (!ad.featuredUntil) return true;
-  return ad.featuredUntil > now;
-}
-
-function getHomepageRank(ad, now) {
-  const featuredNow = isCurrentFeatured(ad, now);
-
-  if (featuredNow && ad.adType !== "FEATURED") return 1;
-  if (ad.adType === "FEATURED") return 2;
-  if (ad.adType === "PREMIUM") return 3;
-  if (ad.adType === "PAID") return 4;
-  if (ad.adType === "FREE") return 5;
-
-  return 6;
 }
 
 async function getHomeAds() {
@@ -73,203 +53,174 @@ async function getHomeAds() {
     take: 100
   });
 
-  return ads.sort((first, second) => {
-    const rankDifference = getHomepageRank(first, now) - getHomepageRank(second, now);
-    if (rankDifference !== 0) return rankDifference;
-
-    const firstTime = new Date(first.createdAt).getTime();
-    const secondTime = new Date(second.createdAt).getTime();
-    return secondTime - firstTime;
-  });
+  return sortAdsForHomepage(ads, now);
 }
 
-async function getHomeFilters() {
+async function getHomeData() {
   return Promise.all([
-    prisma.category.findMany({ orderBy: { nameEn: "asc" } }),
-    getAllowedTier2CitySearchOptions()
+    getHomeAds(),
+    prisma.category.findMany({ orderBy: { nameEn: "asc" } })
   ]);
 }
 
 export default async function HomePage() {
   const cookieStore = await cookies();
   const language = getLanguageFromCookieStore(cookieStore);
-  const [visibleAds, [categories, cities]] = await Promise.all([
-    getHomeAds(),
-    getHomeFilters()
-  ]);
+  const [visibleAds, categories] = await getHomeData();
 
   return (
     <>
       <JsonLd data={[buildOrganizationSchema(), buildWebSiteSchema()]} />
 
-      <main className="bg-[#F8FAFC] px-3 pb-24 pt-4 md:px-4 md:pb-10">
-        <section className="mx-auto max-w-7xl">
-          <section className="rounded-[1.35rem] border border-[#CBD5E1] bg-white p-4 shadow-sm md:p-5">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div className="min-w-0">
-                <Link
-                  href="/"
-                  className="inline-flex max-w-full items-center overflow-visible rounded-2xl border border-[#CBD5E1] bg-white px-3 py-2 shadow-sm"
-                  aria-label="My Classifieds home"
-                >
-                  <BrandLogo />
-                </Link>
+      <main className="bg-[#F8FAFC] pb-24 md:pb-12">
+        <CategoryStrip categories={categories} language={language} />
 
-                <p className="mt-3 text-xs font-black uppercase tracking-wide text-[#C2410C]">
-                  Baramati’s local classifieds • {BRAND_SCOPE_EN}
-                </p>
+        <section className="bg-white px-4 py-8 sm:px-6 md:py-10">
+          <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#AC3400]">
+                Baramati-first local classifieds
+              </p>
+              <h1 className="mt-3 max-w-4xl font-[var(--font-plus-jakarta)] text-3xl font-black leading-tight tracking-tight text-[#002741] md:text-5xl">
+                Find, post and connect directly through trusted local advertisements.
+              </h1>
+              <p className="mt-4 max-w-3xl text-base leading-7 text-[#42474E] md:text-lg">
+                Browse active advertisements for property, jobs, vehicles, agriculture, education, services and business opportunities across Baramati and Maharashtra.
+              </p>
+              <p className="mt-3 text-sm font-black text-[#0F766E] md:text-base">
+                {BRAND_SIGNATURE_MR} / {BRAND_SIGNATURE_EN}
+              </p>
 
-                <h1 className="mt-2 max-w-5xl text-2xl font-black leading-tight text-[#0F3D5E] sm:text-3xl md:text-4xl">
-                  Baramati’s everyday opportunities, all in one local place.
-                </h1>
-
-                <p className="mt-2 max-w-4xl text-sm font-bold leading-6 text-[#0F766E] md:text-base">
-                  बारामतीच्या रोजच्या गरजा आणि संधी—आता एकाच स्थानिक ठिकाणी.
-                </p>
-              </div>
-
-              <div className="flex shrink-0 flex-col gap-2 sm:flex-row lg:flex-col xl:flex-row">
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="/post-ad"
-                  className="rounded-xl bg-[#C2410C] px-5 py-3 text-center text-sm font-black uppercase text-white hover:bg-orange-800"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#C2410C] px-6 py-3 text-sm font-black uppercase text-white shadow-md transition hover:-translate-y-0.5 hover:bg-[#FD6B36]"
                 >
-                  Post Ad
+                  <PlusCircle className="h-4 w-4" />
+                  Post your ad
                 </Link>
-
                 <Link
                   href="/ads"
-                  className="rounded-xl border border-[#CBD5E1] bg-white px-5 py-3 text-center text-sm font-black uppercase text-[#0F3D5E] hover:bg-slate-50"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-[#E2E8F0] bg-white px-6 py-3 text-sm font-black uppercase text-[#002741] transition hover:border-[#002741]"
                 >
-                  Browse Ads
+                  Browse all ads
+                  <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
             </div>
 
-            <form
-              action="/ads"
-              className="mt-4 rounded-2xl border border-[#CBD5E1] bg-[#F8FAFC] p-3 shadow-sm"
-            >
-              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm font-black text-[#0F172A]">
-                  Search local advertisements
-                </p>
-                <p className="text-[11px] font-black uppercase text-[#475569]">
-                  {APPROVED_LOCATION_COUNT} approved locations
-                </p>
+            <div className="rounded-3xl border border-[#E2E8F0] bg-[#F8FAFC] p-5 shadow-[0_4px_12px_rgba(15,61,94,0.05)] md:p-6">
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-[#002741]/60">
+                Why people use My Classifieds
+              </p>
+              <div className="mt-4 space-y-3">
+                {[
+                  "All active ads are shown from your live database.",
+                  "Featured and Business Annual ads get priority, without hiding other active ads.",
+                  "Users contact advertisers directly by the details available in each ad.",
+                  "Safety reminders, reporting and moderation support responsible use."
+                ].map((item) => (
+                  <p key={item} className="flex gap-3 text-sm font-semibold leading-6 text-[#42474E]">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]" />
+                    <span>{item}</span>
+                  </p>
+                ))}
               </div>
-
-              <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(260px,1.4fr)_minmax(190px,0.75fr)_minmax(260px,0.95fr)_minmax(120px,0.35fr)]">
-                <label className="sr-only" htmlFor="home-search-keyword">
-                  Search keyword
-                </label>
-                <input
-                  id="home-search-keyword"
-                  name="q"
-                  placeholder="Jobs, property, services, vehicles…"
-                  className="min-h-12 w-full min-w-0 rounded-xl border border-[#64748B] bg-white px-4 py-3 text-sm font-semibold text-[#0F172A] outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20"
-                />
-
-                <label className="sr-only" htmlFor="home-search-category">
-                  Category
-                </label>
-                <select
-                  id="home-search-category"
-                  name="category"
-                  className="min-h-12 w-full min-w-0 rounded-xl border border-[#64748B] bg-white px-4 py-3 text-sm font-semibold text-[#0F172A] outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20"
-                >
-                  <option value="">All Categories</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.slug}>
-                      {language === "mr" ? category.nameMr || category.nameEn : category.nameEn}
-                    </option>
-                  ))}
-                </select>
-
-                <label className="sr-only" htmlFor="home-search-city">
-                  Location
-                </label>
-                <select
-                  id="home-search-city"
-                  name="city"
-                  defaultValue="baramati"
-                  className="min-h-12 w-full min-w-0 rounded-xl border border-[#64748B] bg-white px-4 py-3 text-sm font-semibold text-[#0F172A] outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20"
-                >
-                  <option value="">All Maharashtra Locations</option>
-                  {cities.map((city) => (
-                    <option key={city.slug} value={city.slug}>
-                      {city.name}
-                    </option>
-                  ))}
-                </select>
-
-                <button
-                  type="submit"
-                  className="min-h-12 w-full rounded-xl bg-[#0F3D5E] px-5 py-3 text-sm font-black uppercase text-white hover:bg-[#0B2F49] md:col-span-2 xl:col-span-1"
-                >
-                  Search
-                </button>
-              </div>
-            </form>
-
-            <div className="mt-3 flex flex-wrap gap-2">
-              {HOME_CATEGORY_MICROCOPY.map((item) => (
-                <Link
-                  key={item.title}
-                  href={item.href}
-                  title={item.text}
-                  className="rounded-full border border-[#CBD5E1] bg-white px-3 py-2 text-[11px] font-black uppercase text-[#475569] hover:border-[#0F3D5E] hover:text-[#0F3D5E]"
-                >
-                  {item.title}
-                </Link>
-              ))}
             </div>
-          </section>
+          </div>
+        </section>
 
-          <section className="mt-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
+        <SafetyBand activeAdsCount={visibleAds.length} />
+
+        <section className="px-4 py-6 sm:px-6 md:py-8">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-6 flex flex-col justify-between gap-4 border-b border-[#E2E8F0] pb-4 md:flex-row md:items-end">
               <div>
-                <h2 className="text-2xl font-black uppercase text-[#0F172A] md:text-3xl">
-                  Active Classifieds
-                </h2>
-                <p className="mt-1 text-sm leading-6 text-[#475569]">
-                  Showing all active non-expired advertisements. Order: regular Featured, Business Annual, Premium, Paid and Free.
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="font-[var(--font-plus-jakarta)] text-2xl font-black tracking-tight text-[#002741] md:text-4xl">
+                    Fresh Recommendations
+                  </h2>
+                  <span className="rounded-full bg-[#CEE5FF] px-3 py-1 text-xs font-black uppercase text-[#002741]">
+                    {visibleAds.length} active ad{visibleAds.length === 1 ? "" : "s"}
+                  </span>
+                </div>
+                <p className="mt-2 text-sm leading-6 text-[#72777E]">
+                  Unified live ranking: regular Featured, Business Annual, Premium, Paid, Free, then any other active ad fallback.
                 </p>
               </div>
 
-              <Link href="/ads" className="text-sm font-black uppercase text-[#0F3D5E]">
-                Browse with filters
+              <Link
+                href="/ads"
+                className="inline-flex rounded-full border border-[#E2E8F0] bg-white px-4 py-2 text-xs font-black uppercase text-[#002741] hover:border-[#002741]"
+              >
+                View with filters
               </Link>
             </div>
 
             {visibleAds.length === 0 ? (
-              <div className="mt-4 rounded-3xl border border-[#CBD5E1] bg-white p-8 text-center shadow-sm">
-                <p className="text-lg font-bold text-[#475569]">
-                  No active advertisements are available right now.
+              <div className="mx-auto my-10 max-w-lg rounded-2xl border border-dashed border-[#CBD5E1] bg-white p-10 text-center">
+                <h3 className="font-[var(--font-plus-jakarta)] text-xl font-black text-[#002741]">
+                  No active advertisements found
+                </h3>
+                <p className="mt-3 text-sm leading-6 text-[#72777E]">
+                  Once an advertisement is approved and non-expired, it will appear here automatically.
                 </p>
                 <Link
                   href="/post-ad"
-                  className="mt-5 inline-flex rounded-xl bg-[#C2410C] px-6 py-3 text-sm font-black uppercase text-white"
+                  className="mt-6 inline-flex rounded-full bg-[#002741] px-6 py-3 text-xs font-black uppercase text-white"
                 >
-                  Post an Ad
+                  Post the first ad
                 </Link>
               </div>
             ) : (
-              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {visibleAds.map((ad) => (
                   <AdCard key={ad.id} ad={ad} language={language} />
                 ))}
               </div>
             )}
-          </section>
+          </div>
+        </section>
 
-          <section className="mt-6 rounded-2xl border border-[#CBD5E1] bg-white p-4 text-sm leading-7 text-[#475569] shadow-sm">
-            <p className="font-black uppercase text-[#0F3D5E]">
-              {BRAND_SIGNATURE_MR} / {BRAND_SIGNATURE_EN}
-            </p>
-            <p className="mt-2">
-              Connect directly, but verify the advertiser, item, service, documents and payment terms yourself. Never share an OTP, UPI PIN or banking password.
-            </p>
-          </section>
+        <section className="px-4 py-8 sm:px-6 md:py-12">
+          <div className="mx-auto grid max-w-7xl overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white shadow-[0_12px_24px_rgba(0,0,0,0.08)] lg:grid-cols-[1fr_360px]">
+            <div className="p-6 md:p-10">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#AC3400]">
+                Ready to reach local users?
+              </p>
+              <h2 className="mt-3 font-[var(--font-plus-jakarta)] text-3xl font-black tracking-tight text-[#002741] md:text-4xl">
+                Post your ad on My Classifieds today.
+              </h2>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-[#42474E] md:text-base">
+                Create a clear advertisement, choose the right category and let interested users contact you directly.
+              </p>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/post-ad"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#FD6B36] px-6 py-3 text-sm font-black uppercase text-white shadow-md hover:bg-[#C2410C]"
+                >
+                  <PlusCircle className="h-4 w-4" />
+                  Start selling
+                </Link>
+                <Link
+                  href="/support"
+                  className="inline-flex items-center justify-center rounded-full bg-[#F2F4F6] px-6 py-3 text-sm font-black uppercase text-[#002741] hover:bg-[#E0E3E5]"
+                >
+                  How it works
+                </Link>
+              </div>
+            </div>
+            <div className="relative hidden bg-[radial-gradient(circle_at_top,#CEE5FF,transparent_42%),linear-gradient(135deg,#F8FAFC,#E0E3E5)] p-8 lg:block">
+              <div className="absolute bottom-8 left-8 right-8 rounded-3xl bg-white p-5 shadow-[0_12px_24px_rgba(0,0,0,0.08)]">
+                <p className="text-xs font-black uppercase tracking-wide text-[#0F766E]">
+                  Local platform
+                </p>
+                <p className="mt-2 font-[var(--font-plus-jakarta)] text-xl font-black text-[#002741]">
+                  Post local. Find local. Connect direct.
+                </p>
+              </div>
+            </div>
+          </div>
         </section>
       </main>
     </>
