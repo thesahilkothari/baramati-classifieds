@@ -1,163 +1,134 @@
 import Link from "next/link";
-import { getConditionLabel } from "../lib/itemConditions";
+import {
+  BriefcaseBusiness,
+  Building2,
+  Car,
+  Clock,
+  GraduationCap,
+  Heart,
+  Laptop,
+  MapPin,
+  ShieldCheck,
+  Sprout,
+  Store,
+  Tag,
+  Wrench
+} from "lucide-react";
 import { t } from "../lib/i18n";
+import { mapAdToCard } from "../lib/redesign/adViewModel";
 
-function formatPrice(price, language) {
-  if (!price) return t(language, "callForPrice");
+function getCategoryIcon(slug) {
+  const normalized = String(slug || "").toLowerCase();
 
-  const amount = Number(price);
+  if (normalized.includes("real") || normalized.includes("property")) return Building2;
+  if (normalized.includes("job")) return BriefcaseBusiness;
+  if (normalized.includes("vehicle") || normalized.includes("car")) return Car;
+  if (normalized.includes("electronic")) return Laptop;
+  if (normalized.includes("agriculture")) return Sprout;
+  if (normalized.includes("education")) return GraduationCap;
+  if (normalized.includes("service")) return Wrench;
+  if (normalized.includes("business")) return Store;
 
-  if (Number.isNaN(amount)) {
-    return t(language, "callForPrice");
-  }
-
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0
-  }).format(amount);
+  return Tag;
 }
 
-function shouldShowFeatured(ad) {
-  if (!ad?.isFeatured) return false;
-  if (!ad?.featuredUntil) return true;
-
-  return new Date(ad.featuredUntil) > new Date();
-}
-
-function getCategoryIcon(categorySlug) {
-  const slug = String(categorySlug || "");
-  if (slug.includes("real-estate")) return "⌂";
-  if (slug.includes("job")) return "▣";
-  if (slug.includes("vehicle")) return "▰";
-  if (slug.includes("electronic")) return "▯";
-  if (slug.includes("agriculture")) return "⚑";
-  if (slug.includes("service")) return "⚙";
-  return "▤";
-}
-
-function getReportCopy(language) {
-  if (language === "mr") {
-    return {
-      summary: "Report issue",
-      warning:
-        "फक्त spam, fraud, prohibited/illegal content, duplicate ad किंवा safety concern असल्यासच report करा.",
-      action: "Continue to report"
-    };
-  }
-
-  return {
-    summary: "Report issue",
-    warning:
-      "Use only for spam, fraud, prohibited/illegal content, duplicate ads or safety concerns.",
-    action: "Continue to report"
-  };
+function getPrimaryBadge(card, language) {
+  if (card.isFeatured && !card.isBusinessAnnual) return t(language, "featured");
+  if (card.isBusinessAnnual) return "Annual";
+  if (card.isPremium) return "Premium";
+  return "Classified";
 }
 
 export default function AdCard({ ad, language = "en" }) {
-  const showFeatured = shouldShowFeatured(ad);
-  const isBusinessAnnual = ad?.adType === "FEATURED";
-  const verifiedSeller = Boolean(ad?.user?.isVerified);
-  const categoryName = language === "mr" ? ad.category?.nameMr || ad.category?.nameEn : ad.category?.nameEn;
-  const categoryIcon = getCategoryIcon(ad.category?.slug);
-  const reportCopy = getReportCopy(language);
+  const card = mapAdToCard(ad, language);
+  const Icon = getCategoryIcon(card.categorySlug);
+  const primaryBadge = getPrimaryBadge(card, language);
 
   return (
-    <article
-      className={`group flex h-full flex-col rounded-xl border bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
-        showFeatured ? "border-[#F59E0B]" : "border-[#CBD5E1]"
-      }`}
-    >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 flex-1 flex-wrap gap-2">
-          {showFeatured && (
-            <span className="rounded bg-[#F59E0B] px-2.5 py-1 text-[10px] font-black uppercase text-[#0F172A]">
-              {t(language, "featured")}
+    <article className="group relative flex h-full overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-[0_4px_12px_rgba(15,61,94,0.05)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(15,61,94,0.10)]">
+      <div className="flex w-full flex-col">
+        <Link href={card.href} className="block">
+          <div className="relative aspect-[4/3] overflow-hidden bg-[#F2F4F6]">
+            {card.imageUrl ? (
+              <img
+                src={card.imageUrl}
+                alt={card.title}
+                className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                loading="lazy"
+              />
+            ) : (
+              <div className="flex h-full w-full flex-col items-center justify-center bg-[radial-gradient(circle_at_top_left,#CEE5FF,transparent_38%),linear-gradient(135deg,#F8FAFC,#E0E3E5)] px-4 text-center">
+                <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-[#002741] shadow-sm">
+                  <Icon className="h-7 w-7" strokeWidth={2} />
+                </span>
+                <span className="mt-3 line-clamp-2 text-xs font-black uppercase tracking-wide text-[#002741]/70">
+                  {card.category}
+                </span>
+              </div>
+            )}
+
+            <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/70 px-2.5 py-1 text-[10px] font-black uppercase text-white backdrop-blur-md">
+              <Tag className="h-3 w-3 text-[#F59E0B]" />
+              {primaryBadge}
             </span>
-          )}
 
-          {isBusinessAnnual && (
-            <span className="rounded bg-purple-100 px-2.5 py-1 text-[10px] font-black uppercase text-purple-800">
-              Annual
+            <span className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-[#64748B] shadow-sm backdrop-blur-md">
+              <Heart className="h-4 w-4" />
             </span>
-          )}
-
-          {verifiedSeller && (
-            <span className="rounded bg-[#0F766E] px-2.5 py-1 text-[10px] font-black uppercase text-white">
-              Verified Seller
-            </span>
-          )}
-
-          {categoryName && (
-            <span className="rounded bg-[#0F3D5E] px-2.5 py-1 text-[10px] font-black uppercase text-white">
-              {categoryName}
-            </span>
-          )}
-        </div>
-
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#CBD5E1] bg-[#F8FAFC] text-lg font-black text-[#0F3D5E]" aria-hidden="true">
-          {categoryIcon}
-        </div>
-      </div>
-
-      <Link href={`/ads/${ad.slug}`} className="mt-4 block">
-        <h3 className="line-clamp-2 text-xl font-black uppercase leading-tight text-[#0F172A] group-hover:text-[#0F3D5E]">
-          {ad.title}
-        </h3>
-      </Link>
-
-      <p className="mt-3 text-2xl font-black text-[#C2410C]">
-        {formatPrice(ad.price, language)}
-      </p>
-
-      <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-bold uppercase text-[#475569]">
-        {ad.city?.name && (
-          <span className="rounded border border-[#CBD5E1] bg-[#F8FAFC] px-2 py-1">
-            {ad.city.name}
-          </span>
-        )}
-
-        {ad.createdAt && (
-          <span className="rounded border border-[#CBD5E1] bg-[#F8FAFC] px-2 py-1">
-            {new Date(ad.createdAt).toLocaleDateString("en-IN")}
-          </span>
-        )}
-
-        {ad.condition && ad.condition !== "NOT_APPLICABLE" && (
-          <span className="rounded border border-[#CBD5E1] bg-[#F8FAFC] px-2 py-1">
-            {getConditionLabel(ad.condition, language)}
-          </span>
-        )}
-      </div>
-
-      <p className="mt-4 line-clamp-4 flex-1 border-t border-[#CBD5E1] pt-4 text-sm leading-6 text-[#475569]">
-        {ad.description}
-      </p>
-
-      <div className="mt-4">
-        <Link
-          href={`/ads/${ad.slug}`}
-          className="block rounded-xl bg-[#0F3D5E] px-3 py-2.5 text-center text-xs font-black uppercase text-white hover:bg-[#0B2F49]"
-        >
-          {t(language, "view")}
+          </div>
         </Link>
 
-        <details className="mt-2 rounded-xl border border-transparent text-xs text-[#475569] open:border-[#CBD5E1] open:bg-[#F8FAFC] open:p-3">
-          <summary className="cursor-pointer list-none text-center text-[11px] font-bold uppercase text-[#B91C1C] underline-offset-4 hover:underline">
-            {reportCopy.summary}
-          </summary>
+        <div className="flex flex-1 flex-col p-4">
+          <div className="flex items-start justify-between gap-2">
+            <p className="font-[var(--font-inter)] text-xl font-black tracking-wide text-[#002741]">
+              {card.price}
+            </p>
+            {card.isVerified && (
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#E6FFFA] px-2 py-1 text-[10px] font-black uppercase text-[#0F766E]">
+                <ShieldCheck className="h-3 w-3" />
+                Verified
+              </span>
+            )}
+          </div>
 
-          <p className="mt-2 text-center text-[11px] leading-5 text-[#475569]">
-            {reportCopy.warning}
-          </p>
-
-          <Link
-            href={`/report?adId=${ad.id}&adSlug=${ad.slug}&source=card`}
-            className="mt-3 block rounded-lg border border-[#B91C1C] bg-white px-3 py-2 text-center text-[11px] font-black uppercase text-[#B91C1C] hover:bg-red-50"
-          >
-            {reportCopy.action}
+          <Link href={card.href} className="mt-2 block">
+            <h3 className="line-clamp-2 text-sm font-bold leading-5 text-[#191C1E] transition group-hover:text-[#002741]">
+              {card.title}
+            </h3>
           </Link>
-        </details>
+
+          {card.description && (
+            <p className="mt-2 line-clamp-2 text-xs leading-5 text-[#64748B]">
+              {card.description}
+            </p>
+          )}
+
+          <div className="mt-auto flex items-center justify-between gap-2 border-t border-[#F1F5F9] pt-3 text-[11px] font-bold text-[#72777E]">
+            <span className="flex min-w-0 items-center gap-1.5">
+              <MapPin className="h-3.5 w-3.5 shrink-0 text-[#FD6B36]" />
+              <span className="truncate">{card.location}</span>
+            </span>
+            <span className="flex shrink-0 items-center gap-1 uppercase text-[#94A3B8]">
+              <Clock className="h-3.5 w-3.5" />
+              {card.postedAgo}
+            </span>
+          </div>
+
+          <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
+            <Link
+              href={card.href}
+              className="rounded-full bg-[#002741] px-4 py-2.5 text-center text-xs font-black uppercase text-white transition hover:bg-[#0F3D5E]"
+            >
+              {t(language, "view")}
+            </Link>
+            <Link
+              href={`/report?adId=${ad.id}&adSlug=${ad.slug}&source=card`}
+              className="rounded-full border border-[#E2E8F0] px-3 py-2.5 text-xs font-black uppercase text-[#B91C1C] transition hover:bg-red-50"
+            >
+              Report
+            </Link>
+          </div>
+        </div>
       </div>
     </article>
   );
